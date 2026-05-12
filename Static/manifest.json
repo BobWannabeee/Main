@@ -1,0 +1,10 @@
+{
+    "name": "Horse Racing & Keno PWA",
+    "short_name": "RaceKeno",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#101124",
+    "theme_color": "#f9a825",
+    "scope": "/",
+    "lang": "en-US"
+}

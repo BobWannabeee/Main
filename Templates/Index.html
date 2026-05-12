@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Lucky Strip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dark:   #1a0f00;
+      --accent: #f5c842;
+      --red:    #d63c3c;
+      --white:  #fff8ee;
+      --muted:  #b89060;
+      --panel:  rgba(26,15,0,0.85);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Barlow Condensed', sans-serif;
+      background: var(--dark);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      background-image: radial-gradient(ellipse at top, #3b1f00 0%, #1a0f00 55%);
+    }
+
+    /* ── Marquee ticker at top ── */
+    .ticker-wrap {
+      width: 100%;
+      background: var(--accent);
+      color: var(--dark);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 6px 0;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+    }
+
+    .ticker-inner {
+      display: inline-block;
+      animation: ticker 22s linear infinite;
+    }
+
+    @keyframes ticker {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── Hero ── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Decorative light rays behind the title */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: conic-gradient(
+        from 260deg at 50% 0%,
+        transparent 0deg,
+        rgba(245,200,66,0.06) 10deg,
+        transparent 20deg,
+        rgba(245,200,66,0.04) 30deg,
+        transparent 40deg
+      );
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 5px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      opacity: 0.75;
+    }
+
+    .hero h1 {
+      font-family: 'Rye', serif;
+      font-size: clamp(3rem, 10vw, 6rem);
+      color: var(--accent);
+      line-height: 1;
+      text-shadow:
+        0 0 40px rgba(245,200,66,0.3),
+        0 4px 16px rgba(0,0,0,0.6);
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    /* Neon underline effect */
+    .hero h1::after {
+      content: '';
+      display: block;
+      height: 3px;
+      width: 60%;
+      margin: 12px auto 0;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      border-radius: 2px;
+      box-shadow: 0 0 12px rgba(245,200,66,0.5);
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--muted);
+      font-style: italic;
+      letter-spacing: 1px;
+      margin-bottom: 36px;
+      max-width: 400px;
+    }
+
+    /* Wallet pill */
+    .wallet-pill {
+      background: rgba(245,200,66,0.12);
+      border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 40px;
+      padding: 10px 28px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 60px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .wallet-pill .coin { font-size: 1.3rem; }
+
+    /* ── Game cards ── */
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 720px;
+      padding: 0 20px;
+      margin-bottom: 60px;
+    }
+
+    .game-card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--white);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(8px);
+      position: relative;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.5);
+    }
+
+    /* Racing card accent */
+    .game-card.race { border-color: rgba(245,200,66,0.2); }
+    .game-card.race:hover { border-color: var(--accent); box-shadow: 0 20px 48px rgba(0,0,0,0.5), 0 0 32px rgba(245,200,66,0.15); }
+
+    /* Keno card accent */
+    .game-card.keno { border-color: rgba(60,214,110,0.15); }
+    .game-card.keno:hover { border-color: #3cd66e; box-shadow: 0 20px 48px rgba(0,0,0,0.5), 0 0 32px rgba(60,214,110,0.12); }
+
+    /* Coloured top banner per card */
+    .card-banner {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card.race .card-banner {
+      background: linear-gradient(135deg, #3b1f00 0%, #5a3010 50%, #3b1f00 100%);
+    }
+
+    .game-card.keno .card-banner {
+      background: linear-gradient(135deg, #001a0f 0%, #003a1e 50%, #001a0f 100%);
+    }
+
+    /* Decorative diagonal stripe on banner */
+    .card-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 12px,
+        rgba(255,255,255,0.025) 12px,
+        rgba(255,255,255,0.025) 14px
+      );
+    }
+
+    .card-emoji { position: relative; z-index: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
+
+    .card-body { padding: 22px 24px 28px; flex: 1; display: flex; flex-direction: column; }
+
+    .card-title {
+      font-family: 'Rye', serif;
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    .game-card.race .card-title { color: var(--accent); }
+    .game-card.keno .card-title { color: #3cd66e; }
+
+    .card-desc {
+      font-size: 0.98rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    /* Stats row */
+    .card-stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-val { font-weight: 700; font-size: 1.1rem; display: block; }
+    .game-card.race .stat-val { color: var(--accent); }
+    .game-card.keno .stat-val { color: #3cd66e; }
+    .stat-lbl { color: var(--muted); font-size: 0.75rem; }
+
+    /* Play button */
+    .play-btn {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      text-align: center;
+      font-family: 'Rye', serif;
+      font-size: 1.05rem;
+      letter-spacing: 1px;
+      transition: opacity 0.15s, transform 0.15s;
+      cursor: pointer;
+    }
+
+    .game-card.race .play-btn {
+      background: var(--accent);
+      color: var(--dark);
+    }
+
+    .game-card.keno .play-btn {
+      background: #3cd66e;
+      color: #001a0f;
+    }
+
+    .play-btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+    /* ── Decorative divider ── */
+    .divider {
+      width: 100%;
+      max-width: 500px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245,200,66,0.25), transparent);
+      margin: 0 auto 40px;
+    }
+
+    /* ── How to play blurb ── */
+    .how-to {
+      max-width: 680px;
+      padding: 0 20px;
+      margin-bottom: 60px;
+      text-align: center;
+    }
+
+    .how-to h2 {
+      font-family: 'Rye', serif;
+      color: var(--accent);
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .step {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 18px 14px;
+    }
+
+    .step-num {
+      font-family: 'Rye', serif;
+      font-size: 1.8rem;
+      color: var(--accent);
+      opacity: 0.4;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .step-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+    .step-desc  { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+
+    /* ── Footer ── */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.2);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      letter-spacing: 1px;
+    }
+
+    /* ── Subtle entrance animations ── */
+    .hero h1        { animation: fadeDown 0.6s ease both; }
+    .hero-eyebrow   { animation: fadeDown 0.5s ease 0.1s both; }
+    .hero-sub       { animation: fadeDown 0.5s ease 0.2s both; }
+    .wallet-pill    { animation: fadeDown 0.5s ease 0.3s both; }
+    .game-card:nth-child(1) { animation: fadeUp 0.5s ease 0.35s both; }
+    .game-card:nth-child(2) { animation: fadeUp 0.5s ease 0.45s both; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Scrolling ticker at the top like a real betting board -->
+<div class="ticker-wrap">
+  <span class="ticker-inner">
+    &nbsp;&nbsp;&nbsp;🏇 THUNDERBOLT pays 4.5x &nbsp;·&nbsp; 🎰 KENO JACKPOT: 10,000x &nbsp;·&nbsp; 🐎 SILVER STREAK pays 6.0x &nbsp;·&nbsp; 🃏 PICK 10 FOR MEGA PAYOUT &nbsp;·&nbsp; 🏆 CRIMSON COMET pays 7.5x &nbsp;·&nbsp; 🎲 EMERALD WIND pays 8.0x &nbsp;·&nbsp;
+    &nbsp;&nbsp;&nbsp;🏇 THUNDERBOLT pays 4.5x &nbsp;·&nbsp; 🎰 KENO JACKPOT: 10,000x &nbsp;·&nbsp; 🐎 SILVER STREAK pays 6.0x &nbsp;·&nbsp; 🃏 PICK 10 FOR MEGA PAYOUT &nbsp;·&nbsp; 🏆 CRIMSON COMET pays 7.5x &nbsp;·&nbsp; 🎲 EMERALD WIND pays 8.0x &nbsp;·&nbsp;
+  </span>
+</div>
+
+<section class="hero">
+  <p class="hero-eyebrow">Est. Tonight &nbsp;·&nbsp; Games of Chance</p>
+  <h1>The Lucky Strip</h1>
+  <p class="hero-sub">Two games. One wallet. Zero mercy.</p>
+  <div class="wallet-pill">
+    <span class="coin">💰</span>
+    Wallet: $<span id="wallet-display">1000</span>
+  </div>
+</section>
+
+<div class="games">
+
+  <!-- Horse Racing Card -->
+  <a href="/race" class="game-card race">
+    <div class="card-banner">
+      <span class="card-emoji">🏇</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Horse Racing</div>
+      <p class="card-desc">
+        Pick your champion from six horses, place your bet, and watch the race play out lane by lane in real time. May the fastest horse win.
+      </p>
+      <div class="card-stats">
+        <div class="stat">
+          <span class="stat-val">6</span>
+          <span class="stat-lbl">Horses</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val">4.5–8x</span>
+          <span class="stat-lbl">Odds range</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val">Live</span>
+          <span class="stat-lbl">Animation</span>
+        </div>
+      </div>
+      <span class="play-btn">Race Now</span>
+    </div>
+  </a>
+
+  <!-- Keno Card -->
+  <a href="/keno" class="game-card keno">
+    <div class="card-banner">
+      <span class="card-emoji">🎰</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Keno</div>
+      <p class="card-desc">
+        Pick 1 to 10 numbers from the board, then watch 20 balls drop. Match enough and you'll walk away with a big multiplier on your bet.
+      </p>
+      <div class="card-stats">
+        <div class="stat">
+          <span class="stat-val">80</span>
+          <span class="stat-lbl">Numbers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val">20</span>
+          <span class="stat-lbl">Balls drawn</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val">10,000x</span>
+          <span class="stat-lbl">Max payout</span>
+        </div>
+      </div>
+      <span class="play-btn">Play Keno</span>
+    </div>
+  </a>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- How to play — quick 3-step summary -->
+<div class="how-to">
+  <h2>How It Works</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Pick a Game</div>
+      <div class="step-desc">Horse Racing for head-to-head action, Keno for a numbers rush.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Place Your Bet</div>
+      <div class="step-desc">Set your stake. All bets come out of your shared wallet.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Watch & Win</div>
+      <div class="step-desc">Live animations play out the result. Win and collect your payout.</div>
+    </div>
+  </div>
+</div>
+
+<footer>For entertainment purposes only &nbsp;·&nbsp; The Lucky Strip &nbsp;·&nbsp; Good luck out there</footer>
+
+</body>
+</html>

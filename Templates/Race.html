@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horse Racing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dirt:   #c8a96e;
+      --dark:   #1a0f00;
+      --rail:   #7a4f1e;
+      --grass:  #3a7d2c;
+      --accent: #f5c842;
+      --red:    #d63c3c;
+      --white:  #fff8ee;
+      --panel:  rgba(26,15,0,0.82);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Barlow Condensed', sans-serif;
+      background: var(--dark);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+      background-image: radial-gradient(ellipse at top, #3b1f00 0%, #1a0f00 60%);
+    }
+    h1 {
+      font-family: 'Rye', serif;
+      font-size: clamp(2rem, 6vw, 3.4rem);
+      color: var(--accent);
+      text-shadow: 0 2px 12px rgba(245,200,66,0.4);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .subtitle { color: #b89060; font-size: 1.1rem; letter-spacing: 1px; text-align: center; margin-bottom: 28px; }
+    .wallet-bar {
+      background: rgba(245,200,66,0.12);
+      border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 28px;
+    }
+    .setup-panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 28px;
+      width: 100%;
+      max-width: 520px;
+      backdrop-filter: blur(6px);
+      transition: opacity 0.3s;
+    }
+    .setup-panel h2 {
+      font-family: 'Rye', serif;
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(245,200,66,0.2);
+      padding-bottom: 10px;
+    }
+    .horse-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .horse-card {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+      position: relative;
+    }
+    .horse-card:hover { border-color: var(--accent); background: rgba(245,200,66,0.08); }
+    .horse-card.selected { border-color: var(--accent); background: rgba(245,200,66,0.15); box-shadow: 0 0 16px rgba(245,200,66,0.2); }
+    .horse-card .horse-icon { font-size: 1.8rem; margin-bottom: 4px; }
+    .horse-card .horse-name { font-weight: 700; font-size: 1rem; }
+    .horse-card .horse-odds { color: var(--accent); font-size: 0.85rem; margin-top: 2px; }
+    .horse-card .check { position: absolute; top: 6px; right: 8px; opacity: 0; transition: opacity 0.15s; font-size: 1.1rem; }
+    .horse-card.selected .check { opacity: 1; }
+    .bet-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .bet-row label { font-size: 1rem; font-weight: 600; color: #cbb07a; white-space: nowrap; }
+    .bet-row input {
+      flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px; padding: 10px 14px; color: var(--white); font-size: 1.1rem;
+      font-family: 'Barlow Condensed', sans-serif; outline: none;
+    }
+    .bet-row input:focus { border-color: var(--accent); }
+    .quick-bets { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .quick-bet {
+      background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 6px; padding: 5px 12px; cursor: pointer; font-size: 0.9rem;
+      color: var(--accent); transition: background 0.15s;
+    }
+    .quick-bet:hover { background: rgba(245,200,66,0.25); }
+    .run-btn {
+      width: 100%; padding: 14px; background: var(--accent); color: var(--dark);
+      border: none; border-radius: 10px; font-family: 'Rye', serif;
+      font-size: 1.2rem; cursor: pointer; letter-spacing: 1px;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .run-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,200,66,0.35); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .race-stage { width: 100%; max-width: 760px; margin-top: 28px; display: none; }
+    .race-stage.visible { display: block; }
+    .track-wrap {
+      background: linear-gradient(180deg, #3a7d2c 0%, #3a7d2c 8%, #a08040 8%, #c8a96e 12%, #b89555 50%, #c8a96e 88%, #a08040 92%, #3a7d2c 92%, #3a7d2c 100%);
+      border-radius: 14px;
+      border: 3px solid var(--rail);
+      overflow: hidden;
+      padding: 10px 0;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .finish-line {
+      position: absolute; top: 0; bottom: 0; right: 60px; width: 6px;
+      background: repeating-linear-gradient(180deg, #fff 0 8px, #111 8px 16px);
+      opacity: 0.7; z-index: 2;
+    }
+    .lane {
+      display: flex; align-items: center; height: 52px;
+      position: relative; border-bottom: 1px dashed rgba(0,0,0,0.15);
+    }
+    .lane:last-child { border-bottom: none; }
+    .lane-label {
+      width: 120px; min-width: 120px; padding: 0 10px 0 14px;
+      font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.85);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6); z-index: 3;
+    }
+    .lane-track { flex: 1; position: relative; height: 100%; }
+    .horse-runner {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 1.7rem; left: 0%;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+      z-index: 3; will-change: left;
+    }
+    .horse-runner.my-horse { filter: drop-shadow(0 0 8px gold); }
+    .status-bar {
+      text-align: center; margin-top: 14px;
+      font-size: 1.15rem; color: #d4b07a; letter-spacing: 1px; min-height: 28px;
+    }
+    .result-card {
+      background: var(--panel); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px; padding: 24px 28px; margin-top: 18px;
+      text-align: center; display: none; animation: slideUp 0.4s ease;
+    }
+    .result-card.show { display: block; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .result-card.win  { border-color: var(--accent); box-shadow: 0 0 24px rgba(245,200,66,0.2); }
+    .result-card.lose { border-color: var(--red); }
+    .result-title { font-family: 'Rye', serif; font-size: 2rem; margin-bottom: 8px; }
+    .result-card.win  .result-title { color: var(--accent); }
+    .result-card.lose .result-title { color: var(--red); }
+    .result-sub { color: #b89060; font-size: 1.05rem; margin-bottom: 14px; }
+    .payout-amt { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+    .finish-list { list-style: none; margin-top: 14px; text-align: left; }
+    .finish-list li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.95rem;
+    }
+    .finish-list li:last-child { border-bottom: none; }
+    .finish-place { font-weight: 700; width: 28px; color: #cbb07a; }
+    .again-btn {
+      margin-top: 20px; padding: 12px 32px;
+      background: transparent; border: 2px solid var(--accent);
+      border-radius: 10px; color: var(--accent);
+      font-family: 'Rye', serif; font-size: 1rem;
+      cursor: pointer; letter-spacing: 1px; transition: background 0.15s;
+    }
+    .again-btn:hover { background: rgba(245,200,66,0.1); }
+    .error-msg { color: var(--red); font-size: 0.9rem; margin-top: 8px; text-align: center; }
+    .crowd-bar { display: flex; gap: 4px; justify-content: center; margin-bottom: 10px; }
+    .crowd-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); opacity: 0.3;
+      animation: pulse 0.5s infinite alternate;
+    }
+    .crowd-dot:nth-child(2) { animation-delay: 0.1s; }
+    .crowd-dot:nth-child(3) { animation-delay: 0.2s; }
+    .crowd-dot:nth-child(4) { animation-delay: 0.3s; }
+    .crowd-dot:nth-child(5) { animation-delay: 0.4s; }
+    @keyframes pulse { to { opacity: 1; transform: scale(1.3); } }
+    .confetti-wrap { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 100; width: 100%; height: 100%; }
+    .confetti-piece {
+      position: absolute; width: 10px; height: 10px; opacity: 0;
+      animation: confettiFall 1.6s ease-in forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+    .hidden { display: none !important; }
+
+    .back-home {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background: rgba(26,15,0,0.85);
+      border: 1px solid rgba(245,200,66,0.35);
+      border-radius: 8px;
+      padding: 7px 14px;
+      color: var(--accent);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 1px;
+      backdrop-filter: blur(6px);
+      transition: background 0.15s, border-color 0.15s;
+      z-index: 50;
+    }
+    .back-home:hover { background: rgba(245,200,66,0.12); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<a href="/" class="back-home">← Home</a>
+
+<h1>Race Day</h1>
+<p class="subtitle">Pick your champion &middot; Place your bet &middot; Watch 'em run</p>
+
+<div class="wallet-bar">Wallet: $<span id="wallet-display">1000</span></div>
+
+<div class="setup-panel" id="setup-panel">
+  <h2>Race Setup</h2>
+  <div class="horse-grid" id="horse-grid">
+    {% for horse in horses %}
+    <div class="horse-card" data-id="{{ horse.id }}" data-name="{{ horse.name }}" data-odds="{{ horse.odds }}" onclick="selectHorse(this)">
+      <div class="horse-icon">🐎</div>
+      <div class="horse-name">{{ horse.name }}</div>
+      <div class="horse-odds">{{ horse.odds }}x odds</div>
+      <span class="check">✅</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="bet-row">
+    <label>Bet $</label>
+    <input type="number" id="bet-input" min="1" step="1" value="50" placeholder="50" />
+  </div>
+  <div class="quick-bets">
+    <span class="quick-bet" onclick="setBet(10)">$10</span>
+    <span class="quick-bet" onclick="setBet(25)">$25</span>
+    <span class="quick-bet" onclick="setBet(50)">$50</span>
+    <span class="quick-bet" onclick="setBet(100)">$100</span>
+    <span class="quick-bet" onclick="setBet(250)">$250</span>
+  </div>
+
+  <div class="error-msg hidden" id="err-msg"></div>
+  <button class="run-btn" id="run-btn" onclick="startRace()">Run the Race!</button>
+</div>
+
+<div class="race-stage" id="race-stage">
+  <div class="crowd-bar">
+    <div class="crowd-dot"></div><div class="crowd-dot"></div>
+    <div class="crowd-dot"></div><div class="crowd-dot"></div>
+    <div class="crowd-dot"></div>
+  </div>
+  <div class="track-wrap">
+    <div class="finish-line"></div>
+    <div id="race-lanes"></div>
+  </div>
+  <p class="status-bar" id="status-bar">Ready...</p>
+
+  <div class="result-card" id="result-card">
+    <div class="result-title" id="result-title">-</div>
+    <div class="result-sub"  id="result-sub">-</div>
+    <div class="payout-amt"  id="payout-amt"></div>
+    <ul class="finish-list"  id="finish-list"></ul>
+    <button class="again-btn" onclick="resetRace()">Race Again</button>
+  </div>
+</div>
+
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<script>
+  const MEDALS = ['1st','2nd','3rd','4th','5th','6th'];
+  let wallet = 1000;
+  let selectedId = null;
+  let animHandle = null;
+
+  function updateWallet() {
+    document.getElementById('wallet-display').textContent = wallet.toLocaleString();
+  }
+
+  function selectHorse(el) {
+    document.querySelectorAll('.horse-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedId = parseInt(el.dataset.id);
+  }
+
+  function setBet(amt) {
+    document.getElementById('bet-input').value = amt;
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('err-msg');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function clearError() {
+    document.getElementById('err-msg').classList.add('hidden');
+  }
+
+  async function startRace() {
+    clearError();
+    if (!selectedId) { showError('Please select a horse first!'); return; }
+    const bet = parseFloat(document.getElementById('bet-input').value);
+    if (!bet || bet <= 0) { showError('Enter a valid bet amount.'); return; }
+    if (bet > wallet) { showError("You don't have enough in your wallet!"); return; }
+
+    wallet -= bet;
+    updateWallet();
+
+    document.getElementById('run-btn').disabled = true;
+    document.getElementById('result-card').className = 'result-card';
+    const setupPanel = document.getElementById('setup-panel');
+    setupPanel.style.opacity = '0.4';
+    setupPanel.style.pointerEvents = 'none';
+
+    const stage = document.getElementById('race-stage');
+    stage.classList.add('visible');
+
+    buildLanes();
+    document.getElementById('status-bar').textContent = 'Fetching race data...';
+
+    let data;
+    try {
+      const resp = await fetch('/api/race', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ horse: selectedId, bet })
+      });
+      data = await resp.json();
+      if (data.error) { showError(data.error); resetSetup(); return; }
+    } catch(e) {
+      showError('Network error - try again.'); resetSetup(); return;
+    }
+
+    await countdown();
+    await animateRace(data);
+    showResult(data, bet);
+  }
+
+  function buildLanes() {
+    const container = document.getElementById('race-lanes');
+    container.innerHTML = '';
+    const cards = [...document.querySelectorAll('.horse-card')];
+    cards.forEach(card => {
+      const id = parseInt(card.dataset.id);
+      const name = card.dataset.name;
+      const lane = document.createElement('div');
+      lane.className = 'lane';
+      lane.innerHTML =
+        '<div class="lane-label">' + name + '</div>' +
+        '<div class="lane-track" id="track-' + id + '">' +
+          '<div class="horse-runner' + (id === selectedId ? ' my-horse' : '') + '" id="runner-' + id + '">🐎</div>' +
+        '</div>';
+      container.appendChild(lane);
+    });
+  }
+
+  function countdown() {
+    return new Promise(resolve => {
+      const stati = ['Ready...', 'Set...', 'GO!'];
+      let i = 0;
+      const bar = document.getElementById('status-bar');
+      bar.textContent = stati[0];
+      const t = setInterval(() => {
+        i++;
+        if (i < stati.length) { bar.textContent = stati[i]; }
+        else { clearInterval(t); resolve(); }
+      }, 700);
+    });
+  }
+
+  function animateRace(data) {
+    const frames = data.frames;
+    const MS = 1000 / 24;
+
+    return new Promise(resolve => {
+      let f = 0;
+      const bar = document.getElementById('status-bar');
+      bar.textContent = "They're off!";
+
+      function tick() {
+        if (f >= frames.length) { resolve(); return; }
+        const frame = frames[f];
+        for (const [id, pct] of Object.entries(frame)) {
+          const runner = document.getElementById('runner-' + id);
+          if (runner) {
+            runner.style.left = (pct / 100 * 91) + '%';
+          }
+        }
+        if (f % 20 === 0) {
+          const leader = data.finishOrder[0];
+          if (frame[leader.id] < 95) {
+            bar.textContent = leader.name + ' in the lead!';
+          }
+        }
+        f++;
+        animHandle = setTimeout(tick, MS);
+      }
+      tick();
+    });
+  }
+
+  function showResult(data, bet) {
+    document.getElementById('status-bar').textContent = data.winner + ' wins the race!';
+
+    const card  = document.getElementById('result-card');
+    const title = document.getElementById('result-title');
+    const sub   = document.getElementById('result-sub');
+    const pamt  = document.getElementById('payout-amt');
+    const flist = document.getElementById('finish-list');
+
+    if (data.win) {
+      wallet += data.payout;
+      updateWallet();
+      card.className = 'result-card show win';
+      title.textContent = 'You Won!';
+      sub.textContent = data.winner + ' crossed the line first!';
+      pamt.textContent = '+$' + data.payout.toLocaleString();
+      launchConfetti();
+    } else {
+      card.className = 'result-card show lose';
+      title.textContent = 'Better Luck Next Time';
+      sub.textContent = data.winner + ' took the trophy.';
+      pamt.textContent = '-$' + bet.toLocaleString();
+    }
+
+    flist.innerHTML = '';
+    data.finishOrder.forEach(function(h, i) {
+      const li = document.createElement('li');
+      li.innerHTML =
+        '<span class="finish-place">' + (i+1) + '.</span>' +
+        '<span>' + h.name + '</span>' +
+        (h.id === selectedId ? '<span style="color:var(--accent);margin-left:auto">your pick</span>' : '');
+      flist.appendChild(li);
+    });
+  }
+
+  function launchConfetti() {
+    const wrap = document.getElementById('confetti-wrap');
+    wrap.innerHTML = '';
+    const colors = ['#f5c842','#e23c3c','#3cd66e','#3c9fe2','#f57842'];
+    for (let i = 0; i < 80; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = (Math.random() * 100) + 'vw';
+      p.style.animationDelay = (Math.random() * 0.8) + 's';
+      p.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      wrap.appendChild(p);
+    }
+    setTimeout(function() { wrap.innerHTML = ''; }, 2500);
+  }
+
+  function resetSetup() {
+    document.getElementById('run-btn').disabled = false;
+    const setupPanel = document.getElementById('setup-panel');
+    setupPanel.style.opacity = '1';
+    setupPanel.style.pointerEvents = 'auto';
+  }
+
+  function resetRace() {
+    if (animHandle) clearTimeout(animHandle);
+    document.getElementById('race-stage').classList.remove('visible');
+    document.getElementById('result-card').className = 'result-card';
+    document.getElementById('race-lanes').innerHTML = '';
+    document.getElementById('status-bar').textContent = 'Ready...';
+    resetSetup();
+    if (wallet <= 0) { wallet = 1000; updateWallet(); }
+  }
+</script>
+</body>
+</html>

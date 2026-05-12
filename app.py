@@ -1,0 +1,400 @@
+import sqlite3
+import random
+from datetime import datetime, timezone
+from functools import wraps
+
+from flask import (
+    Flask, render_template, request, jsonify,
+    redirect, url_for, session, g
+)
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__, static_folder='Static', template_folder='Templates')
+
+# Change this to something long and random in production!
+app.secret_key = 'lucky-strip-secret-key-change-me'
+
+DATABASE = 'lucky_strip.db'
+
+
+# ──────────────────────────────────────────────
+# DATABASE HELPERS
+# SQLite with a connection-per-request pattern.
+# Flask's `g` holds the connection for the life of one request.
+# ──────────────────────────────────────────────
+
+def get_db():
+    """Open a db connection if we don't already have one for this request."""
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row   # access columns by name, not index
+    return g.db
+
+
+@app.teardown_appcontext
+def close_db(error):
+    """Always close the db at the end of a request."""
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+
+def init_db():
+    """
+    Create all tables if they don't exist yet.
+    Safe to call on every startup — won't touch existing data.
+    """
+    db = sqlite3.connect(DATABASE)
+    db.executescript('''
+        CREATE TABLE IF NOT EXISTS users (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            username      TEXT    NOT NULL UNIQUE,
+            email         TEXT    NOT NULL UNIQUE,
+            password_hash TEXT    NOT NULL,
+            wallet        REAL    NOT NULL DEFAULT 1000.0,
+            created_at    TEXT    NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS race_history (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL REFERENCES users(id),
+            horse_id    INTEGER NOT NULL,
+            horse_name  TEXT    NOT NULL,
+            bet         REAL    NOT NULL,
+            won         INTEGER NOT NULL,
+            payout      REAL    NOT NULL,
+            winner_name TEXT    NOT NULL,
+            played_at   TEXT    NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS keno_history (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id    INTEGER NOT NULL REFERENCES users(id),
+            picks      TEXT    NOT NULL,
+            bet        REAL    NOT NULL,
+            hits       INTEGER NOT NULL,
+            won        INTEGER NOT NULL,
+            payout     REAL    NOT NULL,
+            factor     REAL    NOT NULL,
+            played_at  TEXT    NOT NULL
+        );
+    ''')
+    db.commit()
+    db.close()
+
+
+# ──────────────────────────────────────────────
+# AUTH HELPERS
+# Lightweight session-based auth via signed Flask cookie.
+# ──────────────────────────────────────────────
+
+def login_required(f):
+    """Redirect to /login if the user isn't signed in."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
+
+
+def api_login_required(f):
+    """For API routes: return JSON 401 instead of a redirect."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not logged in'}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+
+def current_user():
+    if 'user_id' not in session:
+        return None
+    return get_db().execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+
+
+def now_utc():
+    return datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+
+
+# ──────────────────────────────────────────────
+# HORSE / KENO DATA
+# ──────────────────────────────────────────────
+
+HORSES = [
+    {'id': 1, 'name': 'Thunderbolt',    'odds': 4.5, 'true_weight': 6},
+    {'id': 2, 'name': 'Silver Streak',  'odds': 6.0, 'true_weight': 5},
+    {'id': 3, 'name': 'Midnight Flash', 'odds': 5.0, 'true_weight': 6},
+    {'id': 4, 'name': 'Crimson Comet',  'odds': 7.5, 'true_weight': 4},
+    {'id': 5, 'name': 'Emerald Wind',   'odds': 8.0, 'true_weight': 3},
+    {'id': 6, 'name': 'Royal Charger',  'odds': 5.5, 'true_weight': 5},
+]
+
+PAYOUT_TABLE = {
+    1:  {1: 3},
+    2:  {1: 1,  2: 5},
+    3:  {1: 0,  2: 2,  3: 15},
+    4:  {1: 0,  2: 1,  3: 5,   4: 50},
+    5:  {1: 0,  2: 1,  3: 3,   4: 20,  5: 100},
+    6:  {1: 0,  2: 0,  3: 2,   4: 10,  5: 30,  6: 200},
+    7:  {1: 0,  2: 0,  3: 1,   4: 7,   5: 20,  6: 100,  7: 500},
+    8:  {1: 0,  2: 0,  3: 1,   4: 5,   5: 15,  6: 50,   7: 200,  8: 1000},
+    9:  {1: 0,  2: 0,  3: 1,   4: 3,   5: 10,  6: 30,   7: 150,  8: 500,  9: 2000},
+    10: {1: 0,  2: 0,  3: 1,   4: 2,   5: 5,   6: 20,   7: 100,  8: 400,  9: 1500, 10: 10000},
+}
+
+
+# ──────────────────────────────────────────────
+# RACE ENGINE (rigged 80% of the time)
+# ──────────────────────────────────────────────
+
+HOUSE_EDGE_CHANCE = 0.80
+
+
+def pick_rigged_winner(selected_id):
+    if random.random() < HOUSE_EDGE_CHANCE:
+        weights = [1 if h['id'] == selected_id else h['true_weight'] * 5 for h in HORSES]
+    else:
+        weights = [h['true_weight'] for h in HORSES]
+    return random.choices(HORSES, weights=weights, k=1)[0]
+
+
+def build_finish_order(winner_id):
+    losers = [h for h in HORSES if h['id'] != winner_id]
+    random.shuffle(losers)
+    return [next(h for h in HORSES if h['id'] == winner_id)] + losers
+
+
+def simulate_race_frames(selected_id, winner_id):
+    total = sum(h['true_weight'] for h in HORSES)
+    speeds = {h['id']: (h['true_weight'] / total) * 2.2 for h in HORSES}
+    positions, frames, finished, place = {h['id']: 0.0 for h in HORSES}, [], {}, 1
+    for _ in range(320):
+        lead = max(positions.values())
+        for h in HORSES:
+            if h['id'] in finished:
+                continue
+            spd = speeds[h['id']]
+            if lead > 55:
+                if h['id'] == winner_id:
+                    spd *= 1.18
+                elif h['id'] == selected_id and selected_id != winner_id:
+                    spd *= 0.84
+            positions[h['id']] = min(100.0, positions[h['id']] + max(0.0, random.gauss(spd, 0.38)))
+            if positions[h['id']] >= 100.0:
+                finished[h['id']] = place
+                place += 1
+        frames.append({h['id']: round(positions[h['id']], 2) for h in HORSES})
+        if len(finished) == len(HORSES):
+            break
+    return frames
+
+
+def build_race_response(selected_id, bet):
+    winner = pick_rigged_winner(selected_id)
+    finish_order = build_finish_order(winner['id'])
+    frames = simulate_race_frames(selected_id, winner['id'])
+    won = (winner['id'] == selected_id)
+    payout = round(bet * winner['odds'], 2) if won else 0.0
+    return {
+        'frames':        frames,
+        'finishOrder':   [{'id': h['id'], 'name': h['name']} for h in finish_order],
+        'winner':        winner['name'],
+        'winnerId':      winner['id'],
+        'win':           won,
+        'payout':        payout,
+        'selectedHorse': next(h for h in HORSES if h['id'] == selected_id),
+    }
+
+
+def build_keno_response(picks, bet):
+    draw = random.sample(range(1, 81), 20)
+    matches = sorted(set(picks) & set(draw))
+    hits = len(matches)
+    factor = PAYOUT_TABLE.get(len(picks), {}).get(hits, 0)
+    return {'draw': draw, 'picks': sorted(picks), 'matches': matches,
+            'hits': hits, 'payout': round(bet * factor, 2), 'factor': factor}
+
+
+# ──────────────────────────────────────────────
+# PAGE ROUTES
+# ──────────────────────────────────────────────
+
+@app.route('/')
+@login_required
+def home():
+    return render_template('Index.html', user=current_user())
+
+
+@app.route('/race')
+@login_required
+def race():
+    return render_template('Race.html', horses=HORSES, user=current_user())
+
+
+@app.route('/keno')
+@login_required
+def keno():
+    return render_template('Keno.html', user=current_user())
+
+
+@app.route('/profile')
+@login_required
+def profile():
+    user = current_user()
+    db   = get_db()
+    races = db.execute(
+        'SELECT * FROM race_history WHERE user_id=? ORDER BY played_at DESC LIMIT 20',
+        (user['id'],)
+    ).fetchall()
+    kenos = db.execute(
+        'SELECT * FROM keno_history WHERE user_id=? ORDER BY played_at DESC LIMIT 20',
+        (user['id'],)
+    ).fetchall()
+    race_stats = db.execute(
+        'SELECT COUNT(*) as total, SUM(won) as wins, SUM(bet) as wagered, SUM(payout) as returned FROM race_history WHERE user_id=?',
+        (user['id'],)
+    ).fetchone()
+    keno_stats = db.execute(
+        'SELECT COUNT(*) as total, SUM(won) as wins, SUM(bet) as wagered, SUM(payout) as returned FROM keno_history WHERE user_id=?',
+        (user['id'],)
+    ).fetchone()
+    return render_template('Profile.html', user=user, races=races, kenos=kenos,
+                           race_stats=race_stats, keno_stats=keno_stats)
+
+
+# ──────────────────────────────────────────────
+# AUTH ROUTES
+# ──────────────────────────────────────────────
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if 'user_id' in session:
+        return redirect(url_for('home'))
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email    = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        if not username or not email or not password:
+            error = 'All fields are required.'
+        elif len(password) < 6:
+            error = 'Password must be at least 6 characters.'
+        else:
+            db = get_db()
+            if db.execute('SELECT id FROM users WHERE username=? OR email=?', (username, email)).fetchone():
+                error = 'Username or email already taken.'
+            else:
+                db.execute(
+                    'INSERT INTO users (username, email, password_hash, wallet, created_at) VALUES (?,?,?,?,?)',
+                    (username, email, generate_password_hash(password), 1000.0, now_utc())
+                )
+                db.commit()
+                user = db.execute('SELECT * FROM users WHERE username=?', (username,)).fetchone()
+                session['user_id'] = user['id']
+                return redirect(url_for('home'))
+    return render_template('Signup.html', error=error)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if 'user_id' in session:
+        return redirect(url_for('home'))
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        user = get_db().execute('SELECT * FROM users WHERE username=?', (username,)).fetchone()
+        if not user or not check_password_hash(user['password_hash'], password):
+            error = 'Invalid username or password.'
+        else:
+            session['user_id'] = user['id']
+            return redirect(url_for('home'))
+    return render_template('Login.html', error=error)
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
+# ──────────────────────────────────────────────
+# API ROUTES
+# ──────────────────────────────────────────────
+
+@app.route('/api/wallet')
+@api_login_required
+def api_wallet():
+    return jsonify({'wallet': current_user()['wallet']})
+
+
+@app.route('/api/race', methods=['POST'])
+@api_login_required
+def api_race():
+    data     = request.get_json(force=True, silent=True) or {}
+    selected = int(data.get('horse', 0))
+    bet      = float(data.get('bet', 0))
+    user     = current_user()
+    db       = get_db()
+
+    if selected not in [h['id'] for h in HORSES] or bet <= 0:
+        return jsonify({'error': 'Select a valid horse and a positive bet.'}), 400
+    if bet > user['wallet']:
+        return jsonify({'error': "Not enough in your wallet."}), 400
+
+    result     = build_race_response(selected, bet)
+    new_wallet = round(user['wallet'] - bet + result['payout'], 2)
+
+    db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
+    db.execute(
+        'INSERT INTO race_history (user_id,horse_id,horse_name,bet,won,payout,winner_name,played_at) VALUES (?,?,?,?,?,?,?,?)',
+        (user['id'], selected,
+         next(h['name'] for h in HORSES if h['id'] == selected),
+         bet, 1 if result['win'] else 0, result['payout'], result['winner'], now_utc())
+    )
+    db.commit()
+
+    result['wallet'] = new_wallet
+    return jsonify(result)
+
+
+@app.route('/api/keno', methods=['POST'])
+@api_login_required
+def api_keno():
+    data  = request.get_json(force=True, silent=True) or {}
+    picks = data.get('picks', [])
+    bet   = float(data.get('bet', 0))
+    user  = current_user()
+    db    = get_db()
+
+    if not isinstance(picks, list):
+        return jsonify({'error': 'Picks must be a list.'}), 400
+    picks = sorted({int(n) for n in picks if 1 <= int(n) <= 80})
+    if not (1 <= len(picks) <= 10):
+        return jsonify({'error': 'Pick 1–10 numbers.'}), 400
+    if bet <= 0:
+        return jsonify({'error': 'Enter a positive bet.'}), 400
+    if bet > user['wallet']:
+        return jsonify({'error': "Not enough in your wallet."}), 400
+
+    result     = build_keno_response(picks, bet)
+    new_wallet = round(user['wallet'] - bet + result['payout'], 2)
+
+    db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
+    db.execute(
+        'INSERT INTO keno_history (user_id,picks,bet,hits,won,payout,factor,played_at) VALUES (?,?,?,?,?,?,?,?)',
+        (user['id'], ','.join(str(p) for p in picks), bet,
+         result['hits'], 1 if result['payout'] > 0 else 0,
+         result['payout'], result['factor'], now_utc())
+    )
+    db.commit()
+
+    result['wallet'] = new_wallet
+    return jsonify(result)
+
+
+if __name__ == '__main__':
+    init_db()
+    app.run(debug=True, port=5000)

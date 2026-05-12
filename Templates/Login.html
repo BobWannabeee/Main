@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login – The Lucky Strip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dark: #1a0f00; --accent: #f5c842; --red: #d63c3c;
+      --white: #fff8ee; --muted: #b89060; --panel: rgba(26,15,0,0.88);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Barlow Condensed', sans-serif;
+      background: var(--dark);
+      background-image: radial-gradient(ellipse at top, #3b1f00 0%, #1a0f00 60%);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .logo {
+      font-family: 'Rye', serif;
+      font-size: clamp(2rem, 7vw, 3rem);
+      color: var(--accent);
+      text-shadow: 0 2px 16px rgba(245,200,66,0.35);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .tagline { color: var(--muted); font-size: 1rem; letter-spacing: 1px; margin-bottom: 36px; text-align: center; }
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 400px;
+      backdrop-filter: blur(8px);
+    }
+    .card h2 {
+      font-family: 'Rye', serif;
+      color: var(--accent);
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--white);
+      font-size: 1.05rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--accent);
+      color: var(--dark);
+      border: none;
+      border-radius: 10px;
+      font-family: 'Rye', serif;
+      font-size: 1.1rem;
+      cursor: pointer;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,200,66,0.3); }
+    .error-box {
+      background: rgba(214,60,60,0.15);
+      border: 1px solid rgba(214,60,60,0.4);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #f08080;
+      font-size: 0.9rem;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .alt-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+    .alt-link a { color: var(--accent); text-decoration: none; font-weight: 700; }
+    .alt-link a:hover { text-decoration: underline; }
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 22px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo">The Lucky Strip</div>
+<p class="tagline">Sign in to play</p>
+
+<div class="card">
+  <h2>Welcome Back</h2>
+
+  {% if error %}
+  <div class="error-box">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/login">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" name="username" autocomplete="username" placeholder="your username" required />
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" name="password" autocomplete="current-password" placeholder="••••••••" required />
+    </div>
+    <button type="submit" class="submit-btn">Sign In</button>
+  </form>
+
+  <div class="divider"></div>
+  <div class="alt-link">No account? <a href="/signup">Create one — it's free</a></div>
+</div>
+
+</body>
+</html>
