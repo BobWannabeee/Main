@@ -223,16 +223,39 @@
       z-index: 50;
     }
     .back-home:hover { background: rgba(245,200,66,0.12); border-color: var(--accent); }
+
+    /* Profile link — top right */
+    .nav-right {
+      position: fixed; top: 16px; right: 16px;
+      display: flex; gap: 8px; z-index: 50;
+    }
+    .nav-pill {
+      background: rgba(26,15,0,0.85);
+      border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 8px; padding: 7px 14px;
+      color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem; font-weight: 700; text-decoration: none;
+      letter-spacing: 1px; backdrop-filter: blur(6px);
+      transition: background 0.15s;
+    }
+    .nav-pill:hover { background: rgba(245,200,66,0.14); }
+    .nav-pill.logout { border-color: rgba(214,60,60,0.3); color: #f08080; }
+    .nav-pill.logout:hover { background: rgba(214,60,60,0.14); }
   </style>
 </head>
 <body>
 
-<a href="/" class="back-home">← Home</a>
+<a href="/" class="back-home">&#8592; Home</a>
+
+<div class="nav-right">
+  <a href="/profile" class="nav-pill">My Profile</a>
+  <a href="/logout"  class="nav-pill logout">Sign Out</a>
+</div>
 
 <h1>Race Day</h1>
 <p class="subtitle">Pick your champion &middot; Place your bet &middot; Watch 'em run</p>
 
-<div class="wallet-bar">Wallet: $<span id="wallet-display">1000</span></div>
+<div class="wallet-bar">Wallet: $<span id="wallet-display">{% if user is defined and user %}{{ "%.2f"|format(user['wallet']) }}{% else %}1000.00{% endif %}</span></div>
 
 <div class="setup-panel" id="setup-panel">
   <h2>Race Setup</h2>
@@ -288,12 +311,15 @@
 
 <script>
   const MEDALS = ['1st','2nd','3rd','4th','5th','6th'];
-  let wallet = 1000;
+  // wallet is initialised from the server-rendered value, then kept in sync via API responses
+  let wallet = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g, '')) || 0;
   let selectedId = null;
   let animHandle = null;
 
-  function updateWallet() {
-    document.getElementById('wallet-display').textContent = wallet.toLocaleString();
+  function updateWallet(newVal) {
+    if (newVal !== undefined) wallet = newVal;
+    document.getElementById('wallet-display').textContent =
+      wallet.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
   }
 
   function selectHorse(el) {
@@ -322,9 +348,6 @@
     const bet = parseFloat(document.getElementById('bet-input').value);
     if (!bet || bet <= 0) { showError('Enter a valid bet amount.'); return; }
     if (bet > wallet) { showError("You don't have enough in your wallet!"); return; }
-
-    wallet -= bet;
-    updateWallet();
 
     document.getElementById('run-btn').disabled = true;
     document.getElementById('result-card').className = 'result-card';
@@ -429,14 +452,14 @@
     const flist = document.getElementById('finish-list');
 
     if (data.win) {
-      wallet += data.payout;
-      updateWallet();
+      updateWallet(data.wallet);
       card.className = 'result-card show win';
       title.textContent = 'You Won!';
       sub.textContent = data.winner + ' crossed the line first!';
       pamt.textContent = '+$' + data.payout.toLocaleString();
       launchConfetti();
     } else {
+      updateWallet(data.wallet);
       card.className = 'result-card show lose';
       title.textContent = 'Better Luck Next Time';
       sub.textContent = data.winner + ' took the trophy.';
@@ -485,7 +508,7 @@
     document.getElementById('race-lanes').innerHTML = '';
     document.getElementById('status-bar').textContent = 'Ready...';
     resetSetup();
-    if (wallet <= 0) { wallet = 1000; updateWallet(); }
+    // wallet is managed server-side; no local reset needed
   }
 </script>
 </body>
