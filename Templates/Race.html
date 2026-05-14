@@ -309,8 +309,8 @@
 
 <div class="confetti-wrap" id="confetti-wrap"></div>
 
-<script>
-  const MEDALS = ['1st','2nd','3rd','4th','5th','6th'];
+<script>     // just remeber this is rigged might just delete the win posibility
+  const MEDALS = ['1st','2nd','3rd','4th','5th','6th'];        
   // wallet is initialised from the server-rendered value, then kept in sync via API responses
   let wallet = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g, '')) || 0;
   let selectedId = null;

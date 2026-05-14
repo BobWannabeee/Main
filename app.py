@@ -1,49 +1,37 @@
-import sqlite3
-import random
-from datetime import datetime, timezone
-from functools import wraps
+import sqlite3    
+import random 
+from datetime import datetime, timezone     #this is for the date created
+from functools import wraps  #Ai said tis usefull
 
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, session, g
 )
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash   #this ting hashes the password then just gets rid of it
 
-app = Flask(__name__, static_folder='Static', template_folder='Templates')
-
-# Change this to something long and random in production!
-app.secret_key = 'lucky-strip-secret-key-change-me'
-
-DATABASE = 'lucky_strip.db'
+app = Flask(__name__, static_folder='Static', template_folder='Templates')     #app is = flassk
 
 
-# ──────────────────────────────────────────────
-# DATABASE HELPERS
-# SQLite with a connection-per-request pattern.
-# Flask's `g` holds the connection for the life of one request.
-# ──────────────────────────────────────────────
+app.secret_key = 'bob'
 
-def get_db():
-    """Open a db connection if we don't already have one for this request."""
+DATABASE = 'lucky_strip.db'      #database = exist
+
+
+def get_db():  
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
-        g.db.row_factory = sqlite3.Row   # access columns by name, not index
+        g.db.row_factory = sqlite3.Row   # access columns by name not teh index
     return g.db
 
 
 @app.teardown_appcontext
-def close_db(error):
-    """Always close the db at the end of a request."""
+def close_db(error):   #Closes it
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 
-def init_db():
-    """
-    Create all tables if they don't exist yet.
-    Safe to call on every startup — won't touch existing data.
-    """
+def init_db(): #creats the tables
     db = sqlite3.connect(DATABASE)
     db.executescript('''
         CREATE TABLE IF NOT EXISTS users (
@@ -83,12 +71,8 @@ def init_db():
     db.close()
 
 
-# ──────────────────────────────────────────────
-# AUTH HELPERS
-# Lightweight session-based auth via signed Flask cookie.
-# ──────────────────────────────────────────────
 
-def login_required(f):
+def login_required(f):    #fragile ai thing
     """Redirect to /login if the user isn't signed in."""
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -99,7 +83,6 @@ def login_required(f):
 
 
 def api_login_required(f):
-    """For API routes: return JSON 401 instead of a redirect."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session:
@@ -108,21 +91,18 @@ def api_login_required(f):
     return decorated
 
 
-def current_user():
+def current_user():     
     if 'user_id' not in session:
         return None
     return get_db().execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
 
 
-def now_utc():
+def now_utc():   #this is where time is used
     return datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
 
 
-# ──────────────────────────────────────────────
-# HORSE / KENO DATA
-# ──────────────────────────────────────────────
-
-HORSES = [
+#HOOOOOOOOOOOOOOORSES
+HORSES = [              
     {'id': 1, 'name': 'Thunderbolt',    'odds': 4.5, 'true_weight': 6},
     {'id': 2, 'name': 'Silver Streak',  'odds': 6.0, 'true_weight': 5},
     {'id': 3, 'name': 'Midnight Flash', 'odds': 5.0, 'true_weight': 6},
@@ -130,7 +110,7 @@ HORSES = [
     {'id': 5, 'name': 'Emerald Wind',   'odds': 8.0, 'true_weight': 3},
     {'id': 6, 'name': 'Royal Charger',  'odds': 5.5, 'true_weight': 5},
 ]
-
+#is there a better way to do this probly  but it works
 PAYOUT_TABLE = {
     1:  {1: 3},
     2:  {1: 1,  2: 5},
@@ -145,10 +125,7 @@ PAYOUT_TABLE = {
 }
 
 
-# ──────────────────────────────────────────────
-# RACE ENGINE (rigged 80% of the time)
-# ──────────────────────────────────────────────
-
+#Yes its rigged (:
 HOUSE_EDGE_CHANCE = 0.80
 
 
@@ -217,10 +194,7 @@ def build_keno_response(picks, bet):
             'hits': hits, 'payout': round(bet * factor, 2), 'factor': factor}
 
 
-# ──────────────────────────────────────────────
-# PAGE ROUTES
-# ──────────────────────────────────────────────
-
+#the routtttttttttes
 @app.route('/')
 @login_required
 def home():
@@ -264,9 +238,7 @@ def profile():
                            race_stats=race_stats, keno_stats=keno_stats)
 
 
-# ──────────────────────────────────────────────
-# AUTH ROUTES
-# ──────────────────────────────────────────────
+#this is the authentication tingies
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -320,10 +292,8 @@ def logout():
     return redirect(url_for('login'))
 
 
-# ──────────────────────────────────────────────
-# API ROUTES
-# ──────────────────────────────────────────────
 
+#API   
 @app.route('/api/wallet')
 @api_login_required
 def api_wallet():
@@ -395,6 +365,6 @@ def api_keno():
     return jsonify(result)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':    #start the app (coppied from that one document to-do-app)
     init_db()
     app.run(debug=True, port=5000)

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ── Design tokens — same palette as Race.html ── */
+    /* copied mostly from horsey racing so simular look*/
     :root {
       --dark:   #1a0f00;
       --accent: #f5c842;
@@ -424,14 +424,14 @@
     <button class="clear-btn" onclick="clearPicks()">Clear All</button>
   </div>
 
-  <!-- The 80-number grid — built by JS so we don't have to write 80 divs -->
+  <!-- The 80-number grid built by JS soooooooo don't have to write 80 div -->
   <div class="keno-grid" id="keno-grid"></div>
 
   <div class="bet-row">
     <label>Bet $</label>
     <input type="number" id="bet-input" min="1" step="1" value="20" />
   </div>
-  <div class="quick-bets">
+  <div class="quick-bets">    <!--The bet ammounts may change to a button input-->
     <span class="quick-bet" onclick="setBet(5)">$5</span>
     <span class="quick-bet" onclick="setBet(10)">$10</span>
     <span class="quick-bet" onclick="setBet(20)">$20</span>
@@ -454,7 +454,7 @@
   </div>
 </div>
 
-<!-- Little payout reference table so players know what they're aiming for -->
+<!-- lets players see posible winning even tho we know its rigged (or going to be) -->
 <div class="payout-table-wrap">
   <h3>Payout Reference</h3>
   <div id="payout-ref"></div>
@@ -463,13 +463,12 @@
 <div class="confetti-wrap" id="confetti-wrap"></div>
 
 <script>
-  // ── State ──
-  // wallet synced from server on page load, then updated via API responses
+  // thy wallet is thy synced
   let wallet = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g,'')) || 0;
   let picks     = new Set();   // numbers the player has selected
   const MAX_PICKS = 10;
 
-  // Mirrors the server-side PAYOUT_TABLE so we can render the reference chart
+  // Mirrors PAYOUT_TABLE so we can render the reference chart
   const PAYOUT_TABLE = {
     1:  {1: 3},
     2:  {2: 5},
