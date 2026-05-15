@@ -521,5 +521,389 @@
 
 <footer>For entertainment purposes only &nbsp;·&nbsp; The Lucky Strip &nbsp;·&nbsp; Good luck to everyone exept ... you know who</footer>
 
+
+<!-- ═══════════════════════════════ AD REVENUE SYSTEM ═══════════════════════════════ -->
+<style>
+  .ad-toggle-btn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 200;
+    background: linear-gradient(135deg, #f5c842, #e6a800);
+    border: none; border-radius: 12px;
+    padding: 10px 18px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    color: #1a0f00; cursor: pointer; letter-spacing: 0.5px;
+    box-shadow: 0 4px 18px rgba(245,200,66,0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ad-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.5); }
+  .ad-toggle-btn.ads-on { background: linear-gradient(135deg, #3cd66e, #28b855); box-shadow: 0 4px 18px rgba(60,214,110,0.4); }
+  .ad-toggle-btn .ad-earn-rate { font-size: 0.75rem; opacity: 0.75; }
+
+  .ad-popup {
+    position: fixed; z-index: 9999;
+    background: #fff;
+    border: 3px solid #c00;
+    border-radius: 2px;
+    width: 280px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 0 1px #000;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: visible;
+    animation: adSlideIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    user-select: none;
+  }
+  @keyframes adSlideIn {
+    from { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .ad-titlebar {
+    background: linear-gradient(180deg, #0a6fdb 0%, #0047b0 100%);
+    color: #fff; padding: 4px 6px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; font-weight: bold;
+    cursor: move; gap: 6px;
+  }
+  .ad-titlebar-left { display: flex; align-items: center; gap: 4px; flex:1; overflow:hidden; white-space:nowrap; }
+  .ad-fake-close {
+    background: linear-gradient(180deg, #e9a800, #c47500);
+    border: 1px solid #8a4700; border-radius: 2px;
+    color: #000; font-size: 10px; font-weight: bold;
+    width: 18px; height: 16px; min-width: 18px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; flex-shrink: 0;
+    transition: background 0.1s;
+  }
+  .ad-fake-close:hover { background: linear-gradient(180deg, #ffb800, #e08000); }
+  .ad-coins-badge {
+    position: absolute; top: -9px; right: -9px;
+    background: #3cd66e; color: #001a0f;
+    border-radius: 50%; width: 20px; height: 20px;
+    font-size: 8px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid #001a0f; pointer-events: none;
+  }
+  .ad-body {
+    padding: 10px 12px 12px;
+    background: linear-gradient(180deg, #fffde7 0%, #fff8c0 100%);
+    color: #000; font-size: 12px; line-height: 1.4;
+    min-height: 100px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .ad-headline { font-size: 14px; font-weight: bold; color: #c00; text-transform: uppercase; border-bottom: 2px solid #c00; padding-bottom: 3px; }
+  .ad-body-text { color: #222; }
+  .ad-cta {
+    background: linear-gradient(180deg, #ff6600, #cc3300);
+    color: #fff !important; font-weight: bold; font-size: 12px;
+    padding: 5px 8px; border: 2px solid #8a1100;
+    border-radius: 2px; cursor: pointer; text-align: center;
+    box-shadow: 0 2px 0 #660000; text-decoration: none !important; display: block;
+  }
+  .ad-cta:hover { background: linear-gradient(180deg, #ff7700, #dd4400); }
+  .ad-blink { animation: blinkText 0.5s step-start infinite; color: #c00; font-weight: bold; font-size: 11px; }
+  @keyframes blinkText { 50% { opacity: 0; } }
+  .ad-star-border { border: 2px dashed gold; padding: 3px 5px; background: #fffff0; color: #333; font-size: 10px; text-align: center; }
+  .ad-marquee { overflow: hidden; white-space: nowrap; border: 1px solid #999; background: #fffde7; padding: 2px 0; }
+  .ad-marquee-inner { display: inline-block; animation: marqueeScroll 7s linear infinite; }
+  @keyframes marqueeScroll { from { transform: translateX(280px); } to { transform: translateX(-100%); } }
+
+  @keyframes adShake {
+    0%,100% { transform: translateX(0) rotate(0); }
+    15%  { transform: translateX(-12px) rotate(-3deg); }
+    30%  { transform: translateX(14px) rotate(3deg); }
+    45%  { transform: translateX(-9px) rotate(-2deg); }
+    60%  { transform: translateX(10px) rotate(2deg); }
+    75%  { transform: translateX(-5px); }
+    90%  { transform: translateX(5px); }
+  }
+  .ad-popup.shaking { animation: adShake 0.55s ease !important; }
+
+  .earn-toast {
+    position: fixed; bottom: 72px; right: 20px; z-index: 10001;
+    background: rgba(60,214,110,0.97); color: #001a0f;
+    border-radius: 8px; padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    pointer-events: none; max-width: 320px;
+    animation: toastPop 2.2s ease forwards;
+  }
+  @keyframes toastPop {
+    0%   { opacity: 0; transform: translateY(10px); }
+    12%  { opacity: 1; transform: translateY(0); }
+    78%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-8px); }
+  }
+</style>
+
+<button class="ad-toggle-btn" id="ad-toggle-btn" onclick="window._adSystem.toggle()">
+  📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>
+</button>
+
+<script>
+window._adSystem = (function() {
+  const AD_POOL = [
+    {
+      title: '⚠️ Warning from Microsoft', icon: '🖥️',
+      headline: 'YOUR PC HAS 47 VIRUSES!!!',
+      body: 'Our FREE scan detected 47 critical threats. Click NOW before your bank account is completely drained!!',
+      cta: '⚡ SCAN MY PC FOR FREE RIGHT NOW ⚡',
+      extra: '<div class="ad-blink">⚠️ YOUR DATA IS BEING STOLEN AS YOU READ THIS ⚠️</div>',
+    },
+    {
+      title: '🎉 Congratulations!!', icon: '🎁',
+      headline: 'YOU ARE THE 1,000,000th VISITOR!',
+      body: 'You\'ve been selected for a FREE iPhone 16 Pro + $1000 gift card! No purchase necessary! Absolutely no catch whatsoever!',
+      cta: '🎁 CLAIM MY FREE PRIZE NOW!!!! 🎁',
+      extra: '<div class="ad-star-border">⭐ Offer expires in: <b id="ftimer">04:59</b> — HURRY!! ⭐</div>',
+    },
+    {
+      title: '💊 Doctors HATE This Man', icon: '💊',
+      headline: 'LOSE 30KG IN 3 DAYS!!',
+      body: 'Local mum discovers ONE WEIRD TRICK that big pharma desperately doesn\'t want you to know. She ate only toast!',
+      cta: '👉 SEE THE WEIRD TRICK THEY\'RE HIDING 👈',
+      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">🔥 23,891 people bought this TODAY • ALMOST SOLD OUT • TOTALLY REAL PRODUCT 🔥</span></div>',
+    },
+    {
+      title: '🏦 Nigerian Prince Foundation', icon: '👑',
+      headline: 'URGENT & CONFIDENTIAL PROPOSAL',
+      body: 'Dear Esteemed Friend, I am Prince Adebayo of Lagos. I have $47,000,000 USD frozen. I need YOUR help and will give 40% commission!',
+      cta: '📧 REPLY TO HIS ROYAL HIGHNESS 📧',
+      extra: '<div class="ad-blink" style="font-size:10px;color:green;">✅ 100% REAL ✅ TOTALLY NOT A SCAM ✅ VERY LEGITIMATE</div>',
+    },
+    {
+      title: '🎮 GAMERS FURIOUS!!!', icon: '🕹️',
+      headline: 'UNLIMITED COINS GLITCH FOUND',
+      body: 'Local teen finds exploit that generates UNLIMITED free coins in ANY casino game. Lucky Strip users are furious! Click before they patch it!',
+      cta: '🎮 GET MY UNLIMITED COINS NOW 🎮',
+      extra: '<div class="ad-star-border" style="font-size:10px;">✅ Works here • ✅ 100% Safe • ✅ Definitely Legal • ✅ Won\'t steal your account</div>',
+    },
+    {
+      title: '🔮 Psychic Madame Zelda', icon: '🔮',
+      headline: 'YOUR WALLET IS IN DANGER!!',
+      body: 'Madame Zelda has foreseen great financial suffering in your future. For just $9.99 she will personally hex your enemies AND double your casino luck!',
+      cta: '🔮 CONTACT MADAME ZELDA IMMEDIATELY 🔮',
+      extra: '<div class="ad-blink" style="color:purple;font-size:10px;">★★★★★ "She tripled my keno winnings!" — Totally Real Person, definitely</div>',
+    },
+    {
+      title: '🚨 FLASH SALE ENDS IN 2 MIN', icon: '🚨',
+      headline: 'GENUINE DESIGNER GOODS $4.99!!',
+      body: 'Ray-Ban Sunglasses $4.99! Rolex Watches $7.99! Gucci Bags $12.99! These prices are ABSOLUTELY REAL and the products are definitely authentic!',
+      cta: '🛒 SHOP THESE EXTREMELY REAL DEALS 🛒',
+      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">FREE SHIPPING • 100% GENUINE BRAND NAME PRODUCTS • NOT COUNTERFEIT AT ALL • VERY LEGITIMATE WEBSITE</span></div>',
+    },
+    {
+      title: '🏠 Wealth Secrets REVEALED', icon: '🏘️',
+      headline: 'QUIT YOUR JOB TOMORROW!!',
+      body: 'I made $47,000 last Tuesday flipping properties with NO money, NO experience, and NO pants. My FREE webinar reveals everything. Limited seats!',
+      cta: '💸 REGISTER FOR FREE WEBINAR (Ends Soon!) 💸',
+      extra: '<div class="ad-star-border" style="font-size:10px;">"Was living in a bin. Now I have 17 bins, but they\'re solid gold." — Mike T., Definitely Real</div>',
+    },
+  ];
+
+  const MAX_ADS = 6;
+  const EARN_PER_AD_PER_MIN = 10;
+  const EARN_INTERVAL_MS = 10000; // 10s ticks
+  const COINS_PER_TICK_PER_AD = EARN_PER_AD_PER_MIN / 6; // 1.667
+
+  let adsEnabled = false;
+  let activeAds  = [];
+  let earnTimer  = null;
+  let spawnTimer = null;
+  let adIdCounter = 0;
+  let dragAd = null, dragOffX = 0, dragOffY = 0;
+
+  // ── Wallet display sync ──────────────────────────────────────
+  function updateLocalWallet(newVal) {
+    const el = document.getElementById('wallet-display');
+    if (el) el.textContent = parseFloat(newVal).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  // ── Update toggle button ─────────────────────────────────────
+  function updateBtn() {
+    const btn = document.getElementById('ad-toggle-btn');
+    if (!btn) return;
+    if (adsEnabled) {
+      const rate = activeAds.length * EARN_PER_AD_PER_MIN;
+      btn.className = 'ad-toggle-btn ads-on';
+      btn.innerHTML = '📺 Ads ON (' + activeAds.length + '/' + MAX_ADS + ') <span class="ad-earn-rate">+' + rate + '💰/min</span>';
+    } else {
+      btn.className = 'ad-toggle-btn';
+      btn.innerHTML = '📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>';
+    }
+  }
+
+  // ── Spawn one popup ad ───────────────────────────────────────
+  function spawnAd() {
+    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
+    const id = ++adIdCounter;
+    const d  = AD_POOL[Math.floor(Math.random() * AD_POOL.length)];
+    const pw = 280, ph = 220;
+    const x  = 20 + Math.random() * Math.max(20, window.innerWidth  - pw - 40);
+    const y  = 20 + Math.random() * Math.max(20, window.innerHeight - ph - 40);
+
+    const el = document.createElement('div');
+    el.className = 'ad-popup';
+    el.id = 'adpop-' + id;
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    el.innerHTML =
+      '<div class="ad-titlebar" id="adtb-' + id + '">' +
+        '<div class="ad-titlebar-left">' +
+          '<span>' + d.icon + '</span>' +
+          '<span style="overflow:hidden;text-overflow:ellipsis;">' + d.title + '</span>' +
+        '</div>' +
+        '<div class="ad-fake-close" id="adbtn-' + id + '" title="Close ad">' +
+          '✕<div class="ad-coins-badge">💰</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ad-body">' +
+        '<div class="ad-headline">' + d.headline + '</div>' +
+        '<div class="ad-body-text">' + d.body + '</div>' +
+        (d.extra || '') +
+        '<a class="ad-cta" href="javascript:void(0)" onclick="window._adSystem.ctaClick(' + id + ')">' + d.cta + '</a>' +
+      '</div>';
+
+    document.body.appendChild(el);
+    activeAds.push({ id, el });
+
+    // Drag from titlebar
+    const tb = document.getElementById('adtb-' + id);
+    if (tb) {
+      tb.addEventListener('mousedown', function(e) {
+        if (e.target.closest('.ad-fake-close')) return;
+        dragAd   = el;
+        dragOffX = e.clientX - el.offsetLeft;
+        dragOffY = e.clientY - el.offsetTop;
+        el.style.transition = 'none';
+        e.preventDefault();
+      });
+    }
+
+    // Fake close handler
+    const closeBtn = document.getElementById('adbtn-' + id);
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() { fakeClose(id, closeBtn); });
+    }
+
+    updateBtn();
+  }
+
+  // ── Fake close — button runs away ───────────────────────────
+  function fakeClose(id, btn) {
+    const el = document.getElementById('adpop-' + id);
+    if (!el) return;
+    // Shake the popup
+    el.classList.remove('shaking');
+    void el.offsetWidth;
+    el.classList.add('shaking');
+    setTimeout(function() { el.classList.remove('shaking'); }, 600);
+
+    // Snatch the button and teleport it
+    const sasses = [
+      "Nope!","Nice try 😏","haha no","You wish!",
+      "Error 404","Try again?","That's not it",
+      "Ads = $$$","Keep watching!","Never gonna happen 😁",
+    ];
+    const sass = sasses[Math.floor(Math.random() * sasses.length)];
+    const nx = Math.random() * Math.max(10, window.innerWidth  - 80);
+    const ny = Math.random() * Math.max(10, window.innerHeight - 40);
+
+    btn.style.cssText = 'position:fixed;left:' + nx + 'px;top:' + ny + 'px;z-index:99999;width:auto;padding:3px 8px;font-size:10px;border-radius:4px;';
+    btn.textContent = sass;
+    document.body.appendChild(btn);
+
+    showToast('😈 ' + sass, '#f5c842', '#1a0f00', 1800);
+
+    setTimeout(function() {
+      // Return it to the ad
+      const tb = el.querySelector('.ad-titlebar');
+      if (tb) {
+        btn.removeAttribute('style');
+        btn.innerHTML = '✕<div class="ad-coins-badge">💰</div>';
+        tb.appendChild(btn);
+        btn.addEventListener('click', function() { fakeClose(id, btn); });
+      }
+    }, 2200);
+  }
+
+  // ── CTA click easter egg ─────────────────────────────────────
+  function ctaClick(id) {
+    const msgs = [
+      "🤑 Congrats! You won absolutely nothing. The ad stays though.",
+      "📞 Connecting to Madame Zelda... she says watch more ads.",
+      "🦠 Downloading 47 viruses... just kidding. Ad remains.",
+      "💸 Order confirmed! $0 charged, 0 items shipped. You're welcome!",
+      "🎉 You clicked it! The prince is grateful. The ad is not going anywhere.",
+    ];
+    showToast(msgs[Math.floor(Math.random() * msgs.length)], '#d63c3c', '#fff8ee', 3000);
+  }
+
+  // ── Earn tick ────────────────────────────────────────────────
+  async function earnTick() {
+    if (!adsEnabled || activeAds.length === 0) return;
+    const earned = parseFloat((COINS_PER_TICK_PER_AD * activeAds.length).toFixed(2));
+    try {
+      const resp = await fetch('/api/ads/earn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: earned })
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        updateLocalWallet(data.wallet);
+        if (Math.random() < 0.3) {
+          showToast('+$' + earned.toFixed(2) + ' ad revenue 💰', '#3cd66e', '#001a0f', 1800);
+        }
+      }
+    } catch(e) { /* silent */ }
+  }
+
+  // ── Spawn scheduler ──────────────────────────────────────────
+  function scheduleSpawn() {
+    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
+    const delay = 7000 + Math.random() * 8000;
+    spawnTimer = setTimeout(function() { spawnAd(); scheduleSpawn(); }, delay);
+  }
+
+  // ── Toggle ───────────────────────────────────────────────────
+  function toggle() {
+    adsEnabled = !adsEnabled;
+    if (adsEnabled) {
+      spawnAd();
+      scheduleSpawn();
+      earnTimer = setInterval(earnTick, EARN_INTERVAL_MS);
+      showToast('📺 Ads enabled! +' + EARN_PER_AD_PER_MIN + '💰/min per ad, up to ' + MAX_ADS + ' ads.', '#3cd66e', '#001a0f', 2800);
+    } else {
+      clearTimeout(spawnTimer);
+      clearInterval(earnTimer);
+      activeAds.forEach(function(a) { if (a.el && a.el.parentNode) a.el.parentNode.removeChild(a.el); });
+      activeAds = [];
+      showToast('📺 Ads disabled. The silence is free.', '#d63c3c', '#fff8ee', 2000);
+    }
+    updateBtn();
+  }
+
+  // ── Drag ─────────────────────────────────────────────────────
+  document.addEventListener('mousemove', function(e) {
+    if (!dragAd) return;
+    dragAd.style.left = Math.max(0, e.clientX - dragOffX) + 'px';
+    dragAd.style.top  = Math.max(0, e.clientY - dragOffY) + 'px';
+  });
+  document.addEventListener('mouseup', function() { dragAd = null; });
+
+  // ── Toast ─────────────────────────────────────────────────────
+  function showToast(msg, bg, color, ms) {
+    const t = document.createElement('div');
+    t.className = 'earn-toast';
+    t.style.background = bg || '#3cd66e';
+    t.style.color = color || '#001a0f';
+    t.style.animationDuration = ((ms || 2200) / 1000) + 's';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 2200);
+  }
+
+  return { toggle: toggle, ctaClick: ctaClick };
+})();
+</script>
+
 </body>
 </html>

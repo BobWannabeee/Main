@@ -109,45 +109,221 @@
     }
     .run-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,200,66,0.35); }
     .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .race-stage { width: 100%; max-width: 760px; margin-top: 28px; display: none; }
+
+    /* ── RACE STAGE ── */
+    .race-stage { width: 100%; max-width: 820px; margin-top: 28px; display: none; }
     .race-stage.visible { display: block; }
+
+    /* Crowd / atmosphere dots */
+    .crowd-bar { display: flex; gap: 4px; justify-content: center; margin-bottom: 10px; }
+    .crowd-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); opacity: 0.3;
+      animation: pulse 0.5s infinite alternate;
+    }
+    .crowd-dot:nth-child(2) { animation-delay: 0.1s; }
+    .crowd-dot:nth-child(3) { animation-delay: 0.2s; }
+    .crowd-dot:nth-child(4) { animation-delay: 0.3s; }
+    .crowd-dot:nth-child(5) { animation-delay: 0.4s; }
+    @keyframes pulse { to { opacity: 1; transform: scale(1.3); } }
+
+    /* Track outer wrapper */
     .track-wrap {
-      background: linear-gradient(180deg, #3a7d2c 0%, #3a7d2c 8%, #a08040 8%, #c8a96e 12%, #b89555 50%, #c8a96e 88%, #a08040 92%, #3a7d2c 92%, #3a7d2c 100%);
-      border-radius: 14px;
-      border: 3px solid var(--rail);
+      border-radius: 16px;
+      border: 4px solid #5a3510;
       overflow: hidden;
-      padding: 10px 0;
       position: relative;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
     }
+
+    /* Top grass strip */
+    .track-grass-top {
+      height: 18px;
+      background: linear-gradient(180deg, #2d6621 0%, #3a8c28 60%, #4aaa30 100%);
+      border-bottom: 3px solid #5a3510;
+    }
+    /* Bottom grass strip */
+    .track-grass-bottom {
+      height: 18px;
+      background: linear-gradient(180deg, #4aaa30 0%, #3a8c28 40%, #2d6621 100%);
+      border-top: 3px solid #5a3510;
+    }
+
+    /* The actual dirt track */
+    .track-dirt {
+      position: relative;
+      background:
+        /* subtle track texture lines */
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px,
+          transparent 38px,
+          rgba(0,0,0,0.04) 38px,
+          rgba(0,0,0,0.04) 40px
+        ),
+        linear-gradient(180deg,
+          #b8924a 0%,
+          #c8a55e 15%,
+          #d4b070 40%,
+          #c8a55e 60%,
+          #b89050 85%,
+          #a07840 100%
+        );
+    }
+
+    /* Finish line */
     .finish-line {
-      position: absolute; top: 0; bottom: 0; right: 60px; width: 6px;
-      background: repeating-linear-gradient(180deg, #fff 0 8px, #111 8px 16px);
-      opacity: 0.7; z-index: 2;
+      position: absolute; top: 0; bottom: 0; right: 56px; width: 8px;
+      background: repeating-linear-gradient(180deg, #fff 0 9px, #111 9px 18px);
+      z-index: 4;
+      box-shadow: 0 0 12px rgba(255,255,255,0.4);
     }
+    .finish-flag {
+      position: absolute; top: -22px; right: 50px;
+      font-size: 1.2rem; z-index: 5;
+    }
+
+    /* Starting gate line */
+    .start-line {
+      position: absolute; top: 0; bottom: 0; left: 120px; width: 3px;
+      background: rgba(255,255,255,0.25);
+      z-index: 3;
+    }
+
+    /* Individual lane */
     .lane {
-      display: flex; align-items: center; height: 52px;
-      position: relative; border-bottom: 1px dashed rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      height: 58px;
+      position: relative;
+      border-bottom: 1px solid rgba(0,0,0,0.18);
+      transition: background 0.2s;
     }
     .lane:last-child { border-bottom: none; }
+    /* Alternate lane shading */
+    .lane:nth-child(even) { background: rgba(0,0,0,0.06); }
+
+    /* Lane number badge */
+    .lane-num {
+      width: 28px; min-width: 28px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      z-index: 3;
+    }
+
+    /* Lane name label */
     .lane-label {
-      width: 120px; min-width: 120px; padding: 0 10px 0 14px;
-      font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.85);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.6); z-index: 3;
+      width: 96px; min-width: 96px;
+      padding: 0 6px 0 2px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      z-index: 3;
     }
-    .lane-track { flex: 1; position: relative; height: 100%; }
+
+    /* Track area for runner */
+    .lane-track { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+    /* Dust trail */
+    .dust-trail {
+      position: absolute; top: 50%; left: 0;
+      width: 36px; height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(200,165,94,0.55) 0%, transparent 70%);
+      transform: translateY(-50%);
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    /* Horse runner emoji */
     .horse-runner {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      font-size: 1.7rem; left: 0%;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-      z-index: 3; will-change: left;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.9rem;
+      left: 0%;
+      z-index: 3;
+      will-change: left;
+      /* gallop bounce */
+      animation: gallop 0.22s steps(2, end) infinite;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
     }
-    .horse-runner.my-horse { filter: drop-shadow(0 0 8px gold); }
+    .horse-runner.my-horse {
+      filter: drop-shadow(0 0 10px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+    }
+    /* Winner pulse */
+    .horse-runner.winner-flash {
+      animation: winnerPulse 0.4s ease infinite alternate;
+    }
+    @keyframes gallop {
+      0%   { transform: translateY(-50%) scaleY(1); }
+      50%  { transform: translateY(-56%) scaleY(0.93); }
+      100% { transform: translateY(-50%) scaleY(1); }
+    }
+    @keyframes winnerPulse {
+      from { transform: translateY(-50%) scale(1);   filter: drop-shadow(0 0 8px gold); }
+      to   { transform: translateY(-56%) scale(1.15); filter: drop-shadow(0 0 20px gold); }
+    }
+
+    /* Position indicator that appears mid-race */
+    .pos-badge {
+      position: absolute;
+      right: 4px; top: 4px;
+      background: rgba(0,0,0,0.55);
+      border-radius: 4px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #cbb07a;
+      padding: 1px 4px;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .pos-badge.show { opacity: 1; }
+
+    /* Status bar */
     .status-bar {
       text-align: center; margin-top: 14px;
-      font-size: 1.15rem; color: #d4b07a; letter-spacing: 1px; min-height: 28px;
+      font-size: 1.2rem; color: #d4b07a;
+      letter-spacing: 1px; min-height: 30px;
+      font-weight: 700;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.5);
     }
+
+    /* Countdown overlay */
+    .countdown-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.5);
+      border-radius: 12px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .countdown-overlay.show { opacity: 1; }
+    .countdown-number {
+      font-family: 'Rye', serif;
+      font-size: 5rem;
+      color: var(--accent);
+      text-shadow: 0 0 40px rgba(245,200,66,0.8);
+      animation: pop 0.4s ease;
+    }
+    @keyframes pop {
+      0%   { transform: scale(2); opacity: 0; }
+      60%  { transform: scale(0.9); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Result card */
     .result-card {
       background: var(--panel); border: 1px solid rgba(255,255,255,0.12);
       border-radius: 14px; padding: 24px 28px; margin-top: 18px;
@@ -168,11 +344,14 @@
     .finish-list { list-style: none; margin-top: 14px; text-align: left; }
     .finish-list li {
       display: flex; align-items: center; gap: 10px;
-      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
       font-size: 0.95rem;
     }
     .finish-list li:last-child { border-bottom: none; }
     .finish-place { font-weight: 700; width: 28px; color: #cbb07a; }
+    .finish-place.gold   { color: #f5c842; }
+    .finish-place.silver { color: #c0c0c0; }
+    .finish-place.bronze { color: #cd7f32; }
     .again-btn {
       margin-top: 20px; padding: 12px 32px;
       background: transparent; border: 2px solid var(--accent);
@@ -181,18 +360,11 @@
       cursor: pointer; letter-spacing: 1px; transition: background 0.15s;
     }
     .again-btn:hover { background: rgba(245,200,66,0.1); }
+
     .error-msg { color: var(--red); font-size: 0.9rem; margin-top: 8px; text-align: center; }
-    .crowd-bar { display: flex; gap: 4px; justify-content: center; margin-bottom: 10px; }
-    .crowd-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent); opacity: 0.3;
-      animation: pulse 0.5s infinite alternate;
-    }
-    .crowd-dot:nth-child(2) { animation-delay: 0.1s; }
-    .crowd-dot:nth-child(3) { animation-delay: 0.2s; }
-    .crowd-dot:nth-child(4) { animation-delay: 0.3s; }
-    .crowd-dot:nth-child(5) { animation-delay: 0.4s; }
-    @keyframes pulse { to { opacity: 1; transform: scale(1.3); } }
+    .hidden { display: none !important; }
+
+    /* Confetti */
     .confetti-wrap { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 100; width: 100%; height: 100%; }
     .confetti-piece {
       position: absolute; width: 10px; height: 10px; opacity: 0;
@@ -202,45 +374,43 @@
       0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
       100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
     }
-    .hidden { display: none !important; }
 
+    /* Nav */
     .back-home {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      background: rgba(26,15,0,0.85);
-      border: 1px solid rgba(245,200,66,0.35);
-      border-radius: 8px;
-      padding: 7px 14px;
-      color: var(--accent);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      text-decoration: none;
-      letter-spacing: 1px;
-      backdrop-filter: blur(6px);
-      transition: background 0.15s, border-color 0.15s;
-      z-index: 50;
+      position: fixed; top: 16px; left: 16px;
+      background: rgba(26,15,0,0.85); border: 1px solid rgba(245,200,66,0.35);
+      border-radius: 8px; padding: 7px 14px;
+      color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem; font-weight: 700; text-decoration: none;
+      letter-spacing: 1px; backdrop-filter: blur(6px);
+      transition: background 0.15s, border-color 0.15s; z-index: 50;
     }
     .back-home:hover { background: rgba(245,200,66,0.12); border-color: var(--accent); }
-
-    /* Profile link — top right */
-    .nav-right {
-      position: fixed; top: 16px; right: 16px;
-      display: flex; gap: 8px; z-index: 50;
-    }
+    .nav-right { position: fixed; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 50; }
     .nav-pill {
-      background: rgba(26,15,0,0.85);
-      border: 1px solid rgba(245,200,66,0.3);
+      background: rgba(26,15,0,0.85); border: 1px solid rgba(245,200,66,0.3);
       border-radius: 8px; padding: 7px 14px;
       color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
       font-size: 0.9rem; font-weight: 700; text-decoration: none;
-      letter-spacing: 1px; backdrop-filter: blur(6px);
-      transition: background 0.15s;
+      letter-spacing: 1px; backdrop-filter: blur(6px); transition: background 0.15s;
     }
     .nav-pill:hover { background: rgba(245,200,66,0.14); }
     .nav-pill.logout { border-color: rgba(214,60,60,0.3); color: #f08080; }
     .nav-pill.logout:hover { background: rgba(214,60,60,0.14); }
+
+    /* Live position strip */
+    .live-positions {
+      display: flex; gap: 8px; justify-content: center;
+      margin-top: 8px; flex-wrap: wrap; min-height: 24px;
+    }
+    .live-pos-chip {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px; padding: 2px 10px;
+      font-size: 0.75rem; font-weight: 700;
+      color: #cbb07a; transition: background 0.2s;
+    }
+    .live-pos-chip.leader { background: rgba(245,200,66,0.18); border-color: var(--accent); color: var(--accent); }
   </style>
 </head>
 <body>
@@ -286,16 +456,30 @@
   <button class="run-btn" id="run-btn" onclick="startRace()">Run the Race!</button>
 </div>
 
+<!-- RACE STAGE -->
 <div class="race-stage" id="race-stage">
   <div class="crowd-bar">
     <div class="crowd-dot"></div><div class="crowd-dot"></div>
     <div class="crowd-dot"></div><div class="crowd-dot"></div>
     <div class="crowd-dot"></div>
   </div>
-  <div class="track-wrap">
-    <div class="finish-line"></div>
-    <div id="race-lanes"></div>
+
+  <div class="track-wrap" id="track-wrap">
+    <!-- Countdown overlay inside track -->
+    <div class="countdown-overlay" id="countdown-overlay">
+      <span class="countdown-number" id="countdown-number"></span>
+    </div>
+
+    <div class="track-grass-top"></div>
+    <div class="track-dirt" id="track-dirt">
+      <div class="finish-line"></div>
+      <div class="start-line"></div>
+      <div id="race-lanes"></div>
+    </div>
+    <div class="track-grass-bottom"></div>
   </div>
+
+  <div class="live-positions" id="live-positions"></div>
   <p class="status-bar" id="status-bar">Ready...</p>
 
   <div class="result-card" id="result-card">
@@ -309,9 +493,8 @@
 
 <div class="confetti-wrap" id="confetti-wrap"></div>
 
-<script>     // just remeber this is rigged might just delete the win posibility
-  const MEDALS = ['1st','2nd','3rd','4th','5th','6th'];        
-  // wallet is initialised from the server-rendered value, then kept in sync via API responses
+<script>
+  const MEDALS = ['🥇','🥈','🥉','4th','5th','6th'];
   let wallet = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g, '')) || 0;
   let selectedId = null;
   let animHandle = null;
@@ -383,15 +566,18 @@
     const container = document.getElementById('race-lanes');
     container.innerHTML = '';
     const cards = [...document.querySelectorAll('.horse-card')];
-    cards.forEach(card => {
-      const id = parseInt(card.dataset.id);
+    cards.forEach((card, idx) => {
+      const id   = parseInt(card.dataset.id);
       const name = card.dataset.name;
       const lane = document.createElement('div');
       lane.className = 'lane';
       lane.innerHTML =
+        '<div class="lane-num">' + (idx + 1) + '</div>' +
         '<div class="lane-label">' + name + '</div>' +
         '<div class="lane-track" id="track-' + id + '">' +
+          '<div class="dust-trail" id="dust-' + id + '"></div>' +
           '<div class="horse-runner' + (id === selectedId ? ' my-horse' : '') + '" id="runner-' + id + '">🐎</div>' +
+          '<div class="pos-badge" id="pos-' + id + '"></div>' +
         '</div>';
       container.appendChild(lane);
     });
@@ -399,42 +585,91 @@
 
   function countdown() {
     return new Promise(resolve => {
-      const stati = ['Ready...', 'Set...', 'GO!'];
+      const overlay = document.getElementById('countdown-overlay');
+      const num     = document.getElementById('countdown-number');
+      const bar     = document.getElementById('status-bar');
+      const steps   = ['3', '2', '1', 'GO!'];
       let i = 0;
-      const bar = document.getElementById('status-bar');
-      bar.textContent = stati[0];
-      const t = setInterval(() => {
+
+      function showStep() {
+        if (i >= steps.length) {
+          overlay.classList.remove('show');
+          resolve();
+          return;
+        }
+        overlay.classList.add('show');
+        num.textContent = steps[i];
+        // re-trigger animation
+        num.style.animation = 'none';
+        void num.offsetWidth;
+        num.style.animation = 'pop 0.4s ease';
+
+        bar.textContent = steps[i] === 'GO!' ? "They're off!" : 'Get ready...';
         i++;
-        if (i < stati.length) { bar.textContent = stati[i]; }
-        else { clearInterval(t); resolve(); }
-      }, 700);
+        setTimeout(showStep, steps[i - 1] === 'GO!' ? 600 : 700);
+      }
+      showStep();
     });
   }
 
   function animateRace(data) {
     const frames = data.frames;
-    const MS = 1000 / 24;
+    const MS = 1000 / 28; // ~28fps
 
     return new Promise(resolve => {
       let f = 0;
-      const bar = document.getElementById('status-bar');
-      bar.textContent = "They're off!";
+      const bar      = document.getElementById('status-bar');
+      const livePosEl= document.getElementById('live-positions');
 
       function tick() {
-        if (f >= frames.length) { resolve(); return; }
+        if (f >= frames.length) {
+          // Snap everyone to final positions
+          for (const h of data.finishOrder) {
+            const runner = document.getElementById('runner-' + h.id);
+            if (runner) runner.style.left = '91%';
+          }
+          resolve();
+          return;
+        }
+
         const frame = frames[f];
-        for (const [id, pct] of Object.entries(frame)) {
+
+        // Update horse positions & dust
+        const posArr = Object.entries(frame).map(([id, pct]) => ({ id: parseInt(id), pct }));
+
+        for (const { id, pct } of posArr) {
           const runner = document.getElementById('runner-' + id);
+          const dust   = document.getElementById('dust-' + id);
           if (runner) {
-            runner.style.left = (pct / 100 * 91) + '%';
+            const leftPct = (pct / 100) * 88; // 88% of lane-track width so it stops before finish
+            runner.style.left = leftPct + '%';
+            // Show dust when moving
+            if (dust) {
+              dust.style.left  = Math.max(0, leftPct - 3) + '%';
+              dust.style.opacity = pct > 2 ? '1' : '0';
+            }
           }
         }
-        if (f % 20 === 0) {
-          const leader = data.finishOrder[0];
-          if (frame[leader.id] < 95) {
-            bar.textContent = leader.name + ' in the lead!';
+
+        // Update live position chips every 15 frames
+        if (f % 15 === 0) {
+          const sorted = [...posArr].sort((a, b) => b.pct - a.pct);
+          livePosEl.innerHTML = '';
+          sorted.forEach((item, rank) => {
+            const name = data.finishOrder.find(h => h.id === item.id)?.name || ('Horse ' + item.id);
+            const chip = document.createElement('div');
+            chip.className = 'live-pos-chip' + (rank === 0 ? ' leader' : '');
+            chip.textContent = (rank + 1) + '. ' + name;
+            livePosEl.appendChild(chip);
+          });
+
+          // Update status bar with leader name
+          if (sorted[0].pct < 92) {
+            const leaderName = data.finishOrder.find(h => h.id === sorted[0].id)?.name;
+            if (leaderName) bar.textContent = '🏇 ' + leaderName + ' in the lead!';
           }
         }
+
         f++;
         animHandle = setTimeout(tick, MS);
       }
@@ -443,7 +678,12 @@
   }
 
   function showResult(data, bet) {
-    document.getElementById('status-bar').textContent = data.winner + ' wins the race!';
+    document.getElementById('status-bar').textContent = '🏆 ' + data.winner + ' wins the race!';
+    document.getElementById('live-positions').innerHTML = '';
+
+    // Flash winner horse
+    const winRunner = document.getElementById('runner-' + data.winnerId);
+    if (winRunner) winRunner.classList.add('winner-flash');
 
     const card  = document.getElementById('result-card');
     const title = document.getElementById('result-title');
@@ -454,7 +694,7 @@
     if (data.win) {
       updateWallet(data.wallet);
       card.className = 'result-card show win';
-      title.textContent = 'You Won!';
+      title.textContent = '🎉 You Won!';
       sub.textContent = data.winner + ' crossed the line first!';
       pamt.textContent = '+$' + data.payout.toLocaleString();
       launchConfetti();
@@ -469,10 +709,11 @@
     flist.innerHTML = '';
     data.finishOrder.forEach(function(h, i) {
       const li = document.createElement('li');
+      const placeColors = ['gold', 'silver', 'bronze', '', '', ''];
       li.innerHTML =
-        '<span class="finish-place">' + (i+1) + '.</span>' +
+        '<span class="finish-place ' + (placeColors[i] || '') + '">' + MEDALS[i] + '</span>' +
         '<span>' + h.name + '</span>' +
-        (h.id === selectedId ? '<span style="color:var(--accent);margin-left:auto">your pick</span>' : '');
+        (h.id === selectedId ? '<span style="color:var(--accent);margin-left:auto">⭐ your pick</span>' : '');
       flist.appendChild(li);
     });
   }
@@ -481,17 +722,19 @@
     const wrap = document.getElementById('confetti-wrap');
     wrap.innerHTML = '';
     const colors = ['#f5c842','#e23c3c','#3cd66e','#3c9fe2','#f57842'];
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
       const p = document.createElement('div');
       p.className = 'confetti-piece';
       p.style.left = (Math.random() * 100) + 'vw';
-      p.style.animationDelay = (Math.random() * 0.8) + 's';
+      p.style.animationDelay = (Math.random() * 1.0) + 's';
       p.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
       p.style.background = colors[Math.floor(Math.random() * colors.length)];
       p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      p.style.width  = (6 + Math.random() * 8) + 'px';
+      p.style.height = (6 + Math.random() * 8) + 'px';
       wrap.appendChild(p);
     }
-    setTimeout(function() { wrap.innerHTML = ''; }, 2500);
+    setTimeout(function() { wrap.innerHTML = ''; }, 2800);
   }
 
   function resetSetup() {
@@ -507,9 +750,394 @@
     document.getElementById('result-card').className = 'result-card';
     document.getElementById('race-lanes').innerHTML = '';
     document.getElementById('status-bar').textContent = 'Ready...';
+    document.getElementById('live-positions').innerHTML = '';
+    document.getElementById('countdown-overlay').classList.remove('show');
     resetSetup();
-    // wallet is managed server-side; no local reset needed
   }
 </script>
+
+<!-- ═══════════════════════════════ AD REVENUE SYSTEM ═══════════════════════════════ -->
+<style>
+  .ad-toggle-btn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 200;
+    background: linear-gradient(135deg, #f5c842, #e6a800);
+    border: none; border-radius: 12px;
+    padding: 10px 18px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    color: #1a0f00; cursor: pointer; letter-spacing: 0.5px;
+    box-shadow: 0 4px 18px rgba(245,200,66,0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ad-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.5); }
+  .ad-toggle-btn.ads-on { background: linear-gradient(135deg, #3cd66e, #28b855); box-shadow: 0 4px 18px rgba(60,214,110,0.4); }
+  .ad-toggle-btn .ad-earn-rate { font-size: 0.75rem; opacity: 0.75; }
+
+  .ad-popup {
+    position: fixed; z-index: 9999;
+    background: #fff;
+    border: 3px solid #c00;
+    border-radius: 2px;
+    width: 280px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 0 1px #000;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: visible;
+    animation: adSlideIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    user-select: none;
+  }
+  @keyframes adSlideIn {
+    from { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .ad-titlebar {
+    background: linear-gradient(180deg, #0a6fdb 0%, #0047b0 100%);
+    color: #fff; padding: 4px 6px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; font-weight: bold;
+    cursor: move; gap: 6px;
+  }
+  .ad-titlebar-left { display: flex; align-items: center; gap: 4px; flex:1; overflow:hidden; white-space:nowrap; }
+  .ad-fake-close {
+    background: linear-gradient(180deg, #e9a800, #c47500);
+    border: 1px solid #8a4700; border-radius: 2px;
+    color: #000; font-size: 10px; font-weight: bold;
+    width: 18px; height: 16px; min-width: 18px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; flex-shrink: 0;
+    transition: background 0.1s;
+  }
+  .ad-fake-close:hover { background: linear-gradient(180deg, #ffb800, #e08000); }
+  .ad-coins-badge {
+    position: absolute; top: -9px; right: -9px;
+    background: #3cd66e; color: #001a0f;
+    border-radius: 50%; width: 20px; height: 20px;
+    font-size: 8px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid #001a0f; pointer-events: none;
+  }
+  .ad-body {
+    padding: 10px 12px 12px;
+    background: linear-gradient(180deg, #fffde7 0%, #fff8c0 100%);
+    color: #000; font-size: 12px; line-height: 1.4;
+    min-height: 100px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .ad-headline { font-size: 14px; font-weight: bold; color: #c00; text-transform: uppercase; border-bottom: 2px solid #c00; padding-bottom: 3px; }
+  .ad-body-text { color: #222; }
+  .ad-cta {
+    background: linear-gradient(180deg, #ff6600, #cc3300);
+    color: #fff !important; font-weight: bold; font-size: 12px;
+    padding: 5px 8px; border: 2px solid #8a1100;
+    border-radius: 2px; cursor: pointer; text-align: center;
+    box-shadow: 0 2px 0 #660000; text-decoration: none !important; display: block;
+  }
+  .ad-cta:hover { background: linear-gradient(180deg, #ff7700, #dd4400); }
+  .ad-blink { animation: blinkText 0.5s step-start infinite; color: #c00; font-weight: bold; font-size: 11px; }
+  @keyframes blinkText { 50% { opacity: 0; } }
+  .ad-star-border { border: 2px dashed gold; padding: 3px 5px; background: #fffff0; color: #333; font-size: 10px; text-align: center; }
+  .ad-marquee { overflow: hidden; white-space: nowrap; border: 1px solid #999; background: #fffde7; padding: 2px 0; }
+  .ad-marquee-inner { display: inline-block; animation: marqueeScroll 7s linear infinite; }
+  @keyframes marqueeScroll { from { transform: translateX(280px); } to { transform: translateX(-100%); } }
+
+  @keyframes adShake {
+    0%,100% { transform: translateX(0) rotate(0); }
+    15%  { transform: translateX(-12px) rotate(-3deg); }
+    30%  { transform: translateX(14px) rotate(3deg); }
+    45%  { transform: translateX(-9px) rotate(-2deg); }
+    60%  { transform: translateX(10px) rotate(2deg); }
+    75%  { transform: translateX(-5px); }
+    90%  { transform: translateX(5px); }
+  }
+  .ad-popup.shaking { animation: adShake 0.55s ease !important; }
+
+  .earn-toast {
+    position: fixed; bottom: 72px; right: 20px; z-index: 10001;
+    background: rgba(60,214,110,0.97); color: #001a0f;
+    border-radius: 8px; padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    pointer-events: none; max-width: 320px;
+    animation: toastPop 2.2s ease forwards;
+  }
+  @keyframes toastPop {
+    0%   { opacity: 0; transform: translateY(10px); }
+    12%  { opacity: 1; transform: translateY(0); }
+    78%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-8px); }
+  }
+</style>
+
+<button class="ad-toggle-btn" id="ad-toggle-btn" onclick="window._adSystem.toggle()">
+  📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>
+</button>
+
+<script>
+window._adSystem = (function() {
+  const AD_POOL = [
+    {
+      title: '⚠️ Warning from Microsoft', icon: '🖥️',
+      headline: 'YOUR PC HAS 47 VIRUSES!!!',
+      body: 'Our FREE scan detected 47 critical threats. Click NOW before your bank account is completely drained!!',
+      cta: '⚡ SCAN MY PC FOR FREE RIGHT NOW ⚡',
+      extra: '<div class="ad-blink">⚠️ YOUR DATA IS BEING STOLEN AS YOU READ THIS ⚠️</div>',
+    },
+    {
+      title: '🎉 Congratulations!!', icon: '🎁',
+      headline: 'YOU ARE THE 1,000,000th VISITOR!',
+      body: 'You\'ve been selected for a FREE iPhone 16 Pro + $1000 gift card! No purchase necessary! Absolutely no catch whatsoever!',
+      cta: '🎁 CLAIM MY FREE PRIZE NOW!!!! 🎁',
+      extra: '<div class="ad-star-border">⭐ Offer expires in: <b id="ftimer">04:59</b> — HURRY!! ⭐</div>',
+    },
+    {
+      title: '💊 Doctors HATE This Man', icon: '💊',
+      headline: 'LOSE 30KG IN 3 DAYS!!',
+      body: 'Local mum discovers ONE WEIRD TRICK that big pharma desperately doesn\'t want you to know. She ate only toast!',
+      cta: '👉 SEE THE WEIRD TRICK THEY\'RE HIDING 👈',
+      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">🔥 23,891 people bought this TODAY • ALMOST SOLD OUT • TOTALLY REAL PRODUCT 🔥</span></div>',
+    },
+    {
+      title: '🏦 Nigerian Prince Foundation', icon: '👑',
+      headline: 'URGENT & CONFIDENTIAL PROPOSAL',
+      body: 'Dear Esteemed Friend, I am Prince Adebayo of Lagos. I have $47,000,000 USD frozen. I need YOUR help and will give 40% commission!',
+      cta: '📧 REPLY TO HIS ROYAL HIGHNESS 📧',
+      extra: '<div class="ad-blink" style="font-size:10px;color:green;">✅ 100% REAL ✅ TOTALLY NOT A SCAM ✅ VERY LEGITIMATE</div>',
+    },
+    {
+      title: '🎮 GAMERS FURIOUS!!!', icon: '🕹️',
+      headline: 'UNLIMITED COINS GLITCH FOUND',
+      body: 'Local teen finds exploit that generates UNLIMITED free coins in ANY casino game. Lucky Strip users are furious! Click before they patch it!',
+      cta: '🎮 GET MY UNLIMITED COINS NOW 🎮',
+      extra: '<div class="ad-star-border" style="font-size:10px;">✅ Works here • ✅ 100% Safe • ✅ Definitely Legal • ✅ Won\'t steal your account</div>',
+    },
+    {
+      title: '🔮 Psychic Madame Zelda', icon: '🔮',
+      headline: 'YOUR WALLET IS IN DANGER!!',
+      body: 'Madame Zelda has foreseen great financial suffering in your future. For just $9.99 she will personally hex your enemies AND double your casino luck!',
+      cta: '🔮 CONTACT MADAME ZELDA IMMEDIATELY 🔮',
+      extra: '<div class="ad-blink" style="color:purple;font-size:10px;">★★★★★ "She tripled my keno winnings!" — Totally Real Person, definitely</div>',
+    },
+    {
+      title: '🚨 FLASH SALE ENDS IN 2 MIN', icon: '🚨',
+      headline: 'GENUINE DESIGNER GOODS $4.99!!',
+      body: 'Ray-Ban Sunglasses $4.99! Rolex Watches $7.99! Gucci Bags $12.99! These prices are ABSOLUTELY REAL and the products are definitely authentic!',
+      cta: '🛒 SHOP THESE EXTREMELY REAL DEALS 🛒',
+      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">FREE SHIPPING • 100% GENUINE BRAND NAME PRODUCTS • NOT COUNTERFEIT AT ALL • VERY LEGITIMATE WEBSITE</span></div>',
+    },
+    {
+      title: '🏠 Wealth Secrets REVEALED', icon: '🏘️',
+      headline: 'QUIT YOUR JOB TOMORROW!!',
+      body: 'I made $47,000 last Tuesday flipping properties with NO money, NO experience, and NO pants. My FREE webinar reveals everything. Limited seats!',
+      cta: '💸 REGISTER FOR FREE WEBINAR (Ends Soon!) 💸',
+      extra: '<div class="ad-star-border" style="font-size:10px;">"Was living in a bin. Now I have 17 bins, but they\'re solid gold." — Mike T., Definitely Real</div>',
+    },
+  ];
+
+  const MAX_ADS = 6;
+  const EARN_PER_AD_PER_MIN = 10;
+  const EARN_INTERVAL_MS = 10000; // 10s ticks
+  const COINS_PER_TICK_PER_AD = EARN_PER_AD_PER_MIN / 6; // 1.667
+
+  let adsEnabled = false;
+  let activeAds  = [];
+  let earnTimer  = null;
+  let spawnTimer = null;
+  let adIdCounter = 0;
+  let dragAd = null, dragOffX = 0, dragOffY = 0;
+
+  // ── Wallet display sync ──────────────────────────────────────
+  function updateLocalWallet(newVal) {
+    const el = document.getElementById('wallet-display');
+    if (el) el.textContent = parseFloat(newVal).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  // ── Update toggle button ─────────────────────────────────────
+  function updateBtn() {
+    const btn = document.getElementById('ad-toggle-btn');
+    if (!btn) return;
+    if (adsEnabled) {
+      const rate = activeAds.length * EARN_PER_AD_PER_MIN;
+      btn.className = 'ad-toggle-btn ads-on';
+      btn.innerHTML = '📺 Ads ON (' + activeAds.length + '/' + MAX_ADS + ') <span class="ad-earn-rate">+' + rate + '💰/min</span>';
+    } else {
+      btn.className = 'ad-toggle-btn';
+      btn.innerHTML = '📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>';
+    }
+  }
+
+  // ── Spawn one popup ad ───────────────────────────────────────
+  function spawnAd() {
+    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
+    const id = ++adIdCounter;
+    const d  = AD_POOL[Math.floor(Math.random() * AD_POOL.length)];
+    const pw = 280, ph = 220;
+    const x  = 20 + Math.random() * Math.max(20, window.innerWidth  - pw - 40);
+    const y  = 20 + Math.random() * Math.max(20, window.innerHeight - ph - 40);
+
+    const el = document.createElement('div');
+    el.className = 'ad-popup';
+    el.id = 'adpop-' + id;
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    el.innerHTML =
+      '<div class="ad-titlebar" id="adtb-' + id + '">' +
+        '<div class="ad-titlebar-left">' +
+          '<span>' + d.icon + '</span>' +
+          '<span style="overflow:hidden;text-overflow:ellipsis;">' + d.title + '</span>' +
+        '</div>' +
+        '<div class="ad-fake-close" id="adbtn-' + id + '" title="Close ad">' +
+          '✕<div class="ad-coins-badge">💰</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ad-body">' +
+        '<div class="ad-headline">' + d.headline + '</div>' +
+        '<div class="ad-body-text">' + d.body + '</div>' +
+        (d.extra || '') +
+        '<a class="ad-cta" href="javascript:void(0)" onclick="window._adSystem.ctaClick(' + id + ')">' + d.cta + '</a>' +
+      '</div>';
+
+    document.body.appendChild(el);
+    activeAds.push({ id, el });
+
+    // Drag from titlebar
+    const tb = document.getElementById('adtb-' + id);
+    if (tb) {
+      tb.addEventListener('mousedown', function(e) {
+        if (e.target.closest('.ad-fake-close')) return;
+        dragAd   = el;
+        dragOffX = e.clientX - el.offsetLeft;
+        dragOffY = e.clientY - el.offsetTop;
+        el.style.transition = 'none';
+        e.preventDefault();
+      });
+    }
+
+    // Fake close handler
+    const closeBtn = document.getElementById('adbtn-' + id);
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() { fakeClose(id, closeBtn); });
+    }
+
+    updateBtn();
+  }
+
+  // ── Fake close — button runs away ───────────────────────────
+  function fakeClose(id, btn) {
+    const el = document.getElementById('adpop-' + id);
+    if (!el) return;
+    // Shake the popup
+    el.classList.remove('shaking');
+    void el.offsetWidth;
+    el.classList.add('shaking');
+    setTimeout(function() { el.classList.remove('shaking'); }, 600);
+
+    // Snatch the button and teleport it
+    const sasses = [
+      "Nope!","Nice try 😏","haha no","You wish!",
+      "Error 404","Try again?","That's not it",
+      "Ads = $$$","Keep watching!","Never gonna happen 😁",
+    ];
+    const sass = sasses[Math.floor(Math.random() * sasses.length)];
+    const nx = Math.random() * Math.max(10, window.innerWidth  - 80);
+    const ny = Math.random() * Math.max(10, window.innerHeight - 40);
+
+    btn.style.cssText = 'position:fixed;left:' + nx + 'px;top:' + ny + 'px;z-index:99999;width:auto;padding:3px 8px;font-size:10px;border-radius:4px;';
+    btn.textContent = sass;
+    document.body.appendChild(btn);
+
+    showToast('😈 ' + sass, '#f5c842', '#1a0f00', 1800);
+
+    setTimeout(function() {
+      // Return it to the ad
+      const tb = el.querySelector('.ad-titlebar');
+      if (tb) {
+        btn.removeAttribute('style');
+        btn.innerHTML = '✕<div class="ad-coins-badge">💰</div>';
+        tb.appendChild(btn);
+        btn.addEventListener('click', function() { fakeClose(id, btn); });
+      }
+    }, 2200);
+  }
+
+  // ── CTA click easter egg ─────────────────────────────────────
+  function ctaClick(id) {
+    const msgs = [
+      "🤑 Congrats! You won absolutely nothing. The ad stays though.",
+      "📞 Connecting to Madame Zelda... she says watch more ads.",
+      "🦠 Downloading 47 viruses... just kidding. Ad remains.",
+      "💸 Order confirmed! $0 charged, 0 items shipped. You're welcome!",
+      "🎉 You clicked it! The prince is grateful. The ad is not going anywhere.",
+    ];
+    showToast(msgs[Math.floor(Math.random() * msgs.length)], '#d63c3c', '#fff8ee', 3000);
+  }
+
+  // ── Earn tick ────────────────────────────────────────────────
+  async function earnTick() {
+    if (!adsEnabled || activeAds.length === 0) return;
+    const earned = parseFloat((COINS_PER_TICK_PER_AD * activeAds.length).toFixed(2));
+    try {
+      const resp = await fetch('/api/ads/earn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: earned })
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        updateLocalWallet(data.wallet);
+        if (Math.random() < 0.3) {
+          showToast('+$' + earned.toFixed(2) + ' ad revenue 💰', '#3cd66e', '#001a0f', 1800);
+        }
+      }
+    } catch(e) { /* silent */ }
+  }
+
+  // ── Spawn scheduler ──────────────────────────────────────────
+  function scheduleSpawn() {
+    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
+    const delay = 7000 + Math.random() * 8000;
+    spawnTimer = setTimeout(function() { spawnAd(); scheduleSpawn(); }, delay);
+  }
+
+  // ── Toggle ───────────────────────────────────────────────────
+  function toggle() {
+    adsEnabled = !adsEnabled;
+    if (adsEnabled) {
+      spawnAd();
+      scheduleSpawn();
+      earnTimer = setInterval(earnTick, EARN_INTERVAL_MS);
+      showToast('📺 Ads enabled! +' + EARN_PER_AD_PER_MIN + '💰/min per ad, up to ' + MAX_ADS + ' ads.', '#3cd66e', '#001a0f', 2800);
+    } else {
+      clearTimeout(spawnTimer);
+      clearInterval(earnTimer);
+      activeAds.forEach(function(a) { if (a.el && a.el.parentNode) a.el.parentNode.removeChild(a.el); });
+      activeAds = [];
+      showToast('📺 Ads disabled. The silence is free.', '#d63c3c', '#fff8ee', 2000);
+    }
+    updateBtn();
+  }
+
+  // ── Drag ─────────────────────────────────────────────────────
+  document.addEventListener('mousemove', function(e) {
+    if (!dragAd) return;
+    dragAd.style.left = Math.max(0, e.clientX - dragOffX) + 'px';
+    dragAd.style.top  = Math.max(0, e.clientY - dragOffY) + 'px';
+  });
+  document.addEventListener('mouseup', function() { dragAd = null; });
+
+  // ── Toast ─────────────────────────────────────────────────────
+  function showToast(msg, bg, color, ms) {
+    const t = document.createElement('div');
+    t.className = 'earn-toast';
+    t.style.background = bg || '#3cd66e';
+    t.style.color = color || '#001a0f';
+    t.style.animationDuration = ((ms || 2200) / 1000) + 's';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 2200);
+  }
+
+  return { toggle: toggle, ctaClick: ctaClick };
+})();
+</script>
+
 </body>
 </html>

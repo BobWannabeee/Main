@@ -103,14 +103,14 @@ def now_utc():   #this is where time is used
 
 #HOOOOOOOOOOOOOOORSES
 HORSES = [              
-    {'id': 1, 'name': 'Thunderbolt',    'odds': 4.5, 'true_weight': 6},
-    {'id': 2, 'name': 'Silver Streak',  'odds': 6.0, 'true_weight': 5},
-    {'id': 3, 'name': 'Midnight Flash', 'odds': 5.0, 'true_weight': 6},
-    {'id': 4, 'name': 'Crimson Comet',  'odds': 7.5, 'true_weight': 4},
-    {'id': 5, 'name': 'Emerald Wind',   'odds': 8.0, 'true_weight': 3},
-    {'id': 6, 'name': 'Royal Charger',  'odds': 5.5, 'true_weight': 5},
+    {'id': 1, 'name': 'Coran',    'odds': 4.5, 'true_weight': 6},
+    {'id': 2, 'name': 'Jack',  'odds': 6.0, 'true_weight': 5},
+    {'id': 3, 'name': 'Harry', 'odds': 5.0, 'true_weight': 6},
+    {'id': 4, 'name': 'Mr Kelly',  'odds': 7.5, 'true_weight': 4},
+    {'id': 5, 'name': 'Ari',   'odds': 8.0, 'true_weight': 3},
+    {'id': 6, 'name': 'Joe',  'odds': 5.5, 'true_weight': 5},
 ]
-#is there a better way to do this probly  but it works
+#is there a better way to do this probly  but it works 
 PAYOUT_TABLE = {
     1:  {1: 3},
     2:  {1: 1,  2: 5},
@@ -125,15 +125,9 @@ PAYOUT_TABLE = {
 }
 
 
-#Yes its rigged (:
-HOUSE_EDGE_CHANCE = 0.80
-
-
 def pick_rigged_winner(selected_id):
-    if random.random() < HOUSE_EDGE_CHANCE:
-        weights = [1 if h['id'] == selected_id else h['true_weight'] * 5 for h in HORSES]
-    else:
-        weights = [h['true_weight'] for h in HORSES]
+    # Fair race - winner chosen purely by true_weight odds
+    weights = [h['true_weight'] for h in HORSES]
     return random.choices(HORSES, weights=weights, k=1)[0]
 
 
@@ -153,11 +147,9 @@ def simulate_race_frames(selected_id, winner_id):
             if h['id'] in finished:
                 continue
             spd = speeds[h['id']]
-            if lead > 55:
-                if h['id'] == winner_id:
-                    spd *= 1.18
-                elif h['id'] == selected_id and selected_id != winner_id:
-                    spd *= 0.84
+            # Only boost the true winner near the end so animation matches result
+            if lead > 55 and h['id'] == winner_id:
+                spd *= 1.18
             positions[h['id']] = min(100.0, positions[h['id']] + max(0.0, random.gauss(spd, 0.38)))
             if positions[h['id']] >= 100.0:
                 finished[h['id']] = place
@@ -363,6 +355,24 @@ def api_keno():
 
     result['wallet'] = new_wallet
     return jsonify(result)
+
+
+@app.route('/api/ads/earn', methods=['POST'])
+@api_login_required
+def api_ads_earn():
+    """Passive income from watching terrible popup ads. Each ad = 10 coins/min."""
+    data   = request.get_json(force=True, silent=True) or {}
+    amount = float(data.get('amount', 0))
+    # Safety cap: max 1 full minute of 6 ads per single call (= 60 coins)
+    amount = max(0.0, min(round(amount, 2), 60.0))
+    if amount <= 0:
+        return jsonify({'error': 'No amount specified.'}), 400
+    user = current_user()
+    db   = get_db()
+    new_wallet = round(user['wallet'] + amount, 2)
+    db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
+    db.commit()
+    return jsonify({'wallet': new_wallet, 'earned': amount})
 
 
 if __name__ == '__main__':    #start the app (coppied from that one document to-do-app)
