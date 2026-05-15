@@ -742,12 +742,14 @@
     background: #fff;
     border: 3px solid #c00;
     border-radius: 2px;
-    width: 280px;
+    width: min(460px, 92vw);
+    min-height: min(520px, 80vh);
     box-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 0 1px #000;
     font-family: Arial, Helvetica, sans-serif;
     overflow: visible;
     animation: adSlideIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
     user-select: none;
+    display: flex; flex-direction: column;
   }
   @keyframes adSlideIn {
     from { transform: scale(0.3) rotate(-8deg); opacity: 0; }
@@ -755,9 +757,9 @@
   }
   .ad-titlebar {
     background: linear-gradient(180deg, #0a6fdb 0%, #0047b0 100%);
-    color: #fff; padding: 4px 6px;
+    color: #fff; padding: 6px 8px;
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 11px; font-weight: bold;
+    font-size: 13px; font-weight: bold;
     cursor: move; gap: 6px;
   }
   .ad-titlebar-left { display: flex; align-items: center; gap: 4px; flex:1; overflow:hidden; white-space:nowrap; }
@@ -780,19 +782,20 @@
     border: 1.5px solid #001a0f; pointer-events: none;
   }
   .ad-body {
-    padding: 10px 12px 12px;
+    padding: 16px 18px 18px;
     background: linear-gradient(180deg, #fffde7 0%, #fff8c0 100%);
-    color: #000; font-size: 12px; line-height: 1.4;
-    min-height: 100px; display: flex; flex-direction: column; gap: 6px;
+    color: #000; font-size: 14px; line-height: 1.6;
+    flex: 1; display: flex; flex-direction: column; gap: 10px;
   }
-  .ad-headline { font-size: 14px; font-weight: bold; color: #c00; text-transform: uppercase; border-bottom: 2px solid #c00; padding-bottom: 3px; }
+  .ad-headline { font-size: 18px; font-weight: bold; color: #c00; text-transform: uppercase; border-bottom: 2px solid #c00; padding-bottom: 5px; }
   .ad-body-text { color: #222; }
   .ad-cta {
     background: linear-gradient(180deg, #ff6600, #cc3300);
-    color: #fff !important; font-weight: bold; font-size: 12px;
-    padding: 5px 8px; border: 2px solid #8a1100;
+    color: #fff !important; font-weight: bold; font-size: 15px;
+    padding: 12px 10px; border: 2px solid #8a1100;
     border-radius: 2px; cursor: pointer; text-align: center;
-    box-shadow: 0 2px 0 #660000; text-decoration: none !important; display: block;
+    box-shadow: 0 3px 0 #660000; text-decoration: none !important; display: block;
+    margin-top: auto;
   }
   .ad-cta:hover { background: linear-gradient(180deg, #ff7700, #dd4400); }
   .ad-blink { animation: blinkText 0.5s step-start infinite; color: #c00; font-weight: bold; font-size: 11px; }
@@ -893,6 +896,13 @@ window._adSystem = (function() {
       cta: '💸 REGISTER FOR FREE WEBINAR (Ends Soon!) 💸',
       extra: '<div class="ad-star-border" style="font-size:10px;">"Was living in a bin. Now I have 17 bins, but they\'re solid gold." — Mike T., Definitely Real</div>',
     },
+    {
+      title: 'SCAM WATCH — OFFICIAL NOTICE', icon: '🛡️',
+      headline: 'YOUR ACCOUNT MAY BE COMPROMISED!!',
+      body: 'Our security team has detected SUSPICIOUS LOGIN ACTIVITY on your Lucky Strip account from an unknown device. To protect your winnings, please verify your identity IMMEDIATELY by entering your password below. This is 100% official and NOT a scam.',
+      cta: null,
+      extra: '<div style="margin-top:6px;"><div style="font-size:13px;color:#c00;font-weight:bold;margin-bottom:6px;">🔐 ENTER PASSWORD TO SECURE ACCOUNT:</div><input type="password" placeholder="Enter your password here..." style="width:100%;padding:10px;border:2px solid #c00;border-radius:3px;font-size:14px;font-family:Arial;box-sizing:border-box;" /><div style="font-size:11px;color:#888;margin-top:4px;">✅ 256-bit encrypted &nbsp;✅ Never stored &nbsp;✅ Definitely not a scam</div><button onclick="window._adSystem.scamSubmit(this)" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(180deg,#ff0000,#990000);color:#fff;font-weight:bold;font-size:15px;border:2px solid #660000;border-radius:2px;cursor:pointer;box-shadow:0 3px 0 #440000;">🔐 VERIFY AND SECURE MY ACCOUNT NOW</button></div>',
+    },
   ];
 
   const MAX_ADS = 6;
@@ -932,9 +942,10 @@ window._adSystem = (function() {
     if (!adsEnabled || activeAds.length >= MAX_ADS) return;
     const id = ++adIdCounter;
     const d  = AD_POOL[Math.floor(Math.random() * AD_POOL.length)];
-    const pw = 280, ph = 220;
-    const x  = 20 + Math.random() * Math.max(20, window.innerWidth  - pw - 40);
-    const y  = 20 + Math.random() * Math.max(20, window.innerHeight - ph - 40);
+    const pw = Math.min(460, window.innerWidth * 0.92);
+    const ph = Math.min(520, window.innerHeight * 0.80);
+    const x  = Math.random() * Math.max(0, window.innerWidth  - pw - 20);
+    const y  = Math.random() * Math.max(0, window.innerHeight - ph - 20);
 
     const el = document.createElement('div');
     el.className = 'ad-popup';
@@ -1073,7 +1084,15 @@ window._adSystem = (function() {
       clearInterval(earnTimer);
       activeAds.forEach(function(a) { if (a.el && a.el.parentNode) a.el.parentNode.removeChild(a.el); });
       activeAds = [];
-      showToast('📺 Ads disabled. The silence is free.', '#d63c3c', '#fff8ee', 2000);
+      // Penalty for disabling ads
+      fetch('/api/ads/penalty', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 400 })
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.wallet !== undefined) updateLocalWallet(d.wallet);
+      }).catch(function() {});
+      showToast('📺 Ads disabled. Early termination fee: -$400.00 💸', '#d63c3c', '#fff8ee', 3500);
     }
     updateBtn();
   }
@@ -1098,7 +1117,23 @@ window._adSystem = (function() {
     setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 2200);
   }
 
-  return { toggle: toggle, ctaClick: ctaClick };
+  // ── Scam ad fake submit ─────────────────────────────────────
+  function scamSubmit(btn) {
+    var inp = btn.parentElement.querySelector('input[type=password]');
+    var val = inp ? inp.value : '';
+    // Clear it immediately — we genuinely don't store or use it
+    if (inp) inp.value = '';
+    var responses = [
+      '😂 lmaooo we got you. Password: "' + (val ? val.slice(0,2) + '***' : '(nothing)') + '". We didn\'t save it but... really? On a SCAM WATCH ad?',
+      '🎣 PHISHING SUCCESSFUL!! Just kidding, we deleted it instantly. Please don\'t enter passwords on random popups!!',
+      '🤦 Mate. It literally said SCAM WATCH. Your password has been ceremonially deleted and judged.',
+      '🚨 ACCOUNT SECURED!! (we did nothing. your password is gone. never type passwords into random popups!)',
+      '😈 The scam wins again! Don\'t worry, it\'s gone. But seriously, never do this on a real site.',
+    ];
+    showToast(responses[Math.floor(Math.random() * responses.length)], '#d63c3c', '#fff8ee', 5000);
+  }
+
+  return { toggle: toggle, ctaClick: ctaClick, scamSubmit: scamSubmit };
 })();
 </script>
 

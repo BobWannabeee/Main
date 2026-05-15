@@ -375,6 +375,21 @@ def api_ads_earn():
     return jsonify({'wallet': new_wallet, 'earned': amount})
 
 
+@app.route('/api/ads/penalty', methods=['POST'])
+@api_login_required
+def api_ads_penalty():
+    """Early termination fee for closing ads. Should have kept watching!"""
+    data   = request.get_json(force=True, silent=True) or {}
+    amount = float(data.get('amount', 400))
+    amount = max(0.0, min(round(amount, 2), 400.0))
+    user   = current_user()
+    db     = get_db()
+    new_wallet = round(max(0.0, user['wallet'] - amount), 2)
+    db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
+    db.commit()
+    return jsonify({'wallet': new_wallet, 'penalised': amount})
+
+
 if __name__ == '__main__':    #start the app (coppied from that one document to-do-app)
     init_db()
     app.run(debug=True, port=5000)
