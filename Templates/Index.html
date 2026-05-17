@@ -386,7 +386,7 @@
     .hero { padding-top: 90px; }
   </style>
 </head>
-<body>
+<body data-ad-penalty="{% if ad_penalty is defined and ad_penalty %}true{% else %}false{% endif %}">
 
 <!-- Fixed nav bar — shown on every page -->
 <nav class="top-nav">
@@ -628,6 +628,29 @@
     pointer-events: none; max-width: 320px;
     animation: toastPop 2.2s ease forwards;
   }
+
+  /* Penalty banner — shown on page load if player navigated away while ads were running */
+  .ad-penalty-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10002;
+    background: linear-gradient(135deg, #c00 0%, #800 100%);
+    color: #fff; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px;
+    padding: 14px 20px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    animation: penaltySlide 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes penaltySlide {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(0); }
+  }
+  .ad-penalty-banner .penalty-icon { font-size: 1.8rem; }
+  .ad-penalty-banner .penalty-close {
+    margin-left: auto; background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4); border-radius: 6px;
+    color: #fff; padding: 4px 12px; cursor: pointer; font-size: 0.9rem;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  }
+  .ad-penalty-banner .penalty-close:hover { background: rgba(255,255,255,0.3); }
   @keyframes toastPop {
     0%   { opacity: 0; transform: translateY(10px); }
     12%  { opacity: 1; transform: translateY(0); }
@@ -887,7 +910,8 @@ window._adSystem = (function() {
       clearInterval(earnTimer);
       activeAds.forEach(function(a) { if (a.el && a.el.parentNode) a.el.parentNode.removeChild(a.el); });
       activeAds = [];
-      // Penalty for disabling ads
+      // Penalty for disabling ads — also tell server to clear the session flag cleanly
+      fetch('/api/ads/disable', { method: 'POST' }).catch(function() {});
       fetch('/api/ads/penalty', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -935,6 +959,21 @@ window._adSystem = (function() {
     ];
     showToast(responses[Math.floor(Math.random() * responses.length)], '#d63c3c', '#fff8ee', 5000);
   }
+
+  // ── Show penalty banner if server flagged it ────────────────
+  function showPenaltyBanner() {
+    var banner = document.createElement('div');
+    banner.className = 'ad-penalty-banner';
+    banner.innerHTML =
+      '<span class="penalty-icon">🚔</span>' +
+      '<span>Nice try. You navigated away while ads were running. <b>-$400.00 penalty</b> has been charged. The ads remember. 😈</span>' +
+      '<button class="penalty-close" onclick="this.parentElement.remove()">Dismiss</button>';
+    document.body.prepend(banner);
+    setTimeout(function() { if (banner.parentNode) banner.remove(); }, 8000);
+  }
+
+  // Flask sets a template variable; inline it safely
+  if (document.body.dataset.adPenalty === 'true') showPenaltyBanner();
 
   return { toggle: toggle, ctaClick: ctaClick, scamSubmit: scamSubmit };
 })();

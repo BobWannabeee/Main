@@ -131,41 +131,40 @@ def pick_rigged_winner(selected_id):
     return random.choices(HORSES, weights=weights, k=1)[0]
 
 
-def build_finish_order(winner_id):
-    losers = [h for h in HORSES if h['id'] != winner_id]
-    random.shuffle(losers)
-    return [next(h for h in HORSES if h['id'] == winner_id)] + losers
-
-
-def simulate_race_frames(selected_id, winner_id):
-    total = sum(h['true_weight'] for h in HORSES)
+def simulate_race_frames(winner_id):
+    """Run physics sim. Returns (frames, finish_order sorted by actual crossing time)."""
+    total  = sum(h['true_weight'] for h in HORSES)
     speeds = {h['id']: (h['true_weight'] / total) * 2.2 for h in HORSES}
-    positions, frames, finished, place = {h['id']: 0.0 for h in HORSES}, [], {}, 1
-    for _ in range(320):
+    positions = {h['id']: 0.0 for h in HORSES}
+    frames, finished, place = [], {}, 1
+
+    for _ in range(400):
         lead = max(positions.values())
         for h in HORSES:
             if h['id'] in finished:
                 continue
             spd = speeds[h['id']]
-            # Only boost the true winner near the end so animation matches result
+            # Nudge winner to front when pack is past 55%
             if lead > 55 and h['id'] == winner_id:
-                spd *= 1.18
-            positions[h['id']] = min(100.0, positions[h['id']] + max(0.0, random.gauss(spd, 0.38)))
+                spd *= 1.22
+            positions[h['id']] = min(100.0, positions[h['id']] + max(0.0, random.gauss(spd, 0.4)))
             if positions[h['id']] >= 100.0:
                 finished[h['id']] = place
                 place += 1
         frames.append({h['id']: round(positions[h['id']], 2) for h in HORSES})
         if len(finished) == len(HORSES):
             break
-    return frames
+
+    # Sort by actual simulated finish position — this is what the player saw on screen
+    finish_order = sorted(HORSES, key=lambda h: finished.get(h['id'], 999))
+    return frames, finish_order
 
 
 def build_race_response(selected_id, bet):
-    winner = pick_rigged_winner(selected_id)
-    finish_order = build_finish_order(winner['id'])
-    frames = simulate_race_frames(selected_id, winner['id'])
-    won = (winner['id'] == selected_id)
-    payout = round(bet * winner['odds'], 2) if won else 0.0
+    winner               = pick_rigged_winner(selected_id)
+    frames, finish_order = simulate_race_frames(winner['id'])
+    won                  = (winner['id'] == selected_id)
+    payout               = round(bet * winner['odds'], 2) if won else 0.0
     return {
         'frames':        frames,
         'finishOrder':   [{'id': h['id'], 'name': h['name']} for h in finish_order],
@@ -190,19 +189,32 @@ def build_keno_response(picks, bet):
 @app.route('/')
 @login_required
 def home():
-    return render_template('Index.html', user=current_user())
+    user = current_user()
+    new_wallet, penalised = check_ad_penalty(user)
+    if penalised:
+        # Re-fetch user with updated wallet for template
+        user = get_db().execute('SELECT * FROM users WHERE id=?', (user['id'],)).fetchone()
+    return render_template('Index.html', user=user, ad_penalty=penalised)
 
 
 @app.route('/race')
 @login_required
 def race():
-    return render_template('Race.html', horses=HORSES, user=current_user())
+    user = current_user()
+    new_wallet, penalised = check_ad_penalty(user)
+    if penalised:
+        user = get_db().execute('SELECT * FROM users WHERE id=?', (user['id'],)).fetchone()
+    return render_template('Race.html', horses=HORSES, user=user, ad_penalty=penalised)
 
 
 @app.route('/keno')
 @login_required
 def keno():
-    return render_template('Keno.html', user=current_user())
+    user = current_user()
+    new_wallet, penalised = check_ad_penalty(user)
+    if penalised:
+        user = get_db().execute('SELECT * FROM users WHERE id=?', (user['id'],)).fetchone()
+    return render_template('Keno.html', user=user, ad_penalty=penalised)
 
 
 @app.route('/profile')
@@ -363,10 +375,11 @@ def api_ads_earn():
     """Passive income from watching terrible popup ads. Each ad = 10 coins/min."""
     data   = request.get_json(force=True, silent=True) or {}
     amount = float(data.get('amount', 0))
-    # Safety cap: max 1 full minute of 6 ads per single call (= 60 coins)
     amount = max(0.0, min(round(amount, 2), 60.0))
     if amount <= 0:
         return jsonify({'error': 'No amount specified.'}), 400
+    # Mark ads as active in session so we can penalise page-switchers
+    session['ads_active'] = True
     user = current_user()
     db   = get_db()
     new_wallet = round(user['wallet'] + amount, 2)
@@ -375,19 +388,40 @@ def api_ads_earn():
     return jsonify({'wallet': new_wallet, 'earned': amount})
 
 
+@app.route('/api/ads/disable', methods=['POST'])
+@api_login_required
+def api_ads_disable():
+    """Called when player intentionally disables ads — clears the session flag cleanly."""
+    session.pop('ads_active', None)
+    return jsonify({'ok': True})
+
+
 @app.route('/api/ads/penalty', methods=['POST'])
 @api_login_required
 def api_ads_penalty():
-    """Early termination fee for closing ads. Should have kept watching!"""
+    """Early termination fee — charged when ads were active but player bailed."""
     data   = request.get_json(force=True, silent=True) or {}
     amount = float(data.get('amount', 400))
     amount = max(0.0, min(round(amount, 2), 400.0))
+    session.pop('ads_active', None)
     user   = current_user()
     db     = get_db()
     new_wallet = round(max(0.0, user['wallet'] - amount), 2)
     db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
     db.commit()
     return jsonify({'wallet': new_wallet, 'penalised': amount})
+
+
+def check_ad_penalty(user):
+    """Call at the start of any page load — if ads were active and player navigated away, charge them."""
+    if session.get('ads_active'):
+        session.pop('ads_active', None)
+        db = get_db()
+        new_wallet = round(max(0.0, user['wallet'] - 400.0), 2)
+        db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
+        db.commit()
+        return new_wallet, True   # (new_wallet, was_penalised)
+    return user['wallet'], False
 
 
 if __name__ == '__main__':    #start the app (coppied from that one document to-do-app)
