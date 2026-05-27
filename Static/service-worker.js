@@ -21,6 +21,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET' || event.request.url.includes('/api/')) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
     event.respondWith(
         fetch(event.request)
             .then(response => {

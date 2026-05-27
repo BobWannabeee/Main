@@ -190,19 +190,22 @@ def build_keno_response(picks, bet):
 @app.route('/')
 @login_required
 def home():
-    return render_template('Index.html', user=current_user())
+    penalty = session.pop('ad_penalty', False)   # read once then clear it
+    return render_template('Index.html', user=current_user(), ad_penalty=penalty)
 
 
 @app.route('/race')
 @login_required
 def race():
-    return render_template('Race.html', horses=HORSES, user=current_user())
+    penalty = session.pop('ad_penalty', False)
+    return render_template('Race.html', horses=HORSES, user=current_user(), ad_penalty=penalty)
 
 
 @app.route('/keno')
 @login_required
 def keno():
-    return render_template('Keno.html', user=current_user())
+    penalty = session.pop('ad_penalty', False)
+    return render_template('Keno.html', user=current_user(), ad_penalty=penalty)
 
 
 @app.route('/profile')
@@ -355,6 +358,49 @@ def api_keno():
 
     result['wallet'] = new_wallet
     return jsonify(result)
+
+
+# ── Ad revenue routes ──────────────────────────────────────────────────────
+
+@app.route('/api/ads/earn', methods=['POST'])
+@api_login_required
+def api_ads_earn():
+    """Called every 10s by the ad system — credits earned coins to wallet."""
+    data   = request.get_json(force=True, silent=True) or {}
+    amount = float(data.get('amount', 0))
+    if amount <= 0 or amount > 100:
+        return jsonify({'error': 'Invalid amount'}), 400
+    user = current_user()
+    db   = get_db()
+    new_wallet = round(user['wallet'] + amount, 2)
+    db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
+    db.commit()
+    return jsonify({'wallet': new_wallet})
+
+
+@app.route('/api/ads/penalty', methods=['POST'])
+@api_login_required
+def api_ads_penalty():
+    """Charges the early-termination penalty when player disables ads."""
+    data   = request.get_json(force=True, silent=True) or {}
+    amount = float(data.get('amount', 400))
+    if amount <= 0:
+        return jsonify({'error': 'Invalid amount'}), 400
+    user = current_user()
+    db   = get_db()
+    new_wallet = round(max(0.0, user['wallet'] - amount), 2)
+    db.execute('UPDATE users SET wallet=? WHERE id=?', (new_wallet, user['id']))
+    session['ad_penalty'] = True
+    db.commit()
+    return jsonify({'wallet': new_wallet})
+
+
+@app.route('/api/ads/disable', methods=['POST'])
+@api_login_required
+def api_ads_disable():
+    """Clears the ad-penalty session flag after the banner has been shown."""
+    session.pop('ad_penalty', None)
+    return jsonify({'ok': True})
 
 
 if __name__ == '__main__':    #start the app (coppied from that one document to-do-app)

@@ -927,8 +927,12 @@ window._adSystem = (function() {
   // ── Drag ─────────────────────────────────────────────────────
   document.addEventListener('mousemove', function(e) {
     if (!dragAd) return;
-    dragAd.style.left = Math.max(0, e.clientX - dragOffX) + 'px';
-    dragAd.style.top  = Math.max(0, e.clientY - dragOffY) + 'px';
+    var adW  = dragAd.offsetWidth;
+    var adH  = dragAd.offsetHeight;
+    var maxX = window.innerWidth  - adW;    // can't go past right edge
+    var maxY = window.innerHeight - adH - 8; // 8px buffer above taskbar
+    dragAd.style.left = Math.min(Math.max(0, e.clientX - dragOffX), maxX) + 'px';
+    dragAd.style.top  = Math.min(Math.max(0, e.clientY - dragOffY), maxY) + 'px';
   });
   document.addEventListener('mouseup', function() { dragAd = null; });
 

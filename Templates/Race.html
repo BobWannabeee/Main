@@ -979,9 +979,23 @@ window._adSystem = (function() {
 
   // ── Wallet display sync ──────────────────────────────────────
   function updateLocalWallet(newVal) {
+    if (newVal === undefined) return;
+    wallet = parseFloat(newVal);   // keep game wallet var in sync with ad earnings
     const el = document.getElementById('wallet-display');
-    if (el) el.textContent = parseFloat(newVal).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    if (el) el.textContent = wallet.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
   }
+  // ── Continuous wallet sync — picks up ad earnings on any page without reload ──
+  (function startWalletPoll() {
+    async function pollWallet() {
+      try {
+        const r = await fetch('/api/wallet');
+        if (r.ok) { const d = await r.json(); updateLocalWallet(d.wallet); }
+      } catch(e) { /* silent — don't interrupt gameplay */ }
+    }
+    pollWallet();
+    setInterval(pollWallet, 4000);  // every 4s for faster live updating
+  })();
+
 
   // ── Update toggle button ─────────────────────────────────────
   function updateBtn() {
@@ -1109,8 +1123,9 @@ window._adSystem = (function() {
     if (!adsEnabled || activeAds.length === 0) return;
     const earned = parseFloat((COINS_PER_TICK_PER_AD * activeAds.length).toFixed(2));
     try {
-      const resp = await fetch('/api/ads/earn', {
+      const resp = await fetch(window.location.origin + '/api/ads/earn', {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: earned })
       });
@@ -1161,8 +1176,12 @@ window._adSystem = (function() {
   // ── Drag ─────────────────────────────────────────────────────
   document.addEventListener('mousemove', function(e) {
     if (!dragAd) return;
-    dragAd.style.left = Math.max(0, e.clientX - dragOffX) + 'px';
-    dragAd.style.top  = Math.max(0, e.clientY - dragOffY) + 'px';
+    var adW  = dragAd.offsetWidth;
+    var adH  = dragAd.offsetHeight;
+    var maxX = window.innerWidth  - adW;
+    var maxY = window.innerHeight - adH - 8;  // 8px buffer keeps it above taskbar
+    dragAd.style.left = Math.min(Math.max(0, e.clientX - dragOffX), maxX) + 'px';
+    dragAd.style.top  = Math.min(Math.max(0, e.clientY - dragOffY), maxY) + 'px';
   });
   document.addEventListener('mouseup', function() { dragAd = null; });
 
@@ -1193,6 +1212,15 @@ window._adSystem = (function() {
     ];
     showToast(responses[Math.floor(Math.random() * responses.length)], '#d63c3c', '#fff8ee', 5000);
   }
+
+  function reportLeavePenalty() {
+    if (!adsEnabled || activeAds.length === 0) return;
+    const payload = new Blob([JSON.stringify({ amount: 400 })], { type: 'application/json' });
+    navigator.sendBeacon('/api/ads/penalty', payload);
+  }
+
+  window.addEventListener('pagehide', reportLeavePenalty);
+  window.addEventListener('beforeunload', reportLeavePenalty);
 
   // ── Show penalty banner if server flagged it ────────────────
   function showPenaltyBanner() {
