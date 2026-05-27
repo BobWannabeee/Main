@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Keno</title>
+  <title>Keno – The Lucky Strip</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* copied mostly from horsey racing so simular look*/
     :root {
       --dark:   #1a0f00;
       --accent: #f5c842;
       --red:    #d63c3c;
       --green:  #3cd66e;
+      --blue:   #3c9fe2;
       --white:  #fff8ee;
-      --panel:  rgba(26,15,0,0.85);
+      --panel:  rgba(26,15,0,0.88);
       --muted:  #b89060;
     }
 
@@ -28,447 +28,717 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 60px;
-      background-image: radial-gradient(ellipse at top, #3b1f00 0%, #1a0f00 60%);
+      padding: 100px 16px 80px;
+      background-image:
+        radial-gradient(ellipse at 20% 80%, rgba(60,159,226,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(245,200,66,0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at top, #3b1f00 0%, #1a0f00 60%);
+    }
+
+    /* ── Particle canvas ── */
+    #particle-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 200;
+    }
+
+    /* ── Floating orbs background ── */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+    .bg-orb-1 { width: 300px; height: 300px; background: rgba(245,200,66,0.04); top: 10%; left: -5%; animation-delay: 0s; }
+    .bg-orb-2 { width: 400px; height: 400px; background: rgba(60,214,110,0.03); bottom: 20%; right: -10%; animation-delay: -3s; }
+    .bg-orb-3 { width: 200px; height: 200px; background: rgba(60,159,226,0.04); top: 50%; left: 40%; animation-delay: -5s; }
+    @keyframes orbFloat {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(20px, -30px) scale(1.1); }
+    }
+
+    /* ── Nav ── */
+    .back-home {
+      position: fixed; top: 16px; left: 16px; z-index: 100;
+      background: rgba(26,15,0,0.9); border: 1px solid rgba(245,200,66,0.35);
+      border-radius: 8px; padding: 7px 14px;
+      color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem; font-weight: 700; text-decoration: none;
+      letter-spacing: 1px; backdrop-filter: blur(10px);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .back-home:hover { background: rgba(245,200,66,0.12); border-color: var(--accent); }
+
+    .nav-right {
+      position: fixed; top: 16px; right: 16px;
+      display: flex; gap: 8px; z-index: 100;
+    }
+    .nav-pill {
+      background: rgba(26,15,0,0.9); border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 8px; padding: 7px 14px;
+      color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem; font-weight: 700; text-decoration: none;
+      letter-spacing: 1px; backdrop-filter: blur(10px); transition: background 0.15s;
+    }
+    .nav-pill:hover { background: rgba(245,200,66,0.14); }
+    .nav-pill.logout { border-color: rgba(214,60,60,0.3); color: #f08080; }
+    .nav-pill.logout:hover { background: rgba(214,60,60,0.14); }
+
+    /* ── Header ── */
+    .header-zone {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     h1 {
       font-family: 'Rye', serif;
-      font-size: clamp(2rem, 6vw, 3.4rem);
+      font-size: clamp(2.5rem, 7vw, 4rem);
       color: var(--accent);
-      text-shadow: 0 2px 12px rgba(245,200,66,0.4);
-      letter-spacing: 2px;
-      text-align: center;
+      text-shadow:
+        0 0 60px rgba(245,200,66,0.4),
+        0 2px 12px rgba(245,200,66,0.3);
+      letter-spacing: 3px;
+      line-height: 1;
       margin-bottom: 4px;
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes titleGlow {
+      from { text-shadow: 0 0 40px rgba(245,200,66,0.3), 0 2px 12px rgba(245,200,66,0.2); }
+      to   { text-shadow: 0 0 80px rgba(245,200,66,0.6), 0 2px 20px rgba(245,200,66,0.4); }
     }
 
     .subtitle {
       color: var(--muted);
       font-size: 1.1rem;
-      letter-spacing: 1px;
-      text-align: center;
-      margin-bottom: 24px;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
     }
 
     .wallet-bar {
-      background: rgba(245,200,66,0.12);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245,200,66,0.1);
       border: 1px solid rgba(245,200,66,0.3);
-      border-radius: 8px;
-      padding: 8px 22px;
+      border-radius: 40px;
+      padding: 8px 24px;
       font-size: 1.2rem;
       font-weight: 700;
       color: var(--accent);
       letter-spacing: 1px;
-      margin-bottom: 28px;
+      box-shadow: 0 0 20px rgba(245,200,66,0.1);
+      transition: box-shadow 0.3s;
+    }
+    .wallet-bar.pulse-green {
+      animation: walletWin 0.8s ease;
+    }
+    .wallet-bar.pulse-red {
+      animation: walletLose 0.8s ease;
+    }
+    @keyframes walletWin {
+      0%,100% { box-shadow: 0 0 20px rgba(245,200,66,0.1); }
+      50%      { box-shadow: 0 0 40px rgba(60,214,110,0.5); border-color: var(--green); }
+    }
+    @keyframes walletLose {
+      0%,100% { box-shadow: 0 0 20px rgba(245,200,66,0.1); }
+      50%      { box-shadow: 0 0 40px rgba(214,60,60,0.4); border-color: var(--red); }
     }
 
     /* ── Main card ── */
     .card {
       background: var(--panel);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
       padding: 28px;
       width: 100%;
-      max-width: 680px;
-      backdrop-filter: blur(6px);
+      max-width: 780px;
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
-    .card h2 {
-      font-family: 'Rye', serif;
-      font-size: 1.4rem;
-      color: var(--accent);
-      margin-bottom: 6px;
-      border-bottom: 1px solid rgba(245,200,66,0.2);
-      padding-bottom: 10px;
-    }
-
-    .card-desc {
-      color: var(--muted);
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-    }
-
-    /* ── Number grid (1–80) ── */
-    .grid-header {
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(245,200,66,0.15);
+      padding-bottom: 12px;
     }
-
-    .grid-header span { color: var(--muted); font-size: 0.9rem; }
-
+    .card-header h2 {
+      font-family: 'Rye', serif;
+      font-size: 1.3rem;
+      color: var(--accent);
+    }
     .clear-btn {
-      background: none;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 6px;
-      color: var(--muted);
-      padding: 4px 12px;
-      cursor: pointer;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.9rem;
-      transition: border-color 0.15s, color 0.15s;
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; color: var(--muted); padding: 4px 12px;
+      cursor: pointer; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem; transition: border-color 0.15s, color 0.15s;
     }
     .clear-btn:hover { border-color: var(--red); color: var(--red); }
 
+    .card-desc {
+      color: var(--muted); font-size: 0.92rem; margin-bottom: 14px;
+    }
+
+    /* ── Picks badge ── */
+    .picks-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .picks-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,200,66,0.12);
+      border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 20px; padding: 5px 16px;
+      font-size: 0.9rem; color: var(--accent);
+      font-weight: 700;
+    }
+    .picks-pip {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); opacity: 0.4;
+      transition: all 0.2s;
+    }
+    .picks-pip.active { opacity: 1; box-shadow: 0 0 6px var(--accent); }
+
+    /* ── 90-ball grid ── */
     .keno-grid {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
+      grid-template-columns: repeat(9, 1fr);
       gap: 5px;
       margin-bottom: 20px;
     }
 
-    /* Each number ball */
     .keno-ball {
       aspect-ratio: 1;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(0.6rem, 1.4vw, 0.85rem);
+      font-size: clamp(0.55rem, 1.2vw, 0.82rem);
       font-weight: 700;
       cursor: pointer;
-      border: 2px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.6);
-      transition: all 0.14s;
+      border: 2px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.5);
+      transition: all 0.14s ease;
       user-select: none;
+      position: relative;
+      overflow: hidden;
     }
 
-    .keno-ball:hover:not(.drawn):not(.match) {
-      border-color: rgba(245,200,66,0.5);
+    /* Shimmer hover */
+    .keno-ball::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.14s;
+    }
+    .keno-ball:hover::before { opacity: 1; }
+
+    .keno-ball:hover:not(.drawn):not(.match):not(.locked) {
+      border-color: rgba(245,200,66,0.6);
       color: var(--accent);
-      background: rgba(245,200,66,0.08);
+      background: rgba(245,200,66,0.1);
+      transform: scale(1.12);
+      box-shadow: 0 0 12px rgba(245,200,66,0.25);
     }
 
-    /* Player picked this number */
+    /* Picked by player */
     .keno-ball.picked {
-      background: rgba(245,200,66,0.2);
+      background: radial-gradient(circle at 35% 30%, rgba(255,220,80,0.35), rgba(200,150,20,0.25));
       border-color: var(--accent);
       color: var(--accent);
-      box-shadow: 0 0 10px rgba(245,200,66,0.25);
+      box-shadow: 0 0 14px rgba(245,200,66,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+      transform: scale(1.06);
     }
+    .keno-ball.picked::before { opacity: 1; }
 
-    /* This number was drawn (not a match) */
+    /* Ball drawn – not a match */
     .keno-ball.drawn {
-      background: rgba(255,255,255,0.1);
-      border-color: rgba(255,255,255,0.35);
-      color: rgba(255,255,255,0.7);
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.18), rgba(150,150,150,0.12));
+      border-color: rgba(255,255,255,0.4);
+      color: rgba(255,255,255,0.8);
       cursor: default;
-      animation: ballDrop 0.3s ease;
+      animation: ballDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
     }
 
-    /* This number was drawn AND the player picked it — jackpot! */
+    /* Ball drawn AND matched */
     .keno-ball.match {
-      background: rgba(60,214,110,0.25);
+      background: radial-gradient(circle at 35% 30%, rgba(80,255,140,0.45), rgba(30,180,80,0.3));
       border-color: var(--green);
       color: var(--green);
       cursor: default;
-      box-shadow: 0 0 14px rgba(60,214,110,0.35);
-      animation: ballMatch 0.35s ease;
+      box-shadow: 0 0 20px rgba(60,214,110,0.6), 0 0 40px rgba(60,214,110,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
+      animation: ballMatch 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
     }
 
     @keyframes ballDrop {
-      0%   { transform: scale(0.6); opacity: 0; }
-      70%  { transform: scale(1.12); }
-      100% { transform: scale(1);   opacity: 1; }
+      0%   { transform: scale(0.5) translateY(-8px); opacity: 0; }
+      60%  { transform: scale(1.15) translateY(2px); }
+      80%  { transform: scale(0.95); }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
     }
 
     @keyframes ballMatch {
-      0%   { transform: scale(0.6); opacity: 0; }
-      60%  { transform: scale(1.25); }
-      100% { transform: scale(1);   opacity: 1; }
+      0%   { transform: scale(0.5) translateY(-10px); opacity: 0; }
+      55%  { transform: scale(1.3) translateY(2px); }
+      75%  { transform: scale(0.9); }
+      90%  { transform: scale(1.1); }
+      100% { transform: scale(1.06) translateY(0); opacity: 1; }
     }
 
-    /* ── Bet row ── */
-    .bet-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
-    .bet-row label { font-weight: 600; color: var(--muted); white-space: nowrap; }
+    /* ── Bet controls ── */
+    .bet-section {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .bet-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .bet-row label { font-weight: 700; color: var(--muted); white-space: nowrap; letter-spacing: 1px; }
     .bet-row input {
       flex: 1;
       background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.18);
       border-radius: 8px;
       padding: 10px 14px;
       color: var(--white);
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
       outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .bet-row input:focus { border-color: var(--accent); }
+    .bet-row input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245,200,66,0.12);
+    }
 
-    .quick-bets { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+    .quick-bets { display: flex; gap: 6px; flex-wrap: wrap; }
     .quick-bet {
-      background: rgba(245,200,66,0.1);
-      border: 1px solid rgba(245,200,66,0.3);
-      border-radius: 6px;
-      padding: 5px 12px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      color: var(--accent);
-      transition: background 0.15s;
+      background: rgba(245,200,66,0.08);
+      border: 1px solid rgba(245,200,66,0.25);
+      border-radius: 6px; padding: 5px 14px;
+      cursor: pointer; font-size: 0.9rem;
+      color: var(--accent); font-weight: 700;
+      transition: background 0.15s, transform 0.1s;
     }
-    .quick-bet:hover { background: rgba(245,200,66,0.25); }
+    .quick-bet:hover { background: rgba(245,200,66,0.22); transform: translateY(-1px); }
+    .quick-bet:active { transform: translateY(0); }
 
-    /* Picks counter badge */
-    .picks-badge {
-      display: inline-block;
-      background: rgba(245,200,66,0.15);
-      border: 1px solid rgba(245,200,66,0.35);
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 0.9rem;
-      color: var(--accent);
-      margin-bottom: 18px;
-    }
-
+    /* ── Draw button ── */
     .draw-btn {
       width: 100%;
-      padding: 14px;
-      background: var(--accent);
+      padding: 16px;
+      background: linear-gradient(135deg, #f5c842 0%, #e8a820 100%);
       color: var(--dark);
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: 'Rye', serif;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       cursor: pointer;
-      letter-spacing: 1px;
-      transition: transform 0.12s, box-shadow 0.12s;
+      letter-spacing: 2px;
+      transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s;
+      box-shadow: 0 4px 20px rgba(245,200,66,0.3), inset 0 1px 0 rgba(255,255,255,0.3);
+      position: relative;
+      overflow: hidden;
     }
+    .draw-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 40%; height: 200%;
+      background: rgba(255,255,255,0.15);
+      transform: skewX(-20deg);
+      transition: left 0.5s;
+    }
+    .draw-btn:hover:not(:disabled)::after { left: 120%; }
     .draw-btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(245,200,66,0.35);
+      box-shadow: 0 8px 28px rgba(245,200,66,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
     }
-    .draw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .draw-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-    /* ── Results panel ── */
+    /* ── Draw status ── */
+    .draw-status {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--muted);
+      min-height: 22px;
+      margin-top: 10px;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    /* ── Live draw counter pill ── */
+    .live-counter {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 10px;
+      background: rgba(60,214,110,0.1);
+      border: 1px solid rgba(60,214,110,0.25);
+      border-radius: 20px; padding: 5px 16px;
+      font-size: 0.9rem; color: var(--green); font-weight: 700;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .live-counter.show { opacity: 1; }
+    .live-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      animation: livePulse 0.6s ease infinite alternate;
+    }
+    @keyframes livePulse {
+      from { opacity: 0.4; transform: scale(0.8); }
+      to   { opacity: 1;   transform: scale(1.2); }
+    }
+
+    /* ── Last drawn ball display ── */
+    .last-drawn-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin: 10px 0; min-height: 54px;
+    }
+    .last-drawn-ball {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .last-drawn-ball.show {
+      opacity: 1;
+      animation: bigBallIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+    .last-drawn-ball.is-match {
+      background: radial-gradient(circle at 35% 30%, rgba(80,255,140,0.6), rgba(30,180,80,0.4));
+      border: 3px solid var(--green);
+      color: var(--green);
+      box-shadow: 0 0 30px rgba(60,214,110,0.7);
+    }
+    .last-drawn-ball.not-match {
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.3), rgba(150,150,150,0.18));
+      border: 3px solid rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.9);
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    }
+    @keyframes bigBallIn {
+      0%   { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+      60%  { transform: scale(1.2) rotate(5deg); }
+      80%  { transform: scale(0.92) rotate(-2deg); }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    .match-flash {
+      font-family: 'Rye', serif;
+      font-size: 1.1rem;
+      color: var(--green);
+      opacity: 0;
+      font-weight: 700;
+      letter-spacing: 2px;
+      animation: matchFlash 0.5s ease forwards;
+    }
+    @keyframes matchFlash {
+      0%   { opacity: 0; transform: scale(0.7) translateY(8px); }
+      50%  { opacity: 1; transform: scale(1.1) translateY(-2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ── Error ── */
+    .error-msg { color: var(--red); font-size: 0.9rem; margin-top: 8px; text-align: center; font-weight: 600; }
+    .hidden { display: none !important; }
+
+    /* ── Result panel ── */
     .result-panel {
       margin-top: 22px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 22px;
+      border-radius: 16px;
+      padding: 28px;
       display: none;
-      animation: slideUp 0.4s ease;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-    .result-panel.show { display: block; }
-    .result-panel.win  { border-color: var(--accent); box-shadow: 0 0 24px rgba(245,200,66,0.15); }
-    .result-panel.lose { border-color: var(--red); }
+    .result-panel.show { display: block; animation: resultIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
+    @keyframes resultIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .result-panel.win {
+      background: radial-gradient(ellipse at top, rgba(60,214,110,0.12) 0%, rgba(26,15,0,0.9) 70%);
+      border: 1px solid rgba(60,214,110,0.4);
+      box-shadow: 0 0 60px rgba(60,214,110,0.1), inset 0 1px 0 rgba(60,214,110,0.15);
+    }
+    .result-panel.lose {
+      background: radial-gradient(ellipse at top, rgba(214,60,60,0.1) 0%, rgba(26,15,0,0.9) 70%);
+      border: 1px solid rgba(214,60,60,0.3);
+    }
+
+    /* Star burst behind result */
+    .result-panel::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .result-panel.win::before {
+      background: radial-gradient(circle, rgba(60,214,110,0.15) 0%, transparent 70%);
+      opacity: 1;
     }
 
     .result-title {
       font-family: 'Rye', serif;
-      font-size: 1.9rem;
-      margin-bottom: 8px;
+      font-size: 2.2rem;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 20px currentColor;
     }
     .result-panel.win  .result-title { color: var(--accent); }
     .result-panel.lose .result-title { color: var(--red); }
 
-    .result-sub { color: var(--muted); font-size: 1rem; margin-bottom: 12px; }
+    .result-sub { color: var(--muted); font-size: 1rem; margin-bottom: 16px; letter-spacing: 1px; }
 
-    .hit-counter {
+    .hit-ring {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
       font-size: 2.8rem;
       font-weight: 700;
-      line-height: 1;
-      margin-bottom: 4px;
+      position: relative;
     }
-    .result-panel.win  .hit-counter { color: var(--green); }
-    .result-panel.lose .hit-counter { color: var(--red); }
+    .result-panel.win .hit-ring {
+      background: radial-gradient(circle, rgba(60,214,110,0.2), transparent);
+      border: 3px solid rgba(60,214,110,0.5);
+      color: var(--green);
+      box-shadow: 0 0 40px rgba(60,214,110,0.3);
+      animation: ringPulse 1.5s ease infinite;
+    }
+    .result-panel.lose .hit-ring {
+      background: radial-gradient(circle, rgba(214,60,60,0.15), transparent);
+      border: 3px solid rgba(214,60,60,0.4);
+      color: var(--red);
+    }
+    @keyframes ringPulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(60,214,110,0.3); }
+      50%       { box-shadow: 0 0 60px rgba(60,214,110,0.6), 0 0 100px rgba(60,214,110,0.2); }
+    }
+
+    .hit-label { font-size: 0.8rem; color: var(--muted); font-weight: 400; display: block; margin-top: -2px; }
 
     .payout-line {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 700;
-      color: var(--accent);
-      margin-top: 6px;
+      margin-top: 8px;
+      font-family: 'Rye', serif;
     }
+    .result-panel.win  .payout-line { color: var(--accent); text-shadow: 0 0 20px rgba(245,200,66,0.5); }
+    .result-panel.lose .payout-line { color: var(--red); }
 
-    .payout-factor {
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-top: 2px;
+    .payout-factor { font-size: 0.9rem; color: var(--muted); margin-top: 4px; }
+
+    /* Matched numbers display */
+    .matched-nums {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      justify-content: center; margin: 14px 0;
+    }
+    .matched-num-pill {
+      background: rgba(60,214,110,0.2);
+      border: 1px solid rgba(60,214,110,0.5);
+      border-radius: 20px; padding: 3px 12px;
+      color: var(--green); font-size: 0.85rem; font-weight: 700;
+      animation: pillPop 0.3s ease both;
+    }
+    @keyframes pillPop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
     }
 
     .again-btn {
-      margin-top: 18px;
-      padding: 11px 30px;
-      background: transparent;
-      border: 2px solid var(--accent);
-      border-radius: 10px;
-      color: var(--accent);
-      font-family: 'Rye', serif;
-      font-size: 1rem;
-      cursor: pointer;
-      letter-spacing: 1px;
-      transition: background 0.15s;
+      margin-top: 18px; padding: 12px 36px;
+      background: transparent; border: 2px solid var(--accent);
+      border-radius: 10px; color: var(--accent);
+      font-family: 'Rye', serif; font-size: 1rem;
+      cursor: pointer; letter-spacing: 1px;
+      transition: background 0.15s, transform 0.12s, box-shadow 0.12s;
     }
-    .again-btn:hover { background: rgba(245,200,66,0.1); }
+    .again-btn:hover {
+      background: rgba(245,200,66,0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245,200,66,0.2);
+    }
 
-    .error-msg { color: var(--red); font-size: 0.9rem; margin-top: 8px; text-align: center; }
-    .hidden { display: none !important; }
-
-    /* ── Payout cheat-sheet ── */
+    /* ── Payout table ── */
     .payout-table-wrap {
-      margin-top: 28px;
-      width: 100%;
-      max-width: 680px;
+      margin-top: 28px; width: 100%; max-width: 780px;
+      position: relative; z-index: 1;
     }
-
     .payout-table-wrap h3 {
-      font-family: 'Rye', serif;
-      color: var(--accent);
-      font-size: 1.1rem;
-      margin-bottom: 12px;
-      opacity: 0.8;
+      font-family: 'Rye', serif; color: var(--accent);
+      font-size: 1rem; margin-bottom: 10px; opacity: 0.7;
+      letter-spacing: 1px;
     }
-
     .pt-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      margin-bottom: 6px;
-      font-size: 0.82rem;
-      color: var(--muted);
+      display: flex; gap: 4px; align-items: center; margin-bottom: 5px;
+      font-size: 0.8rem;
     }
-
-    .pt-label { min-width: 60px; font-weight: 700; color: rgba(255,255,255,0.5); }
+    .pt-label { min-width: 52px; font-weight: 700; color: rgba(255,255,255,0.4); }
     .pt-cell {
-      background: rgba(255,255,255,0.05);
-      border-radius: 4px;
-      padding: 3px 6px;
-      text-align: center;
-      min-width: 36px;
+      background: rgba(255,255,255,0.04); border-radius: 4px;
+      padding: 3px 5px; text-align: center; min-width: 32px; color: var(--muted);
     }
-    .pt-cell.nonzero { color: var(--accent); }
+    .pt-cell.nonzero { color: var(--accent); font-weight: 700; }
+    .pt-cell.jackpot { color: var(--green); text-shadow: 0 0 8px rgba(60,214,110,0.5); }
 
-    /* confetti */
-    .confetti-wrap { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 100; width: 100%; height: 100%; }
+    /* ── confetti ── */
+    .confetti-wrap {
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 300;
+      width: 100%; height: 100%;
+    }
     .confetti-piece {
-      position: absolute; width: 10px; height: 10px; opacity: 0;
-      animation: confettiFall 1.6s ease-in forwards;
+      position: absolute; opacity: 0;
+      animation: confettiFall 1.8s ease-in forwards;
     }
     @keyframes confettiFall {
-      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+      0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(800deg) scale(0.5); opacity: 0; }
     }
 
-    /* status bar while drawing */
-    .draw-status {
-      text-align: center;
-      font-size: 1.05rem;
-      color: var(--muted);
-      min-height: 24px;
-      margin-top: 12px;
-      letter-spacing: 1px;
+    /* Shake on lose */
+    @keyframes shakeLose {
+      0%, 100% { transform: translateX(0); }
+      20%      { transform: translateX(-8px); }
+      40%      { transform: translateX(8px); }
+      60%      { transform: translateX(-5px); }
+      80%      { transform: translateX(5px); }
     }
-    .back-home {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      background: rgba(26,15,0,0.85);
-      border: 1px solid rgba(245,200,66,0.35);
-      border-radius: 8px;
-      padding: 7px 14px;
-      color: var(--accent);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      text-decoration: none;
-      letter-spacing: 1px;
-      backdrop-filter: blur(6px);
-      transition: background 0.15s, border-color 0.15s;
-      z-index: 50;
-    }
-    .back-home:hover { background: rgba(245,200,66,0.12); border-color: var(--accent); }
-
-    .nav-right {
-      position: fixed; top: 16px; right: 16px;
-      display: flex; gap: 8px; z-index: 50;
-    }
-    .nav-pill {
-      background: rgba(26,15,0,0.85);
-      border: 1px solid rgba(245,200,66,0.3);
-      border-radius: 8px; padding: 7px 14px;
-      color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.9rem; font-weight: 700; text-decoration: none;
-      letter-spacing: 1px; backdrop-filter: blur(6px); transition: background 0.15s;
-    }
-    .nav-pill:hover { background: rgba(245,200,66,0.14); }
-    .nav-pill.logout { border-color: rgba(214,60,60,0.3); color: #f08080; }
-    .nav-pill.logout:hover { background: rgba(214,60,60,0.14); }
+    .shake { animation: shakeLose 0.5s ease both; }
   </style>
 </head>
-<body data-ad-penalty="{% if ad_penalty is defined and ad_penalty %}true{% else %}false{% endif %}">
+<body>
+
+<!-- Particle canvas for burst effects -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Ambient orbs -->
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="bg-orb bg-orb-3"></div>
 
 <a href="/" class="back-home">&#8592; Home</a>
-
 <div class="nav-right">
   <a href="/profile" class="nav-pill">My Profile</a>
   <a href="/logout"  class="nav-pill logout">Sign Out</a>
 </div>
 
-<h1>Keno</h1>
-<p class="subtitle">Pick up to 10 numbers &middot; Match the draw &middot; Win big</p>
-
-<div class="wallet-bar">Wallet: $<span id="wallet-display">{% if user is defined and user %}{{ "%.2f"|format(user['wallet']) }}{% else %}1000.00{% endif %}</span></div>
+<div class="header-zone">
+  <h1>Keno</h1>
+  <p class="subtitle">Pick up to 10 &middot; Draw 20 from 90 &middot; Win big</p>
+  <div class="wallet-bar" id="wallet-bar">
+    💰 $<span id="wallet-display">{% if user is defined and user %}{{ "%.2f"|format(user['wallet']) }}{% else %}1000.00{% endif %}</span>
+  </div>
+</div>
 
 <div class="card" id="main-card">
-  <h2>Pick Your Numbers</h2>
-  <p class="card-desc">Click any number to pick it. Pick 1–10 numbers total, then place your bet.</p>
+  <div class="card-header">
+    <h2>🎱 Pick Your Numbers</h2>
+    <button class="clear-btn" onclick="clearPicks()">✕ Clear All</button>
+  </div>
+  <p class="card-desc">Select 1–10 numbers from the board below, then place your bet and draw!</p>
 
-  <div class="grid-header">
-    <span id="picks-counter">0 / 10 picked</span>
-    <button class="clear-btn" onclick="clearPicks()">Clear All</button>
+  <!-- Picks progress pips -->
+  <div class="picks-row">
+    <span class="picks-badge">
+      <span id="picks-count">0</span>&nbsp;/ 10 picked
+    </span>
+    <div style="display:flex;gap:4px;" id="picks-pips">
+      <!-- 10 pips built by JS -->
+    </div>
   </div>
 
-  <!-- The 80-number grid built by JS soooooooo don't have to write 80 div -->
+  <!-- 90-ball grid -->
   <div class="keno-grid" id="keno-grid"></div>
 
-  <div class="bet-row">
-    <label>Bet $</label>
-    <input type="number" id="bet-input" min="1" step="1" value="20" />
+  <!-- Last drawn ball showcase -->
+  <div class="last-drawn-wrap" id="last-drawn-wrap">
+    <div class="last-drawn-ball" id="last-drawn-ball"></div>
+    <div id="match-label"></div>
   </div>
-  <div class="quick-bets">    <!--The bet ammounts may change to a button input-->
-    <span class="quick-bet" onclick="setBet(5)">$5</span>
-    <span class="quick-bet" onclick="setBet(10)">$10</span>
-    <span class="quick-bet" onclick="setBet(20)">$20</span>
-    <span class="quick-bet" onclick="setBet(50)">$50</span>
-    <span class="quick-bet" onclick="setBet(100)">$100</span>
+
+  <div class="live-counter" id="live-counter">
+    <div class="live-dot"></div>
+    <span id="live-text">Drawing...</span>
+  </div>
+
+  <!-- Bet controls -->
+  <div class="bet-section">
+    <div class="bet-row">
+      <label>BET $</label>
+      <input type="number" id="bet-input" min="1" step="1" value="20" />
+    </div>
+    <div class="quick-bets">
+      <span class="quick-bet" onclick="setBet(5)">$5</span>
+      <span class="quick-bet" onclick="setBet(10)">$10</span>
+      <span class="quick-bet" onclick="setBet(20)">$20</span>
+      <span class="quick-bet" onclick="setBet(50)">$50</span>
+      <span class="quick-bet" onclick="setBet(100)">$100</span>
+    </div>
   </div>
 
   <div class="error-msg hidden" id="err-msg"></div>
-  <button class="draw-btn" id="draw-btn" onclick="runDraw()">Draw Numbers!</button>
+  <button class="draw-btn" id="draw-btn" onclick="runDraw()">✦ Draw Numbers! ✦</button>
   <div class="draw-status" id="draw-status"></div>
 
-  <!-- Result shows below the grid after draw completes -->
+  <!-- Result -->
   <div class="result-panel" id="result-panel">
     <div class="result-title" id="result-title">-</div>
-    <div class="result-sub"  id="result-sub">-</div>
-    <div class="hit-counter" id="hit-counter">-</div>
-    <div class="payout-line"   id="payout-line"></div>
+    <div class="result-sub" id="result-sub">-</div>
+    <div class="hit-ring" id="hit-ring">
+      <span id="hit-num">-</span>
+    </div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-top:-8px;" id="hit-lbl"></div>
+    <div class="matched-nums" id="matched-nums"></div>
+    <div class="payout-line" id="payout-line"></div>
     <div class="payout-factor" id="payout-factor"></div>
     <button class="again-btn" onclick="resetGame()">Play Again</button>
   </div>
 </div>
 
-<!-- lets players see posible winning even tho we know its rigged (or going to be) -->
+<!-- Payout reference -->
 <div class="payout-table-wrap">
-  <h3>Payout Reference</h3>
+  <h3>Payout Reference (multipliers)</h3>
   <div id="payout-ref"></div>
 </div>
 
 <div class="confetti-wrap" id="confetti-wrap"></div>
 
 <script>
-  // thy wallet is thy synced
-  let wallet = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g,'')) || 0;
-  let picks     = new Set();   // numbers the player has selected
-  const MAX_PICKS = 10;
+  /* ─────────────────────────────────────────────
+     CONFIG
+  ───────────────────────────────────────────── */
+  const MAX_BALLS = 90;
+  const DRAW_COUNT = 20;
+  const MAX_PICKS  = 10;
 
-  // Mirrors PAYOUT_TABLE so we can render the reference chart
   const PAYOUT_TABLE = {
     1:  {1: 3},
     2:  {2: 5},
@@ -476,17 +746,78 @@
     4:  {2: 1, 3: 5,  4: 50},
     5:  {2: 1, 3: 3,  4: 20,  5: 100},
     6:  {3: 2, 4: 10, 5: 30,  6: 200},
-    7:  {3: 1, 4: 7,  5: 20,  6: 100,  7: 500},
-    8:  {3: 1, 4: 5,  5: 15,  6: 50,   7: 200, 8: 1000},
-    9:  {3: 1, 4: 3,  5: 10,  6: 30,   7: 150, 8: 500, 9: 2000},
-    10: {3: 1, 4: 2,  5: 5,   6: 20,   7: 100, 8: 400, 9: 1500, 10: 10000},
+    7:  {3: 1, 4: 7,  5: 20,  6: 100, 7: 500},
+    8:  {3: 1, 4: 5,  5: 15,  6: 50,  7: 200, 8: 1000},
+    9:  {3: 1, 4: 3,  5: 10,  6: 30,  7: 150, 8: 500, 9: 2000},
+    10: {3: 1, 4: 2,  5: 5,   6: 20,  7: 100, 8: 400, 9: 1500, 10: 10000},
   };
 
-  // ── Build the 80-ball grid ──
+  let wallet = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g,'')) || 0;
+  let picks  = new Set();
+
+  /* ─────────────────────────────────────────────
+     PARTICLE SYSTEM
+  ───────────────────────────────────────────── */
+  const canvas = document.getElementById('particle-canvas');
+  const ctx    = canvas.getContext('2d');
+  let particles = [];
+
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function spawnBurst(x, y, color, count = 18) {
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.5;
+      const speed = 2.5 + Math.random() * 4;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.5,
+        r:  2.5 + Math.random() * 3.5,
+        color,
+        alpha: 1,
+        decay: 0.028 + Math.random() * 0.02
+      });
+    }
+  }
+
+  function spawnMatchBurst(x, y) {
+    const colors = ['#3cd66e','#f5c842','#ffffff','#3c9fe2'];
+    colors.forEach(c => spawnBurst(x, y, c, 10));
+  }
+
+  function animParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter(p => p.alpha > 0.02);
+    for (const p of particles) {
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle   = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.12; // gravity
+      p.vx *= 0.97;
+      p.alpha -= p.decay;
+      p.r    *= 0.98;
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animParticles);
+  }
+  animParticles();
+
+  /* ─────────────────────────────────────────────
+     GRID BUILD
+  ───────────────────────────────────────────── */
   function buildGrid() {
     const grid = document.getElementById('keno-grid');
     grid.innerHTML = '';
-    for (let n = 1; n <= 80; n++) {
+    for (let n = 1; n <= MAX_BALLS; n++) {
       const ball = document.createElement('div');
       ball.className = 'keno-ball';
       ball.id = 'ball-' + n;
@@ -496,7 +827,17 @@
     }
   }
 
-  // ── Build payout reference ──
+  function buildPips() {
+    const wrap = document.getElementById('picks-pips');
+    wrap.innerHTML = '';
+    for (let i = 0; i < MAX_PICKS; i++) {
+      const pip = document.createElement('div');
+      pip.className = 'picks-pip';
+      pip.id = 'pip-' + i;
+      wrap.appendChild(pip);
+    }
+  }
+
   function buildPayoutRef() {
     const wrap = document.getElementById('payout-ref');
     wrap.innerHTML = '';
@@ -505,35 +846,26 @@
       row.className = 'pt-row';
       row.innerHTML = '<span class="pt-label">' + spots + ' spot' + (spots > 1 ? 's' : '') + '</span>';
       for (let hits = 0; hits <= spots; hits++) {
-        const mult = PAYOUT_TABLE[spots] && PAYOUT_TABLE[spots][hits] ? PAYOUT_TABLE[spots][hits] : 0;
+        const mult = PAYOUT_TABLE[spots]?.[hits] || 0;
         const cell = document.createElement('span');
-        cell.className = 'pt-cell' + (mult > 0 ? ' nonzero' : '');
-        // Show "hits: mult" label but keep it compact
+        const isJackpot = mult >= 1000;
+        cell.className = 'pt-cell' + (mult > 0 ? (isJackpot ? ' jackpot' : ' nonzero') : '');
         cell.title = hits + ' hits = ' + (mult ? mult + 'x' : 'lose');
-        cell.textContent = mult > 0 ? mult + 'x' : '-';
+        cell.textContent = mult > 0 ? (mult >= 1000 ? (mult/1000)+'k' : mult + 'x') : '–';
         row.appendChild(cell);
       }
       wrap.appendChild(row);
     }
   }
 
-  function updateWallet(newVal) {
-    if (newVal !== undefined) wallet = newVal;
-    document.getElementById('wallet-display').textContent =
-      wallet.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-
-  function setBet(amt) {
-    document.getElementById('bet-input').value = amt;
-  }
-
-  // ── Toggle a number pick ──
+  /* ─────────────────────────────────────────────
+     PICK MANAGEMENT
+  ───────────────────────────────────────────── */
   function togglePick(n) {
     const ball = document.getElementById('ball-' + n);
-    if (!ball || ball.classList.contains('drawn') || ball.classList.contains('match')) return;
+    if (!ball || ball.classList.contains('drawn') || ball.classList.contains('match') || ball.classList.contains('locked')) return;
 
     if (picks.has(n)) {
-      // deselect
       picks.delete(n);
       ball.classList.remove('picked');
     } else {
@@ -543,23 +875,33 @@
       }
       picks.add(n);
       ball.classList.add('picked');
+      // Mini burst when picking
+      const rect = ball.getBoundingClientRect();
+      spawnBurst(rect.left + rect.width/2, rect.top + rect.height/2, '#f5c842', 8);
     }
     clearError();
-    updatePicksCounter();
+    updateUI();
   }
 
-  function updatePicksCounter() {
-    document.getElementById('picks-counter').textContent =
-      picks.size + ' / 10 picked';
+  function updateUI() {
+    document.getElementById('picks-count').textContent = picks.size;
+    for (let i = 0; i < MAX_PICKS; i++) {
+      const pip = document.getElementById('pip-' + i);
+      if (pip) pip.classList.toggle('active', i < picks.size);
+    }
   }
 
   function clearPicks() {
     picks.forEach(n => {
-      const ball = document.getElementById('ball-' + n);
-      if (ball) ball.classList.remove('picked');
+      const b = document.getElementById('ball-' + n);
+      if (b) b.classList.remove('picked');
     });
     picks.clear();
-    updatePicksCounter();
+    updateUI();
+  }
+
+  function setBet(amt) {
+    document.getElementById('bet-input').value = amt;
   }
 
   function showError(msg) {
@@ -567,110 +909,175 @@
     el.textContent = msg;
     el.classList.remove('hidden');
   }
-
   function clearError() {
     document.getElementById('err-msg').classList.add('hidden');
   }
 
-  // ── Run the draw ──
+  function updateWallet(newVal, won) {
+    if (newVal !== undefined) wallet = newVal;
+    document.getElementById('wallet-display').textContent =
+      wallet.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    const bar = document.getElementById('wallet-bar');
+    bar.classList.remove('pulse-green','pulse-red');
+    void bar.offsetWidth;
+    bar.classList.add(won ? 'pulse-green' : 'pulse-red');
+  }
+
+  /* ─────────────────────────────────────────────
+     DRAW
+  ───────────────────────────────────────────── */
   async function runDraw() {
     clearError();
-
     if (picks.size === 0) { showError('Pick at least 1 number first!'); return; }
-
     const bet = parseFloat(document.getElementById('bet-input').value);
     if (!bet || bet <= 0) { showError('Enter a valid bet amount.'); return; }
-    if (bet > wallet)     { showError("You don't have enough in your wallet!"); return; }
+    if (bet > wallet)     { showError("Not enough in your wallet!"); return; }
 
-    // Disable controls while draw runs
     document.getElementById('draw-btn').disabled = true;
     document.getElementById('keno-grid').style.pointerEvents = 'none';
     document.getElementById('result-panel').className = 'result-panel';
+    document.getElementById('draw-status').textContent = '';
 
     let data;
     try {
       const resp = await fetch('/api/keno', {
-        method:  'POST',
+        method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body:    JSON.stringify({ picks: [...picks], bet })
+        body: JSON.stringify({ picks: [...picks], bet })
       });
       data = await resp.json();
       if (data.error) { showError(data.error); resetControls(); return; }
-    } catch (e) {
+    } catch(e) {
       showError('Network error — try again.'); resetControls(); return;
     }
 
-    // Animate the 20 drawn balls one by one
     await animateDraw(data.draw, data.matches);
-
-    // Show result
     showResult(data, bet);
   }
 
-  // ── Reveal balls one at a time with a short delay between each ──
+  /* ─────────────────────────────────────────────
+     ANIMATION
+  ───────────────────────────────────────────── */
   function animateDraw(draw, matches) {
     const matchSet = new Set(matches);
-    const status   = document.getElementById('draw-status');
+    const liveEl   = document.getElementById('live-counter');
+    const liveText = document.getElementById('live-text');
+    const lastBall = document.getElementById('last-drawn-ball');
+    const matchLbl = document.getElementById('match-label');
+
+    liveEl.classList.add('show');
+    let matchCount = 0;
 
     return new Promise(resolve => {
       let i = 0;
 
       function revealNext() {
         if (i >= draw.length) {
-          status.textContent = '';
+          liveEl.classList.remove('show');
+          lastBall.classList.remove('show');
+          matchLbl.innerHTML = '';
           resolve();
           return;
         }
 
-        const n    = draw[i];
-        const ball = document.getElementById('ball-' + n);
+        const n = draw[i];
         const isMatch = matchSet.has(n);
+        const ball = document.getElementById('ball-' + n);
 
-        // Small screen: remove picked class first so colour transition is clean
+        // Animate grid ball
         if (ball) {
           ball.classList.remove('picked');
           ball.classList.add(isMatch ? 'match' : 'drawn');
+
+          // Burst from ball position
+          const rect = ball.getBoundingClientRect();
+          const bx = rect.left + rect.width/2;
+          const by = rect.top  + rect.height/2;
+
+          if (isMatch) {
+            spawnMatchBurst(bx, by);
+          } else {
+            spawnBurst(bx, by, 'rgba(255,255,255,0.7)', 6);
+          }
         }
 
-        // Live counter while drawing
-        const matchesSoFar = draw.slice(0, i + 1).filter(x => matchSet.has(x)).length;
-        status.textContent = 'Drawing... ' + (i + 1) + ' / 20' + (matchesSoFar ? '  |  ' + matchesSoFar + ' match' + (matchesSoFar > 1 ? 'es' : '') + '!' : '');
+        // Big ball showcase
+        lastBall.className = 'last-drawn-ball ' + (isMatch ? 'is-match' : 'not-match');
+        lastBall.textContent = n;
+        // Re-trigger animation
+        lastBall.style.animation = 'none';
+        void lastBall.offsetWidth;
+        lastBall.style.animation = '';
+        lastBall.classList.add('show');
+
+        // Match label
+        if (isMatch) {
+          matchCount++;
+          matchLbl.innerHTML = '<div class="match-flash">MATCH! 🎯</div>';
+        } else {
+          matchLbl.innerHTML = '';
+        }
+
+        // Live counter text
+        const matchesSoFar = draw.slice(0, i+1).filter(x => matchSet.has(x)).length;
+        liveText.textContent = (i+1) + ' / ' + DRAW_COUNT + ' drawn' +
+          (matchesSoFar ? '  ·  ' + matchesSoFar + ' match' + (matchesSoFar > 1 ? 'es' : '') + '!' : '');
 
         i++;
-        // 90ms between reveals — fast enough to stay exciting, slow enough to watch
-        setTimeout(revealNext, 90);
+        // Slightly slower for matches so player can enjoy
+        const delay = isMatch ? 160 : 95;
+        setTimeout(revealNext, delay);
       }
 
       revealNext();
     });
   }
 
+  /* ─────────────────────────────────────────────
+     RESULT
+  ───────────────────────────────────────────── */
   function showResult(data, bet) {
     const panel  = document.getElementById('result-panel');
     const title  = document.getElementById('result-title');
     const sub    = document.getElementById('result-sub');
-    const hitEl  = document.getElementById('hit-counter');
+    const hitNum = document.getElementById('hit-num');
+    const hitLbl = document.getElementById('hit-lbl');
     const payEl  = document.getElementById('payout-line');
     const factEl = document.getElementById('payout-factor');
+    const matchEl= document.getElementById('matched-nums');
 
     const won = data.payout > 0;
+    updateWallet(data.wallet, won);
+
+    // Matched numbers pills
+    matchEl.innerHTML = '';
+    if (data.matches && data.matches.length > 0) {
+      data.matches.forEach((m, idx) => {
+        const pill = document.createElement('div');
+        pill.className = 'matched-num-pill';
+        pill.style.animationDelay = (idx * 0.06) + 's';
+        pill.textContent = m;
+        matchEl.appendChild(pill);
+      });
+    }
+
+    hitNum.textContent = data.hits;
+    hitLbl.textContent = 'hit' + (data.hits !== 1 ? 's' : '') + ' out of ' + data.picks.length + ' picked';
 
     if (won) {
-      updateWallet(data.wallet);
       panel.className = 'result-panel show win';
-      title.textContent = 'Winner!';
-      sub.textContent   = data.hits + ' match' + (data.hits > 1 ? 'es' : '') + ' on ' + data.picks.length + ' spots picked.';
-      hitEl.textContent = data.hits + ' hits';
+      title.textContent = data.hits === data.picks.length ? '🏆 JACKPOT!' : '🎉 You Won!';
+      sub.textContent   = data.hits + ' match' + (data.hits > 1 ? 'es' : '') + ' — payout incoming!';
       payEl.textContent = '+$' + data.payout.toLocaleString();
-      factEl.textContent = data.factor + 'x multiplier';
+      factEl.textContent = data.factor + 'x multiplier on your $' + bet.toLocaleString() + ' bet';
       launchConfetti();
     } else {
-      updateWallet(data.wallet);
       panel.className = 'result-panel show lose';
-      title.textContent = data.hits === 0 ? 'No Matches' : 'No Payout';
-      sub.textContent   = data.hits + ' match' + (data.hits !== 1 ? 'es' : '') + ' — not enough to pay out.';
-      hitEl.textContent = data.hits + ' hits';
-      payEl.textContent = '-$' + bet.toLocaleString();
+      panel.classList.add('shake');
+      setTimeout(() => panel.classList.remove('shake'), 600);
+      title.textContent = data.hits === 0 ? '😬 No Matches' : 'Not Enough';
+      sub.textContent   = data.hits + ' match' + (data.hits !== 1 ? 'es' : '') + ' — need more to pay out.';
+      payEl.textContent = '−$' + bet.toLocaleString();
       factEl.textContent = '';
     }
   }
@@ -680,501 +1087,51 @@
     document.getElementById('keno-grid').style.pointerEvents = 'auto';
   }
 
-  // ── Reset for a new game ──
   function resetGame() {
-    // Clear all ball states
-    for (let n = 1; n <= 80; n++) {
-      const ball = document.getElementById('ball-' + n);
-      if (ball) ball.className = 'keno-ball';
+    for (let n = 1; n <= MAX_BALLS; n++) {
+      const b = document.getElementById('ball-' + n);
+      if (b) b.className = 'keno-ball';
     }
     picks.clear();
-    updatePicksCounter();
+    updateUI();
     document.getElementById('result-panel').className = 'result-panel';
-    document.getElementById('draw-status').textContent = '';
+    document.getElementById('last-drawn-ball').classList.remove('show');
+    document.getElementById('live-counter').classList.remove('show');
+    document.getElementById('match-label').innerHTML = '';
     clearError();
     resetControls();
-
-    // wallet managed server-side
   }
 
+  /* ─────────────────────────────────────────────
+     CONFETTI
+  ───────────────────────────────────────────── */
   function launchConfetti() {
     const wrap   = document.getElementById('confetti-wrap');
-    const colors = ['#f5c842','#3cd66e','#3c9fe2','#d63c3c','#f57842'];
+    const colors = ['#f5c842','#3cd66e','#3c9fe2','#d63c3c','#f57842','#ffffff'];
     wrap.innerHTML = '';
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 120; i++) {
       const p = document.createElement('div');
       p.className = 'confetti-piece';
-      p.style.left              = (Math.random() * 100) + 'vw';
-      p.style.animationDelay    = (Math.random() * 0.9) + 's';
-      p.style.animationDuration = (1.1 + Math.random() * 0.9) + 's';
-      p.style.background        = colors[Math.floor(Math.random() * colors.length)];
-      p.style.borderRadius      = Math.random() > 0.5 ? '50%' : '2px';
+      const size = 6 + Math.random() * 9;
+      p.style.cssText = `
+        left: ${Math.random()*100}vw;
+        animation-delay: ${Math.random()*1.1}s;
+        animation-duration: ${1.4 + Math.random()*1}s;
+        background: ${colors[Math.floor(Math.random()*colors.length)]};
+        width: ${size}px; height: ${size}px;
+        border-radius: ${Math.random()>0.4 ? '50%' : '2px'};
+      `;
       wrap.appendChild(p);
     }
-    setTimeout(() => { wrap.innerHTML = ''; }, 2800);
+    setTimeout(() => { wrap.innerHTML = ''; }, 3200);
   }
 
-  // ── Init ──
+  /* ─────────────────────────────────────────────
+     INIT
+  ───────────────────────────────────────────── */
   buildGrid();
+  buildPips();
   buildPayoutRef();
 </script>
-
-<!-- ═══════════════════════════════ AD REVENUE SYSTEM ═══════════════════════════════ -->
-<style>
-  .ad-toggle-btn {
-    position: fixed; bottom: 20px; right: 20px; z-index: 200;
-    background: linear-gradient(135deg, #f5c842, #e6a800);
-    border: none; border-radius: 12px;
-    padding: 10px 18px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.95rem; font-weight: 700;
-    color: #1a0f00; cursor: pointer; letter-spacing: 0.5px;
-    box-shadow: 0 4px 18px rgba(245,200,66,0.4);
-    transition: transform 0.15s, box-shadow 0.15s;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .ad-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.5); }
-  .ad-toggle-btn.ads-on { background: linear-gradient(135deg, #3cd66e, #28b855); box-shadow: 0 4px 18px rgba(60,214,110,0.4); }
-  .ad-toggle-btn .ad-earn-rate { font-size: 0.75rem; opacity: 0.75; }
-
-  .ad-popup {
-    position: fixed; z-index: 9999;
-    background: #fff;
-    border: 3px solid #c00;
-    border-radius: 2px;
-    width: min(460px, 92vw);
-    min-height: min(520px, 80vh);
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 0 1px #000;
-    font-family: Arial, Helvetica, sans-serif;
-    overflow: visible;
-    animation: adSlideIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    user-select: none;
-    display: flex; flex-direction: column;
-  }
-  @keyframes adSlideIn {
-    from { transform: scale(0.3) rotate(-8deg); opacity: 0; }
-    to   { transform: scale(1) rotate(0deg); opacity: 1; }
-  }
-  .ad-titlebar {
-    background: linear-gradient(180deg, #0a6fdb 0%, #0047b0 100%);
-    color: #fff; padding: 6px 8px;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 13px; font-weight: bold;
-    cursor: move; gap: 6px;
-  }
-  .ad-titlebar-left { display: flex; align-items: center; gap: 4px; flex:1; overflow:hidden; white-space:nowrap; }
-  .ad-fake-close {
-    background: linear-gradient(180deg, #e9a800, #c47500);
-    border: 1px solid #8a4700; border-radius: 2px;
-    color: #000; font-size: 10px; font-weight: bold;
-    width: 18px; height: 16px; min-width: 18px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; position: relative; flex-shrink: 0;
-    transition: background 0.1s;
-  }
-  .ad-fake-close:hover { background: linear-gradient(180deg, #ffb800, #e08000); }
-  .ad-coins-badge {
-    position: absolute; top: -9px; right: -9px;
-    background: #3cd66e; color: #001a0f;
-    border-radius: 50%; width: 20px; height: 20px;
-    font-size: 8px; font-weight: bold;
-    display: flex; align-items: center; justify-content: center;
-    border: 1.5px solid #001a0f; pointer-events: none;
-  }
-  .ad-body {
-    padding: 16px 18px 18px;
-    background: linear-gradient(180deg, #fffde7 0%, #fff8c0 100%);
-    color: #000; font-size: 14px; line-height: 1.6;
-    flex: 1; display: flex; flex-direction: column; gap: 10px;
-  }
-  .ad-headline { font-size: 18px; font-weight: bold; color: #c00; text-transform: uppercase; border-bottom: 2px solid #c00; padding-bottom: 5px; }
-  .ad-body-text { color: #222; }
-  .ad-cta {
-    background: linear-gradient(180deg, #ff6600, #cc3300);
-    color: #fff !important; font-weight: bold; font-size: 15px;
-    padding: 12px 10px; border: 2px solid #8a1100;
-    border-radius: 2px; cursor: pointer; text-align: center;
-    box-shadow: 0 3px 0 #660000; text-decoration: none !important; display: block;
-    margin-top: auto;
-  }
-  .ad-cta:hover { background: linear-gradient(180deg, #ff7700, #dd4400); }
-  .ad-blink { animation: blinkText 0.5s step-start infinite; color: #c00; font-weight: bold; font-size: 11px; }
-  @keyframes blinkText { 50% { opacity: 0; } }
-  .ad-star-border { border: 2px dashed gold; padding: 3px 5px; background: #fffff0; color: #333; font-size: 10px; text-align: center; }
-  .ad-marquee { overflow: hidden; white-space: nowrap; border: 1px solid #999; background: #fffde7; padding: 2px 0; }
-  .ad-marquee-inner { display: inline-block; animation: marqueeScroll 7s linear infinite; }
-  @keyframes marqueeScroll { from { transform: translateX(280px); } to { transform: translateX(-100%); } }
-
-  @keyframes adShake {
-    0%,100% { transform: translateX(0) rotate(0); }
-    15%  { transform: translateX(-12px) rotate(-3deg); }
-    30%  { transform: translateX(14px) rotate(3deg); }
-    45%  { transform: translateX(-9px) rotate(-2deg); }
-    60%  { transform: translateX(10px) rotate(2deg); }
-    75%  { transform: translateX(-5px); }
-    90%  { transform: translateX(5px); }
-  }
-  .ad-popup.shaking { animation: adShake 0.55s ease !important; }
-
-  .earn-toast {
-    position: fixed; bottom: 72px; right: 20px; z-index: 10001;
-    background: rgba(60,214,110,0.97); color: #001a0f;
-    border-radius: 8px; padding: 6px 14px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem; font-weight: 700;
-    pointer-events: none; max-width: 320px;
-    animation: toastPop 2.2s ease forwards;
-  }
-
-  /* Penalty banner — shown on page load if player navigated away while ads were running */
-  .ad-penalty-banner {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 10002;
-    background: linear-gradient(135deg, #c00 0%, #800 100%);
-    color: #fff; font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px;
-    padding: 14px 20px; display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-    animation: penaltySlide 0.5s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes penaltySlide {
-    from { transform: translateY(-100%); }
-    to   { transform: translateY(0); }
-  }
-  .ad-penalty-banner .penalty-icon { font-size: 1.8rem; }
-  .ad-penalty-banner .penalty-close {
-    margin-left: auto; background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.4); border-radius: 6px;
-    color: #fff; padding: 4px 12px; cursor: pointer; font-size: 0.9rem;
-    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
-  }
-  .ad-penalty-banner .penalty-close:hover { background: rgba(255,255,255,0.3); }
-  @keyframes toastPop {
-    0%   { opacity: 0; transform: translateY(10px); }
-    12%  { opacity: 1; transform: translateY(0); }
-    78%  { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-8px); }
-  }
-</style>
-
-<button class="ad-toggle-btn" id="ad-toggle-btn" onclick="window._adSystem.toggle()">
-  📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>
-</button>
-
-<script>
-window._adSystem = (function() {
-  const AD_POOL = [
-    {
-      title: '⚠️ Warning from Microsoft', icon: '🖥️',
-      headline: 'YOUR PC HAS 47 VIRUSES!!!',
-      body: 'Our FREE scan detected 47 critical threats. Click NOW before your bank account is completely drained!!',
-      cta: '⚡ SCAN MY PC FOR FREE RIGHT NOW ⚡',
-      extra: '<div class="ad-blink">⚠️ YOUR DATA IS BEING STOLEN AS YOU READ THIS ⚠️</div>',
-    },
-    {
-      title: '🎉 Congratulations!!', icon: '🎁',
-      headline: 'YOU ARE THE 1,000,000th VISITOR!',
-      body: 'You\'ve been selected for a FREE iPhone 16 Pro + $1000 gift card! No purchase necessary! Absolutely no catch whatsoever!',
-      cta: '🎁 CLAIM MY FREE PRIZE NOW!!!! 🎁',
-      extra: '<div class="ad-star-border">⭐ Offer expires in: <b id="ftimer">04:59</b> — HURRY!! ⭐</div>',
-    },
-    {
-      title: '💊 Doctors HATE This Man', icon: '💊',
-      headline: 'LOSE 30KG IN 3 DAYS!!',
-      body: 'Local mum discovers ONE WEIRD TRICK that big pharma desperately doesn\'t want you to know. She ate only toast!',
-      cta: '👉 SEE THE WEIRD TRICK THEY\'RE HIDING 👈',
-      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">🔥 23,891 people bought this TODAY • ALMOST SOLD OUT • TOTALLY REAL PRODUCT 🔥</span></div>',
-    },
-    {
-      title: '🏦 Nigerian Prince Foundation', icon: '👑',
-      headline: 'URGENT & CONFIDENTIAL PROPOSAL',
-      body: 'Dear Esteemed Friend, I am Prince Adebayo of Lagos. I have $47,000,000 USD frozen. I need YOUR help and will give 40% commission!',
-      cta: '📧 REPLY TO HIS ROYAL HIGHNESS 📧',
-      extra: '<div class="ad-blink" style="font-size:10px;color:green;">✅ 100% REAL ✅ TOTALLY NOT A SCAM ✅ VERY LEGITIMATE</div>',
-    },
-    {
-      title: '🎮 GAMERS FURIOUS!!!', icon: '🕹️',
-      headline: 'UNLIMITED COINS GLITCH FOUND',
-      body: 'Local teen finds exploit that generates UNLIMITED free coins in ANY casino game. Lucky Strip users are furious! Click before they patch it!',
-      cta: '🎮 GET MY UNLIMITED COINS NOW 🎮',
-      extra: '<div class="ad-star-border" style="font-size:10px;">✅ Works here • ✅ 100% Safe • ✅ Definitely Legal • ✅ Won\'t steal your account</div>',
-    },
-    {
-      title: '🔮 Psychic Madame Zelda', icon: '🔮',
-      headline: 'YOUR WALLET IS IN DANGER!!',
-      body: 'Madame Zelda has foreseen great financial suffering in your future. For just $9.99 she will personally hex your enemies AND double your casino luck!',
-      cta: '🔮 CONTACT MADAME ZELDA IMMEDIATELY 🔮',
-      extra: '<div class="ad-blink" style="color:purple;font-size:10px;">★★★★★ "She tripled my keno winnings!" — Totally Real Person, definitely</div>',
-    },
-    {
-      title: '🚨 FLASH SALE ENDS IN 2 MIN', icon: '🚨',
-      headline: 'GENUINE DESIGNER GOODS $4.99!!',
-      body: 'Ray-Ban Sunglasses $4.99! Rolex Watches $7.99! Gucci Bags $12.99! These prices are ABSOLUTELY REAL and the products are definitely authentic!',
-      cta: '🛒 SHOP THESE EXTREMELY REAL DEALS 🛒',
-      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">FREE SHIPPING • 100% GENUINE BRAND NAME PRODUCTS • NOT COUNTERFEIT AT ALL • VERY LEGITIMATE WEBSITE</span></div>',
-    },
-    {
-      title: '🏠 Wealth Secrets REVEALED', icon: '🏘️',
-      headline: 'QUIT YOUR JOB TOMORROW!!',
-      body: 'I made $47,000 last Tuesday flipping properties with NO money, NO experience, and NO pants. My FREE webinar reveals everything. Limited seats!',
-      cta: '💸 REGISTER FOR FREE WEBINAR (Ends Soon!) 💸',
-      extra: '<div class="ad-star-border" style="font-size:10px;">"Was living in a bin. Now I have 17 bins, but they\'re solid gold." — Mike T., Definitely Real</div>',
-    },
-    {
-      title: 'SCAM WATCH — OFFICIAL NOTICE', icon: '🛡️',
-      headline: 'YOUR ACCOUNT MAY BE COMPROMISED!!',
-      body: 'Our security team has detected SUSPICIOUS LOGIN ACTIVITY on your Lucky Strip account from an unknown device. To protect your winnings, please verify your identity IMMEDIATELY by entering your password below. This is 100% official and NOT a scam.',
-      cta: null,
-      extra: '<div style="margin-top:6px;"><div style="font-size:13px;color:#c00;font-weight:bold;margin-bottom:6px;">🔐 ENTER PASSWORD TO SECURE ACCOUNT:</div><input type="password" placeholder="Enter your password here..." style="width:100%;padding:10px;border:2px solid #c00;border-radius:3px;font-size:14px;font-family:Arial;box-sizing:border-box;" /><div style="font-size:11px;color:#888;margin-top:4px;">✅ 256-bit encrypted &nbsp;✅ Never stored &nbsp;✅ Definitely not a scam</div><button onclick="window._adSystem.scamSubmit(this)" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(180deg,#ff0000,#990000);color:#fff;font-weight:bold;font-size:15px;border:2px solid #660000;border-radius:2px;cursor:pointer;box-shadow:0 3px 0 #440000;">🔐 VERIFY AND SECURE MY ACCOUNT NOW</button></div>',
-    },
-  ];
-
-  const MAX_ADS = 6;
-  const EARN_PER_AD_PER_MIN = 10;
-  const EARN_INTERVAL_MS = 10000; // 10s ticks
-  const COINS_PER_TICK_PER_AD = EARN_PER_AD_PER_MIN / 6; // 1.667
-
-  let adsEnabled = false;
-  let activeAds  = [];
-  let earnTimer  = null;
-  let spawnTimer = null;
-  let adIdCounter = 0;
-  let dragAd = null, dragOffX = 0, dragOffY = 0;
-
-  // ── Wallet display sync ──────────────────────────────────────
-  function updateLocalWallet(newVal) {
-    const el = document.getElementById('wallet-display');
-    if (el) el.textContent = parseFloat(newVal).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-
-  // ── Update toggle button ─────────────────────────────────────
-  function updateBtn() {
-    const btn = document.getElementById('ad-toggle-btn');
-    if (!btn) return;
-    if (adsEnabled) {
-      const rate = activeAds.length * EARN_PER_AD_PER_MIN;
-      btn.className = 'ad-toggle-btn ads-on';
-      btn.innerHTML = '📺 Ads ON (' + activeAds.length + '/' + MAX_ADS + ') <span class="ad-earn-rate">+' + rate + '💰/min</span>';
-    } else {
-      btn.className = 'ad-toggle-btn';
-      btn.innerHTML = '📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>';
-    }
-  }
-
-  // ── Spawn one popup ad ───────────────────────────────────────
-  function spawnAd() {
-    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
-    const id = ++adIdCounter;
-    const d  = AD_POOL[Math.floor(Math.random() * AD_POOL.length)];
-    const pw = Math.min(460, window.innerWidth * 0.92);
-    const ph = Math.min(520, window.innerHeight * 0.80);
-    const x  = Math.random() * Math.max(0, window.innerWidth  - pw - 20);
-    const y  = Math.random() * Math.max(0, window.innerHeight - ph - 20);
-
-    const el = document.createElement('div');
-    el.className = 'ad-popup';
-    el.id = 'adpop-' + id;
-    el.style.left = x + 'px';
-    el.style.top  = y + 'px';
-    el.innerHTML =
-      '<div class="ad-titlebar" id="adtb-' + id + '">' +
-        '<div class="ad-titlebar-left">' +
-          '<span>' + d.icon + '</span>' +
-          '<span style="overflow:hidden;text-overflow:ellipsis;">' + d.title + '</span>' +
-        '</div>' +
-        '<div class="ad-fake-close" id="adbtn-' + id + '" title="Close ad">' +
-          '✕<div class="ad-coins-badge">💰</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="ad-body">' +
-        '<div class="ad-headline">' + d.headline + '</div>' +
-        '<div class="ad-body-text">' + d.body + '</div>' +
-        (d.extra || '') +
-        '<a class="ad-cta" href="javascript:void(0)" onclick="window._adSystem.ctaClick(' + id + ')">' + d.cta + '</a>' +
-      '</div>';
-
-    document.body.appendChild(el);
-    activeAds.push({ id, el });
-
-    // Drag from titlebar
-    const tb = document.getElementById('adtb-' + id);
-    if (tb) {
-      tb.addEventListener('mousedown', function(e) {
-        if (e.target.closest('.ad-fake-close')) return;
-        dragAd   = el;
-        dragOffX = e.clientX - el.offsetLeft;
-        dragOffY = e.clientY - el.offsetTop;
-        el.style.transition = 'none';
-        e.preventDefault();
-      });
-    }
-
-    // Fake close handler
-    const closeBtn = document.getElementById('adbtn-' + id);
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function() { fakeClose(id, closeBtn); });
-    }
-
-    updateBtn();
-  }
-
-  // ── Fake close — button runs away ───────────────────────────
-  function fakeClose(id, btn) {
-    const el = document.getElementById('adpop-' + id);
-    if (!el) return;
-    // Shake the popup
-    el.classList.remove('shaking');
-    void el.offsetWidth;
-    el.classList.add('shaking');
-    setTimeout(function() { el.classList.remove('shaking'); }, 600);
-
-    // Snatch the button and teleport it
-    const sasses = [
-      "Nope!","Nice try 😏","haha no","You wish!",
-      "Error 404","Try again?","That's not it",
-      "Ads = $$$","Keep watching!","Never gonna happen 😁",
-    ];
-    const sass = sasses[Math.floor(Math.random() * sasses.length)];
-    const nx = Math.random() * Math.max(10, window.innerWidth  - 80);
-    const ny = Math.random() * Math.max(10, window.innerHeight - 40);
-
-    btn.style.cssText = 'position:fixed;left:' + nx + 'px;top:' + ny + 'px;z-index:99999;width:auto;padding:3px 8px;font-size:10px;border-radius:4px;';
-    btn.textContent = sass;
-    document.body.appendChild(btn);
-
-    showToast('😈 ' + sass, '#f5c842', '#1a0f00', 1800);
-
-    setTimeout(function() {
-      // Return it to the ad
-      const tb = el.querySelector('.ad-titlebar');
-      if (tb) {
-        btn.removeAttribute('style');
-        btn.innerHTML = '✕<div class="ad-coins-badge">💰</div>';
-        tb.appendChild(btn);
-        btn.addEventListener('click', function() { fakeClose(id, btn); });
-      }
-    }, 2200);
-  }
-
-  // ── CTA click easter egg ─────────────────────────────────────
-  function ctaClick(id) {
-    const msgs = [
-      "🤑 Congrats! You won absolutely nothing. The ad stays though.",
-      "📞 Connecting to Madame Zelda... she says watch more ads.",
-      "🦠 Downloading 47 viruses... just kidding. Ad remains.",
-      "💸 Order confirmed! $0 charged, 0 items shipped. You're welcome!",
-      "🎉 You clicked it! The prince is grateful. The ad is not going anywhere.",
-    ];
-    showToast(msgs[Math.floor(Math.random() * msgs.length)], '#d63c3c', '#fff8ee', 3000);
-  }
-
-  // ── Earn tick ────────────────────────────────────────────────
-  async function earnTick() {
-    if (!adsEnabled || activeAds.length === 0) return;
-    const earned = parseFloat((COINS_PER_TICK_PER_AD * activeAds.length).toFixed(2));
-    try {
-      const resp = await fetch('/api/ads/earn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: earned })
-      });
-      if (resp.ok) {
-        const data = await resp.json();
-        updateLocalWallet(data.wallet);
-        if (Math.random() < 0.3) {
-          showToast('+$' + earned.toFixed(2) + ' ad revenue 💰', '#3cd66e', '#001a0f', 1800);
-        }
-      }
-    } catch(e) { /* silent */ }
-  }
-
-  // ── Spawn scheduler ──────────────────────────────────────────
-  function scheduleSpawn() {
-    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
-    const delay = 7000 + Math.random() * 8000;
-    spawnTimer = setTimeout(function() { spawnAd(); scheduleSpawn(); }, delay);
-  }
-
-  // ── Toggle ───────────────────────────────────────────────────
-  function toggle() {
-    adsEnabled = !adsEnabled;
-    if (adsEnabled) {
-      spawnAd();
-      scheduleSpawn();
-      earnTimer = setInterval(earnTick, EARN_INTERVAL_MS);
-      showToast('📺 Ads enabled! +' + EARN_PER_AD_PER_MIN + '💰/min per ad, up to ' + MAX_ADS + ' ads.', '#3cd66e', '#001a0f', 2800);
-    } else {
-      clearTimeout(spawnTimer);
-      clearInterval(earnTimer);
-      activeAds.forEach(function(a) { if (a.el && a.el.parentNode) a.el.parentNode.removeChild(a.el); });
-      activeAds = [];
-      // Penalty for disabling ads — also tell server to clear the session flag cleanly
-      fetch('/api/ads/disable', { method: 'POST' }).catch(function() {});
-      fetch('/api/ads/penalty', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 400 })
-      }).then(function(r) { return r.json(); }).then(function(d) {
-        if (d.wallet !== undefined) updateLocalWallet(d.wallet);
-      }).catch(function() {});
-      showToast('📺 Ads disabled. Early termination fee: -$400.00 💸', '#d63c3c', '#fff8ee', 3500);
-    }
-    updateBtn();
-  }
-
-  // ── Drag ─────────────────────────────────────────────────────
-  document.addEventListener('mousemove', function(e) {
-    if (!dragAd) return;
-    dragAd.style.left = Math.max(0, e.clientX - dragOffX) + 'px';
-    dragAd.style.top  = Math.max(0, e.clientY - dragOffY) + 'px';
-  });
-  document.addEventListener('mouseup', function() { dragAd = null; });
-
-  // ── Toast ─────────────────────────────────────────────────────
-  function showToast(msg, bg, color, ms) {
-    const t = document.createElement('div');
-    t.className = 'earn-toast';
-    t.style.background = bg || '#3cd66e';
-    t.style.color = color || '#001a0f';
-    t.style.animationDuration = ((ms || 2200) / 1000) + 's';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 2200);
-  }
-
-  // ── Scam ad fake submit ─────────────────────────────────────
-  function scamSubmit(btn) {
-    var inp = btn.parentElement.querySelector('input[type=password]');
-    var val = inp ? inp.value : '';
-    // Clear it immediately — we genuinely don't store or use it
-    if (inp) inp.value = '';
-    var responses = [
-      '😂 lmaooo we got you. Password: "' + (val ? val.slice(0,2) + '***' : '(nothing)') + '". We didn\'t save it but... really? On a SCAM WATCH ad?',
-      '🎣 PHISHING SUCCESSFUL!! Just kidding, we deleted it instantly. Please don\'t enter passwords on random popups!!',
-      '🤦 Mate. It literally said SCAM WATCH. Your password has been ceremonially deleted and judged.',
-      '🚨 ACCOUNT SECURED!! (we did nothing. your password is gone. never type passwords into random popups!)',
-      '😈 The scam wins again! Don\'t worry, it\'s gone. But seriously, never do this on a real site.',
-    ];
-    showToast(responses[Math.floor(Math.random() * responses.length)], '#d63c3c', '#fff8ee', 5000);
-  }
-
-  // ── Show penalty banner if server flagged it ────────────────
-  function showPenaltyBanner() {
-    var banner = document.createElement('div');
-    banner.className = 'ad-penalty-banner';
-    banner.innerHTML =
-      '<span class="penalty-icon">🚔</span>' +
-      '<span>Nice try. You navigated away while ads were running. <b>-$400.00 penalty</b> has been charged. The ads remember. 😈</span>' +
-      '<button class="penalty-close" onclick="this.parentElement.remove()">Dismiss</button>';
-    document.body.prepend(banner);
-    setTimeout(function() { if (banner.parentNode) banner.remove(); }, 8000);
-  }
-
-  // Flask sets a template variable; inline it safely
-  if (document.body.dataset.adPenalty === 'true') showPenaltyBanner();
-
-  return { toggle: toggle, ctaClick: ctaClick, scamSubmit: scamSubmit };
-})();
-</script>
-
 </body>
 </html>
