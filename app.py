@@ -7,12 +7,13 @@ from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, session, g
 )
+
 from werkzeug.security import generate_password_hash, check_password_hash   #this ting hashes the password then just gets rid of it
 
 app = Flask(__name__, static_folder='Static', template_folder='Templates')     #app is = flassk
 
 
-app.secret_key = 'bob'
+app.secret_key = 'bob'          
 
 DATABASE = 'lucky_strip.db'      #database = exist
 

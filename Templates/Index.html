@@ -726,7 +726,7 @@ window._adSystem = (function() {
       title: 'SCAM WATCH — OFFICIAL NOTICE', icon: '🛡️',
       headline: 'YOUR ACCOUNT MAY BE COMPROMISED!!',
       body: 'Our security team has detected SUSPICIOUS LOGIN ACTIVITY on your Lucky Strip account from an unknown device. To protect your winnings, please verify your identity IMMEDIATELY by entering your password below. This is 100% official and NOT a scam.',
-      cta: null,
+      cta: '🔐 VERIFY MY ACCOUNT NOW 🔐',
       extra: '<div style="margin-top:6px;"><div style="font-size:13px;color:#c00;font-weight:bold;margin-bottom:6px;">🔐 ENTER PASSWORD TO SECURE ACCOUNT:</div><input type="password" placeholder="Enter your password here..." style="width:100%;padding:10px;border:2px solid #c00;border-radius:3px;font-size:14px;font-family:Arial;box-sizing:border-box;" /><div style="font-size:11px;color:#888;margin-top:4px;">✅ 256-bit encrypted &nbsp;✅ Never stored &nbsp;✅ Definitely not a scam</div><button onclick="window._adSystem.scamSubmit(this)" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(180deg,#ff0000,#990000);color:#fff;font-weight:bold;font-size:15px;border:2px solid #660000;border-radius:2px;cursor:pointer;box-shadow:0 3px 0 #440000;">🔐 VERIFY AND SECURE MY ACCOUNT NOW</button></div>',
     },
   ];
@@ -844,7 +844,7 @@ window._adSystem = (function() {
     btn.textContent = sass;
     document.body.appendChild(btn);
 
-    showToast('😈 ' + sass, '#f5c842', '#1a0f00', 1800);
+    showToast('L' + sass, '#f5c842', '#1a0f00', 1800);
 
     setTimeout(function() {
       // Return it to the ad
@@ -970,7 +970,7 @@ window._adSystem = (function() {
     banner.className = 'ad-penalty-banner';
     banner.innerHTML =
       '<span class="penalty-icon">🚔</span>' +
-      '<span>Nice try. You navigated away while ads were running. <b>-$400.00 penalty</b> has been charged. The ads remember. 😈</span>' +
+      '<span>Nice try. You navigated away while ads were running. <b>-$400.00 penalty</b> has been charged. The ads remember. </span>' +
       '<button class="penalty-close" onclick="this.parentElement.remove()">Dismiss</button>';
     document.body.prepend(banner);
     setTimeout(function() { if (banner.parentNode) banner.remove(); }, 8000);
