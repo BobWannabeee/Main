@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Horse Racing</title>
+  <title>Race Day – The Lucky Strip</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
       --dirt:   #c8a96e;
@@ -14,7 +14,11 @@
       --grass:  #3a7d2c;
       --accent: #f5c842;
       --red:    #d63c3c;
+      --green:  #3cd66e;
+      --blue:   #3c9fe2;
+      --purple: #a855f7;
       --white:  #fff8ee;
+      --muted:  #b89060;
       --panel:  rgba(26,15,0,0.82);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,7 +30,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 48px;
+      padding: 24px 16px 80px;
       background-image: radial-gradient(ellipse at top, #3b1f00 0%, #1a0f00 60%);
     }
     h1 {
@@ -34,58 +38,134 @@
       font-size: clamp(2rem, 6vw, 3.4rem);
       color: var(--accent);
       text-shadow: 0 2px 12px rgba(245,200,66,0.4);
-      letter-spacing: 2px;
-      margin-bottom: 4px;
-      text-align: center;
+      letter-spacing: 2px; margin-bottom: 4px; text-align: center;
     }
-    .subtitle { color: #b89060; font-size: 1.1rem; letter-spacing: 1px; text-align: center; margin-bottom: 28px; }
-    .wallet-bar {
-      background: rgba(245,200,66,0.12);
-      border: 1px solid rgba(245,200,66,0.3);
-      border-radius: 8px;
-      padding: 8px 20px;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 1px;
-      margin-bottom: 28px;
+    .subtitle { color: var(--muted); font-size: 1.1rem; letter-spacing: 1px; text-align: center; margin-bottom: 20px; }
+
+    /* ── Wallet + XP bar ── */
+    .top-stats {
+      display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center;
     }
+    .stat-pill {
+      background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 8px; padding: 8px 20px;
+      font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: 1px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stat-pill.blue { background: rgba(60,159,226,0.12); border-color: rgba(60,159,226,0.3); color: var(--blue); }
+    .stat-pill.purple { background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.3); color: var(--purple); }
+    .xp-bar-wrap { width: 100%; max-width: 520px; margin-bottom: 20px; }
+    .xp-bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; }
+    .xp-bar-bg { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .xp-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--purple), #f5c842); transition: width 0.6s ease; }
+
+    /* ── GAME MODE TABS ── */
+    .mode-tabs {
+      display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;
+      width: 100%; max-width: 520px;
+    }
+    .mode-tab {
+      flex: 1; min-width: 100px;
+      background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 10px 8px; cursor: pointer; text-align: center;
+      transition: all 0.18s; position: relative;
+    }
+    .mode-tab:hover { border-color: rgba(245,200,66,0.4); background: rgba(245,200,66,0.05); }
+    .mode-tab.active { border-color: var(--accent); background: rgba(245,200,66,0.12); }
+    .mode-tab .mode-icon { font-size: 1.5rem; display: block; }
+    .mode-tab .mode-name { font-family: 'Rye', serif; font-size: 0.8rem; color: var(--accent); display: block; margin-top: 3px; }
+    .mode-tab .mode-desc { font-size: 0.7rem; color: var(--muted); display: block; margin-top: 2px; line-height: 1.2; }
+    .mode-tab .mode-locked { position: absolute; inset: 0; border-radius: 8px; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+    /* ── Setup panel ── */
     .setup-panel {
-      background: var(--panel);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 28px;
-      width: 100%;
-      max-width: 520px;
-      backdrop-filter: blur(6px);
-      transition: opacity 0.3s;
+      background: var(--panel); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px; padding: 28px; width: 100%; max-width: 520px;
+      backdrop-filter: blur(6px); transition: opacity 0.3s;
     }
     .setup-panel h2 {
-      font-family: 'Rye', serif;
-      font-size: 1.4rem;
-      color: var(--accent);
-      margin-bottom: 20px;
-      border-bottom: 1px solid rgba(245,200,66,0.2);
-      padding-bottom: 10px;
+      font-family: 'Rye', serif; font-size: 1.4rem; color: var(--accent);
+      margin-bottom: 20px; border-bottom: 1px solid rgba(245,200,66,0.2); padding-bottom: 10px;
+      display: flex; align-items: center; gap: 10px;
     }
+    .mode-badge {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .mode-badge.classic { background: rgba(245,200,66,0.2); color: var(--accent); }
+    .mode-badge.turbo   { background: rgba(214,60,60,0.2); color: var(--red); }
+    .mode-badge.mystery { background: rgba(168,85,247,0.2); color: var(--purple); }
+    .mode-badge.weather { background: rgba(60,159,226,0.2); color: var(--blue); }
+
+    /* ── Horse grid ── */
     .horse-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .horse-card {
-      background: rgba(255,255,255,0.05);
-      border: 2px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      padding: 12px;
-      cursor: pointer;
-      transition: all 0.18s;
-      text-align: center;
-      position: relative;
+      background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.18s;
+      text-align: center; position: relative; overflow: hidden;
     }
     .horse-card:hover { border-color: var(--accent); background: rgba(245,200,66,0.08); }
     .horse-card.selected { border-color: var(--accent); background: rgba(245,200,66,0.15); box-shadow: 0 0 16px rgba(245,200,66,0.2); }
-    .horse-card .horse-icon { font-size: 1.8rem; margin-bottom: 4px; }
-    .horse-card .horse-name { font-weight: 700; font-size: 1rem; }
-    .horse-card .horse-odds { color: var(--accent); font-size: 0.85rem; margin-top: 2px; }
+    .horse-card .horse-icon { font-size: 1.8rem; margin-bottom: 2px; }
+    .horse-card .horse-name { font-weight: 700; font-size: 0.95rem; }
+    .horse-card .horse-odds { color: var(--accent); font-size: 0.82rem; margin-top: 1px; }
+    .horse-card .horse-form { font-size: 0.72rem; color: var(--muted); margin-top: 2px; letter-spacing: 2px; }
     .horse-card .check { position: absolute; top: 6px; right: 8px; opacity: 0; transition: opacity 0.15s; font-size: 1.1rem; }
     .horse-card.selected .check { opacity: 1; }
+    /* Trait badge on card */
+    .horse-card .trait-badge {
+      position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+      font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 20px;
+      white-space: nowrap; letter-spacing: 0.5px;
+    }
+    .trait-fast    { background: rgba(214,60,60,0.25); color: var(--red); }
+    .trait-stamina { background: rgba(60,214,110,0.25); color: var(--green); }
+    .trait-lucky   { background: rgba(245,200,66,0.25); color: var(--accent); }
+    .trait-erratic { background: rgba(168,85,247,0.25); color: var(--purple); }
+    .trait-steady  { background: rgba(60,159,226,0.25); color: var(--blue); }
+
+    /* ── Weather banner ── */
+    .weather-banner {
+      background: rgba(60,159,226,0.12); border: 1px solid rgba(60,159,226,0.3);
+      border-radius: 8px; padding: 10px 16px; margin-bottom: 16px;
+      font-size: 0.9rem; color: var(--blue); display: flex; gap: 8px; align-items: center;
+    }
+    .weather-banner .weather-icon { font-size: 1.4rem; }
+
+    /* ── Mystery mode info ── */
+    .mystery-info {
+      background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 8px; padding: 10px 16px; margin-bottom: 16px;
+      font-size: 0.85rem; color: var(--purple); line-height: 1.5;
+    }
+
+    /* ── Turbo mode info ── */
+    .turbo-info {
+      background: rgba(214,60,60,0.1); border: 1px solid rgba(214,60,60,0.3);
+      border-radius: 8px; padding: 10px 16px; margin-bottom: 16px;
+      font-size: 0.85rem; color: var(--red);
+    }
+
+    /* ── POWERS section ── */
+    .powers-section { margin-bottom: 18px; }
+    .powers-title { font-family: 'Rye', serif; color: var(--accent); font-size: 1rem; margin-bottom: 10px; opacity: 0.9; }
+    .powers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .power-card {
+      background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 8px; cursor: pointer;
+      text-align: center; transition: all 0.18s; position: relative;
+      user-select: none;
+    }
+    .power-card:hover:not(.disabled):not(.active-power) { border-color: rgba(245,200,66,0.4); background: rgba(245,200,66,0.06); }
+    .power-card.active-power { border-color: var(--accent); background: rgba(245,200,66,0.15); }
+    .power-card.disabled { opacity: 0.35; cursor: not-allowed; }
+    .power-card .p-icon { font-size: 1.5rem; display: block; }
+    .power-card .p-name { font-size: 0.7rem; font-weight: 700; color: var(--accent); margin-top: 3px; display: block; }
+    .power-card .p-cost { font-size: 0.65rem; color: var(--muted); display: block; }
+    .power-card .p-count { position: absolute; top: 4px; right: 6px; background: var(--accent); color: var(--dark); font-size: 0.65rem; font-weight: 700; border-radius: 10px; padding: 0 5px; }
+    .power-card.active-power .p-name { color: var(--accent); }
+
+    /* ── Bet row ── */
     .bet-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
     .bet-row label { font-size: 1rem; font-weight: 600; color: #cbb07a; white-space: nowrap; }
     .bet-row input {
@@ -110,255 +190,192 @@
     .run-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,200,66,0.35); }
     .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    /* ── Active powers strip (below bet) ── */
+    .active-powers-strip {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; min-height: 0;
+    }
+    .active-power-chip {
+      background: rgba(245,200,66,0.15); border: 1px solid var(--accent);
+      border-radius: 20px; padding: 3px 10px; font-size: 0.78rem; color: var(--accent);
+      display: flex; align-items: center; gap: 4px;
+    }
+
     /* ── RACE STAGE ── */
     .race-stage { width: 100%; max-width: 820px; margin-top: 28px; display: none; }
     .race-stage.visible { display: block; }
 
-    /* Crowd / atmosphere dots */
     .crowd-bar { display: flex; gap: 4px; justify-content: center; margin-bottom: 10px; }
-    .crowd-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent); opacity: 0.3;
-      animation: pulse 0.5s infinite alternate;
-    }
+    .crowd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.3; animation: pulse 0.5s infinite alternate; }
     .crowd-dot:nth-child(2) { animation-delay: 0.1s; }
     .crowd-dot:nth-child(3) { animation-delay: 0.2s; }
     .crowd-dot:nth-child(4) { animation-delay: 0.3s; }
     .crowd-dot:nth-child(5) { animation-delay: 0.4s; }
     @keyframes pulse { to { opacity: 1; transform: scale(1.3); } }
 
-    /* Track outer wrapper */
+    /* MODE-SPECIFIC TRACK THEMES */
     .track-wrap {
-      border-radius: 16px;
-      border: 4px solid #5a3510;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 12px 48px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+      border-radius: 16px; border: 4px solid #5a3510; overflow: hidden;
+      position: relative; box-shadow: 0 12px 48px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+      transition: border-color 0.4s;
     }
+    .track-wrap.mode-turbo   { border-color: #d63c3c; box-shadow: 0 12px 48px rgba(214,60,60,0.3); }
+    .track-wrap.mode-mystery { border-color: #a855f7; box-shadow: 0 12px 48px rgba(168,85,247,0.3); }
+    .track-wrap.mode-weather-rain { border-color: #3c9fe2; box-shadow: 0 12px 48px rgba(60,159,226,0.3); }
+    .track-wrap.mode-weather-night { border-color: #4a3c7a; box-shadow: 0 12px 48px rgba(74,60,122,0.4); }
 
-    /* Top grass strip */
     .track-grass-top {
       height: 18px;
       background: linear-gradient(180deg, #2d6621 0%, #3a8c28 60%, #4aaa30 100%);
       border-bottom: 3px solid #5a3510;
     }
-    /* Bottom grass strip */
     .track-grass-bottom {
       height: 18px;
       background: linear-gradient(180deg, #4aaa30 0%, #3a8c28 40%, #2d6621 100%);
       border-top: 3px solid #5a3510;
     }
+    /* Weather overlays on grass */
+    .track-wrap.mode-weather-rain .track-grass-top,
+    .track-wrap.mode-weather-rain .track-grass-bottom { filter: saturate(0.6) brightness(0.7); }
+    .track-wrap.mode-weather-night .track-grass-top,
+    .track-wrap.mode-weather-night .track-grass-bottom { filter: brightness(0.35) hue-rotate(200deg); }
 
-    /* The actual dirt track */
     .track-dirt {
       position: relative;
       background:
-        /* subtle track texture lines */
-        repeating-linear-gradient(
-          90deg,
-          transparent 0px,
-          transparent 38px,
-          rgba(0,0,0,0.04) 38px,
-          rgba(0,0,0,0.04) 40px
-        ),
-        linear-gradient(180deg,
-          #b8924a 0%,
-          #c8a55e 15%,
-          #d4b070 40%,
-          #c8a55e 60%,
-          #b89050 85%,
-          #a07840 100%
-        );
+        repeating-linear-gradient(90deg, transparent 0px, transparent 38px, rgba(0,0,0,0.04) 38px, rgba(0,0,0,0.04) 40px),
+        linear-gradient(180deg, #b8924a 0%, #c8a55e 15%, #d4b070 40%, #c8a55e 60%, #b89050 85%, #a07840 100%);
+      transition: filter 0.5s;
     }
+    .track-wrap.mode-weather-rain .track-dirt  { filter: saturate(0.5) brightness(0.75); }
+    .track-wrap.mode-weather-night .track-dirt { filter: brightness(0.3); }
+    .track-wrap.mode-mystery .track-dirt { filter: hue-rotate(120deg) saturate(1.3) brightness(0.6); }
+    .track-wrap.mode-turbo .track-dirt { filter: saturate(0.4) brightness(0.85); }
 
-    /* Finish line */
+    /* Rain effect */
+    .rain-overlay {
+      position: absolute; inset: 0; pointer-events: none; z-index: 20;
+      background: repeating-linear-gradient(
+        90deg, transparent 0px, transparent 3px,
+        rgba(180,200,255,0.07) 3px, rgba(180,200,255,0.07) 4px
+      );
+      animation: rainFall 0.12s linear infinite;
+      display: none;
+    }
+    .track-wrap.mode-weather-rain .rain-overlay { display: block; }
+    @keyframes rainFall { from { background-position-y: 0; } to { background-position-y: 20px; } }
+
+    /* Night overlay */
+    .night-overlay {
+      position: absolute; inset: 0; pointer-events: none; z-index: 15;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.8) 100%);
+      display: none;
+    }
+    .track-wrap.mode-weather-night .night-overlay { display: block; }
+
+    /* Finish / start lines */
     .finish-line {
       position: absolute; top: 0; bottom: 0; right: 56px; width: 8px;
       background: repeating-linear-gradient(180deg, #fff 0 9px, #111 9px 18px);
-      z-index: 4;
-      box-shadow: 0 0 12px rgba(255,255,255,0.4);
+      z-index: 4; box-shadow: 0 0 12px rgba(255,255,255,0.4);
     }
-    .finish-flag {
-      position: absolute; top: -22px; right: 50px;
-      font-size: 1.2rem; z-index: 5;
-    }
+    .start-line { position: absolute; top: 0; bottom: 0; left: 120px; width: 3px; background: rgba(255,255,255,0.25); z-index: 3; }
 
-    /* Starting gate line */
-    .start-line {
-      position: absolute; top: 0; bottom: 0; left: 120px; width: 3px;
-      background: rgba(255,255,255,0.25);
-      z-index: 3;
-    }
-
-    /* Individual lane */
-    .lane {
-      display: flex;
-      align-items: center;
-      height: 58px;
-      position: relative;
-      border-bottom: 1px solid rgba(0,0,0,0.18);
-      transition: background 0.2s;
-    }
+    /* Lane */
+    .lane { display: flex; align-items: center; height: 58px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.18); transition: background 0.2s; }
     .lane:last-child { border-bottom: none; }
-    /* Alternate lane shading */
     .lane:nth-child(even) { background: rgba(0,0,0,0.06); }
-
-    /* Lane number badge */
-    .lane-num {
-      width: 28px; min-width: 28px;
-      text-align: center;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.5);
-      z-index: 3;
-    }
-
-    /* Lane name label */
-    .lane-label {
-      width: 96px; min-width: 96px;
-      padding: 0 6px 0 2px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.9);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-      z-index: 3;
-    }
-
-    /* Track area for runner */
+    .lane-num { width: 28px; min-width: 28px; text-align: center; font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.5); z-index: 3; }
+    .lane-label { width: 96px; min-width: 96px; padding: 0 6px 0 2px; font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 3; }
     .lane-track { flex: 1; position: relative; height: 100%; overflow: hidden; }
 
-    /* Dust trail */
-    .dust-trail {
-      position: absolute; top: 50%; left: 0;
-      width: 36px; height: 14px;
-      border-radius: 50%;
-      background: radial-gradient(ellipse, rgba(200,165,94,0.55) 0%, transparent 70%);
-      transform: translateY(-50%);
-      pointer-events: none;
-      z-index: 2;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
+    /* Dust */
+    .dust-trail { position: absolute; top: 50%; left: 0; width: 36px; height: 14px; border-radius: 50%; background: radial-gradient(ellipse, rgba(200,165,94,0.55) 0%, transparent 70%); transform: translateY(-50%); pointer-events: none; z-index: 2; opacity: 0; transition: opacity 0.15s; }
 
-    /* Horse runner emoji */
-    .horse-runner {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.9rem;
-      left: 0%;
-      z-index: 3;
-      will-change: left;
-      /* gallop bounce */
-      animation: gallop 0.22s steps(2, end) infinite;
-      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
-    }
-    .horse-runner.my-horse {
-      filter: drop-shadow(0 0 10px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.5));
-    }
-    /* Winner pulse */
-    .horse-runner.winner-flash {
-      animation: winnerPulse 0.4s ease infinite alternate;
-    }
-    @keyframes gallop {
-      0%   { transform: translateY(-50%) scaleY(1); }
-      50%  { transform: translateY(-56%) scaleY(0.93); }
-      100% { transform: translateY(-50%) scaleY(1); }
-    }
-    @keyframes winnerPulse {
-      from { transform: translateY(-50%) scale(1);   filter: drop-shadow(0 0 8px gold); }
-      to   { transform: translateY(-56%) scale(1.15); filter: drop-shadow(0 0 20px gold); }
-    }
+    /* Horse runner */
+    .horse-runner { position: absolute; top: 50%; transform: translateY(-50%); font-size: 1.9rem; left: 0%; z-index: 3; will-change: left; animation: gallop 0.22s steps(2, end) infinite; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
+    .horse-runner.my-horse { filter: drop-shadow(0 0 10px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
+    .horse-runner.winner-flash { animation: winnerPulse 0.4s ease infinite alternate; }
+    /* Power visual effects on horses */
+    .horse-runner.powered-boost { filter: drop-shadow(0 0 14px #f5c842) drop-shadow(0 0 28px #ff8c00); }
+    .horse-runner.powered-ghost { opacity: 0.45; filter: drop-shadow(0 0 12px #a855f7); }
+    .horse-runner.powered-shield { filter: drop-shadow(0 0 12px #3c9fe2) drop-shadow(0 0 6px #fff); }
+    @keyframes gallop { 0% { transform: translateY(-50%) scaleY(1); } 50% { transform: translateY(-56%) scaleY(0.93); } 100% { transform: translateY(-50%) scaleY(1); } }
+    @keyframes winnerPulse { from { transform: translateY(-50%) scale(1); filter: drop-shadow(0 0 8px gold); } to { transform: translateY(-56%) scale(1.15); filter: drop-shadow(0 0 20px gold); } }
 
-    /* Position indicator that appears mid-race */
-    .pos-badge {
-      position: absolute;
-      right: 4px; top: 4px;
-      background: rgba(0,0,0,0.55);
-      border-radius: 4px;
-      font-size: 0.62rem;
-      font-weight: 700;
-      color: #cbb07a;
-      padding: 1px 4px;
-      z-index: 5;
-      opacity: 0;
-      transition: opacity 0.3s;
+    /* Turbo mode: speed lines on running horses */
+    .track-wrap.mode-turbo .horse-runner { animation: gallopFast 0.12s steps(2, end) infinite; }
+    @keyframes gallopFast { 0% { transform: translateY(-50%) scaleX(1.05); } 50% { transform: translateY(-58%) scaleX(1); } 100% { transform: translateY(-50%) scaleX(1.05); } }
+
+    /* Mystery fog */
+    .fog-overlay {
+      position: absolute; top: 0; bottom: 0; right: 0; width: 60%; pointer-events: none; z-index: 14;
+      background: linear-gradient(90deg, transparent, rgba(80,0,120,0.7) 60%);
+      display: none;
     }
+    .track-wrap.mode-mystery .fog-overlay { display: block; animation: fogPulse 3s ease-in-out infinite; }
+    @keyframes fogPulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+    /* Boost visual on lane */
+    .boost-spark {
+      position: absolute; top: 50%; width: 6px; height: 6px; border-radius: 50%;
+      background: #f5c842; pointer-events: none; z-index: 10;
+      animation: sparkPop 0.4s ease forwards;
+    }
+    @keyframes sparkPop { 0% { opacity:1; transform: translateY(-50%) scale(1); } 100% { opacity:0; transform: translateY(-50%) scale(3); } }
+
+    /* Pos badge */
+    .pos-badge { position: absolute; right: 4px; top: 4px; background: rgba(0,0,0,0.55); border-radius: 4px; font-size: 0.62rem; font-weight: 700; color: #cbb07a; padding: 1px 4px; z-index: 5; opacity: 0; transition: opacity 0.3s; }
     .pos-badge.show { opacity: 1; }
 
     /* Status bar */
-    .status-bar {
-      text-align: center; margin-top: 14px;
-      font-size: 1.2rem; color: #d4b07a;
-      letter-spacing: 1px; min-height: 30px;
-      font-weight: 700;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.5);
-    }
+    .status-bar { text-align: center; margin-top: 14px; font-size: 1.2rem; color: #d4b07a; letter-spacing: 1px; min-height: 30px; font-weight: 700; text-shadow: 0 1px 6px rgba(0,0,0,0.5); }
 
-    /* Countdown overlay */
-    .countdown-overlay {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.5);
-      border-radius: 12px;
-      z-index: 10;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
+    /* Countdown */
+    .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border-radius: 12px; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
     .countdown-overlay.show { opacity: 1; }
-    .countdown-number {
-      font-family: 'Rye', serif;
-      font-size: 5rem;
-      color: var(--accent);
-      text-shadow: 0 0 40px rgba(245,200,66,0.8);
-      animation: pop 0.4s ease;
+    .countdown-number { font-family: 'Rye', serif; font-size: 5rem; color: var(--accent); text-shadow: 0 0 40px rgba(245,200,66,0.8); animation: pop 0.4s ease; }
+    @keyframes pop { 0% { transform: scale(2); opacity: 0; } 60% { transform: scale(0.9); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+    /* Power activation flash */
+    .power-flash {
+      position: absolute; inset: 0; z-index: 25; pointer-events: none;
+      border-radius: 12px; opacity: 0;
     }
-    @keyframes pop {
-      0%   { transform: scale(2); opacity: 0; }
-      60%  { transform: scale(0.9); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
+    .power-flash.boost-flash  { background: rgba(245,200,66,0.25); }
+    .power-flash.shield-flash { background: rgba(60,159,226,0.2); }
+    .power-flash.ghost-flash  { background: rgba(168,85,247,0.2); }
+    .power-flash.sabotage-flash { background: rgba(214,60,60,0.25); }
+    .power-flash.active { animation: flashIn 0.5s ease forwards; }
+    @keyframes flashIn { 0% { opacity:1; } 100% { opacity:0; } }
 
     /* Result card */
-    .result-card {
-      background: var(--panel); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 14px; padding: 24px 28px; margin-top: 18px;
-      text-align: center; display: none; animation: slideUp 0.4s ease;
-    }
+    .result-card { background: var(--panel); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 24px 28px; margin-top: 18px; text-align: center; display: none; animation: slideUp 0.4s ease; }
     .result-card.show { display: block; }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     .result-card.win  { border-color: var(--accent); box-shadow: 0 0 24px rgba(245,200,66,0.2); }
     .result-card.lose { border-color: var(--red); }
     .result-title { font-family: 'Rye', serif; font-size: 2rem; margin-bottom: 8px; }
     .result-card.win  .result-title { color: var(--accent); }
     .result-card.lose .result-title { color: var(--red); }
-    .result-sub { color: #b89060; font-size: 1.05rem; margin-bottom: 14px; }
+    .result-sub { color: var(--muted); font-size: 1.05rem; margin-bottom: 14px; }
     .payout-amt { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+
+    /* XP earned chip in result */
+    .xp-earned { display: inline-flex; align-items: center; gap: 6px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.4); border-radius: 20px; padding: 4px 14px; font-size: 0.9rem; color: var(--purple); margin-top: 8px; font-weight: 700; }
+
     .finish-list { list-style: none; margin-top: 14px; text-align: left; }
-    .finish-list li {
-      display: flex; align-items: center; gap: 10px;
-      padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
-      font-size: 0.95rem;
-    }
+    .finish-list li { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 0.95rem; }
     .finish-list li:last-child { border-bottom: none; }
     .finish-place { font-weight: 700; width: 28px; color: #cbb07a; }
     .finish-place.gold   { color: #f5c842; }
     .finish-place.silver { color: #c0c0c0; }
     .finish-place.bronze { color: #cd7f32; }
-    .again-btn {
-      margin-top: 20px; padding: 12px 32px;
-      background: transparent; border: 2px solid var(--accent);
-      border-radius: 10px; color: var(--accent);
-      font-family: 'Rye', serif; font-size: 1rem;
-      cursor: pointer; letter-spacing: 1px; transition: background 0.15s;
-    }
+
+    /* Power used report in result */
+    .power-report { background: rgba(245,200,66,0.07); border: 1px solid rgba(245,200,66,0.2); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 0.85rem; color: var(--muted); text-align: left; }
+    .power-report strong { color: var(--accent); }
+
+    .again-btn { margin-top: 20px; padding: 12px 32px; background: transparent; border: 2px solid var(--accent); border-radius: 10px; color: var(--accent); font-family: 'Rye', serif; font-size: 1rem; cursor: pointer; letter-spacing: 1px; transition: background 0.15s; }
     .again-btn:hover { background: rgba(245,200,66,0.1); }
 
     .error-msg { color: var(--red); font-size: 0.9rem; margin-top: 8px; text-align: center; }
@@ -366,80 +383,150 @@
 
     /* Confetti */
     .confetti-wrap { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 100; width: 100%; height: 100%; }
-    .confetti-piece {
-      position: absolute; width: 10px; height: 10px; opacity: 0;
-      animation: confettiFall 1.6s ease-in forwards;
-    }
-    @keyframes confettiFall {
-      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-    }
+    .confetti-piece { position: absolute; width: 10px; height: 10px; opacity: 0; animation: confettiFall 1.6s ease-in forwards; }
+    @keyframes confettiFall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+    /* Live positions */
+    .live-positions { display: flex; gap: 8px; justify-content: center; margin-top: 8px; flex-wrap: wrap; min-height: 24px; }
+    .live-pos-chip { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; font-weight: 700; color: #cbb07a; transition: background 0.2s; }
+    .live-pos-chip.leader { background: rgba(245,200,66,0.18); border-color: var(--accent); color: var(--accent); }
 
     /* Nav */
-    .back-home {
-      position: fixed; top: 16px; left: 16px;
-      background: rgba(26,15,0,0.85); border: 1px solid rgba(245,200,66,0.35);
-      border-radius: 8px; padding: 7px 14px;
-      color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.95rem; font-weight: 700; text-decoration: none;
-      letter-spacing: 1px; backdrop-filter: blur(6px);
-      transition: background 0.15s, border-color 0.15s; z-index: 50;
-    }
+    .back-home { position: fixed; top: 16px; left: 16px; background: rgba(26,15,0,0.85); border: 1px solid rgba(245,200,66,0.35); border-radius: 8px; padding: 7px 14px; color: var(--accent); font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; text-decoration: none; letter-spacing: 1px; backdrop-filter: blur(6px); transition: background 0.15s, border-color 0.15s; z-index: 50; }
     .back-home:hover { background: rgba(245,200,66,0.12); border-color: var(--accent); }
     .nav-right { position: fixed; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 50; }
-    .nav-pill {
-      background: rgba(26,15,0,0.85); border: 1px solid rgba(245,200,66,0.3);
-      border-radius: 8px; padding: 7px 14px;
-      color: var(--accent); font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.9rem; font-weight: 700; text-decoration: none;
-      letter-spacing: 1px; backdrop-filter: blur(6px); transition: background 0.15s;
-    }
+    .nav-pill { background: rgba(26,15,0,0.85); border: 1px solid rgba(245,200,66,0.3); border-radius: 8px; padding: 7px 14px; color: var(--accent); font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; text-decoration: none; letter-spacing: 1px; backdrop-filter: blur(6px); transition: background 0.15s; }
     .nav-pill:hover { background: rgba(245,200,66,0.14); }
     .nav-pill.logout { border-color: rgba(214,60,60,0.3); color: #f08080; }
     .nav-pill.logout:hover { background: rgba(214,60,60,0.14); }
 
-    /* Live position strip */
-    .live-positions {
-      display: flex; gap: 8px; justify-content: center;
-      margin-top: 8px; flex-wrap: wrap; min-height: 24px;
-    }
-    .live-pos-chip {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 20px; padding: 2px 10px;
-      font-size: 0.75rem; font-weight: 700;
-      color: #cbb07a; transition: background 0.2s;
-    }
-    .live-pos-chip.leader { background: rgba(245,200,66,0.18); border-color: var(--accent); color: var(--accent); }
+    /* Toast */
+    .toast-notif { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(26,15,0,0.95); border: 1px solid var(--accent); border-radius: 10px; padding: 10px 22px; font-size: 0.95rem; color: var(--accent); font-weight: 700; z-index: 999; pointer-events: none; animation: toastIn 2.5s ease forwards; white-space: nowrap; }
+    @keyframes toastIn { 0% { opacity:0; transform: translateX(-50%) translateY(10px); } 10% { opacity:1; transform: translateX(-50%) translateY(0); } 80% { opacity:1; } 100% { opacity:0; transform: translateX(-50%) translateY(-6px); } }
+
+    /* Level-up overlay */
+    .levelup-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; pointer-events: none; display: none; }
+    .levelup-box { background: rgba(26,15,0,0.97); border: 3px solid var(--purple); border-radius: 20px; padding: 40px 60px; text-align: center; animation: levelupPop 0.5s ease; }
+    .levelup-box h2 { font-family: 'Rye', serif; color: var(--purple); font-size: 2rem; margin-bottom: 8px; }
+    .levelup-box p { color: var(--muted); font-size: 1.1rem; }
+    @keyframes levelupPop { 0% { transform: scale(0.5); opacity:0; } 70% { transform: scale(1.05); } 100% { transform: scale(1); opacity:1; } }
+
+    /* Streak indicator */
+    .streak-bar { display: flex; gap: 4px; justify-content: center; margin-bottom: 12px; }
+    .streak-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s; }
+    .streak-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(245,200,66,0.5); }
+    .streak-dot.on-fire { background: var(--red); border-color: var(--red); box-shadow: 0 0 8px rgba(214,60,60,0.6); animation: firePulse 0.5s infinite alternate; }
+    @keyframes firePulse { to { transform: scale(1.3); } }
+
+    /* Rebuy button */
+    .rebuy-btn { width: 100%; padding: 11px; background: rgba(60,214,110,0.15); border: 2px solid var(--green); border-radius: 10px; color: var(--green); font-family: 'Rye', serif; font-size: 1rem; cursor: pointer; letter-spacing: 1px; margin-top: 10px; transition: background 0.15s; }
+    .rebuy-btn:hover { background: rgba(60,214,110,0.25); }
+
+    /* Challenge panel */
+    .challenge-panel { margin-top: 20px; background: rgba(245,200,66,0.06); border: 1px solid rgba(245,200,66,0.2); border-radius: 12px; padding: 16px 20px; width: 100%; max-width: 520px; }
+    .challenge-panel h3 { font-family: 'Rye', serif; color: var(--accent); font-size: 1rem; margin-bottom: 10px; }
+    .challenge-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.88rem; color: var(--muted); }
+    .challenge-item .ch-bar-bg { flex:1; height:6px; border-radius:3px; background: rgba(255,255,255,0.08); }
+    .challenge-item .ch-bar-fill { height:100%; border-radius:3px; background: var(--accent); transition: width 0.5s; }
+    .challenge-item.done { color: var(--green); }
+    .challenge-item .ch-reward { color: var(--accent); font-weight: 700; margin-left: auto; }
   </style>
 </head>
-<body data-ad-penalty="{% if ad_penalty is defined and ad_penalty %}true{% else %}false{% endif %}">
+<body>
 
 <a href="/" class="back-home">&#8592; Home</a>
-
 <div class="nav-right">
   <a href="/profile" class="nav-pill">My Profile</a>
   <a href="/logout"  class="nav-pill logout">Sign Out</a>
 </div>
 
 <h1>Race Day</h1>
-<p class="subtitle">Pick your champion &middot; Place your bet &middot; Watch 'em run</p>
+<p class="subtitle">Pick your champion &middot; Use your powers &middot; Win big</p>
 
-<div class="wallet-bar">Wallet: $<span id="wallet-display">{% if user is defined and user %}{{ "%.2f"|format(user['wallet']) }}{% else %}1000.00{% endif %}</span></div>
+<!-- Top stats bar -->
+<div class="top-stats">
+  <div class="stat-pill">💰 $<span id="wallet-display">{% if user is defined and user %}{{ "%.2f"|format(user['wallet']) }}{% else %}1000.00{% endif %}</span></div>
+  <div class="stat-pill blue">🏆 <span id="streak-display">0</span> streak</div>
+  <div class="stat-pill purple">⚡ Lv.<span id="level-display">1</span> &nbsp;|&nbsp; <span id="xp-display">0</span>/<span id="xp-next-display">100</span> XP</div>
+</div>
 
+<!-- XP progress bar -->
+<div class="xp-bar-wrap">
+  <div class="xp-bar-label"><span>Jockey Level</span><span id="xp-pct-label">0%</span></div>
+  <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+</div>
+
+<!-- Win streak dots -->
+<div class="streak-bar" id="streak-bar">
+  <div class="streak-dot" id="sd0"></div>
+  <div class="streak-dot" id="sd1"></div>
+  <div class="streak-dot" id="sd2"></div>
+  <div class="streak-dot" id="sd3"></div>
+  <div class="streak-dot" id="sd4"></div>
+</div>
+
+<!-- GAME MODE TABS -->
+<div class="mode-tabs" id="mode-tabs">
+  <div class="mode-tab active" data-mode="classic" onclick="setMode('classic',this)">
+    <span class="mode-icon">🏇</span>
+    <span class="mode-name">Classic</span>
+    <span class="mode-desc">Standard race, fair odds</span>
+  </div>
+  <div class="mode-tab" data-mode="turbo" onclick="setMode('turbo',this)">
+    <span class="mode-icon">⚡</span>
+    <span class="mode-name">Turbo</span>
+    <span class="mode-desc">2× speed, 1.5× payouts</span>
+  </div>
+  <div class="mode-tab" data-mode="mystery" onclick="setMode('mystery',this)">
+    <span class="mode-icon">🎭</span>
+    <span class="mode-name">Mystery</span>
+    <span class="mode-desc">Hidden odds, wild swings</span>
+  </div>
+  <div class="mode-tab" data-mode="weather" onclick="setMode('weather',this)">
+    <span class="mode-icon">🌦️</span>
+    <span class="mode-name">Weather</span>
+    <span class="mode-desc">Conditions affect horses</span>
+  </div>
+</div>
+
+<!-- Setup panel -->
 <div class="setup-panel" id="setup-panel">
-  <h2>Race Setup</h2>
+  <h2 id="setup-title">Race Setup <span class="mode-badge classic" id="mode-badge-label">Classic</span></h2>
+
+  <!-- Mode-specific info banners (hidden by default) -->
+  <div class="turbo-info hidden" id="turbo-info">⚡ <strong>TURBO MODE:</strong> Race runs at 2× speed. All payouts are multiplied by 1.5×. Higher risk — horses are more erratic!</div>
+  <div class="mystery-info hidden" id="mystery-info">🎭 <strong>MYSTERY MODE:</strong> Odds are hidden until after the race. Some horses get secret stat boosts. Anything can happen in the fog.</div>
+  <div class="weather-banner hidden" id="weather-banner">
+    <span class="weather-icon" id="weather-icon">🌧️</span>
+    <span id="weather-text">Loading conditions...</span>
+  </div>
+
+  <!-- Horse grid -->
   <div class="horse-grid" id="horse-grid">
     {% for horse in horses %}
-    <div class="horse-card" data-id="{{ horse.id }}" data-name="{{ horse.name }}" data-odds="{{ horse.odds }}" onclick="selectHorse(this)">
+    <div class="horse-card" data-id="{{ horse.id }}" data-name="{{ horse.name }}" data-odds="{{ horse.odds }}" data-trait="{{ horse.trait }}" onclick="selectHorse(this)">
       <div class="horse-icon">🐎</div>
       <div class="horse-name">{{ horse.name }}</div>
-      <div class="horse-odds">{{ horse.odds }}x odds</div>
+      <div class="horse-odds" id="card-odds-{{ horse.id }}">{{ horse.odds }}x odds</div>
+      <div class="horse-form" id="card-form-{{ horse.id }}">{{ horse.form }}</div>
       <span class="check">✅</span>
+      <span class="trait-badge trait-{{ horse.trait }}">{{ horse.trait }}</span>
     </div>
     {% endfor %}
   </div>
 
+  <!-- POWERS section -->
+  <div class="powers-section">
+    <div class="powers-title">⚡ Powers  <span style="color:var(--muted);font-size:0.8rem;font-family:'Barlow Condensed',sans-serif;">(click to toggle, multiple allowed)</span></div>
+    <div class="powers-grid" id="powers-grid">
+      <!-- Built by JS -->
+    </div>
+  </div>
+
+  <!-- Active powers strip -->
+  <div class="active-powers-strip" id="active-powers-strip"></div>
+
+  <!-- Bet -->
   <div class="bet-row">
     <label>Bet $</label>
     <input type="number" id="bet-input" min="1" step="1" value="50" placeholder="50" />
@@ -450,10 +537,12 @@
     <span class="quick-bet" onclick="setBet(50)">$50</span>
     <span class="quick-bet" onclick="setBet(100)">$100</span>
     <span class="quick-bet" onclick="setBet(250)">$250</span>
+    <span class="quick-bet" onclick="setBet(500)">$500</span>
   </div>
 
   <div class="error-msg hidden" id="err-msg"></div>
-  <button class="run-btn" id="run-btn" onclick="startRace()">Run the Race!</button>
+  <button class="run-btn" id="run-btn" onclick="startRace()">🏁 Run the Race!</button>
+  <button class="rebuy-btn hidden" id="rebuy-btn" onclick="doBuyIn()">💰 Top-up Wallet (+$500)</button>
 </div>
 
 <!-- RACE STAGE -->
@@ -465,11 +554,13 @@
   </div>
 
   <div class="track-wrap" id="track-wrap">
-    <!-- Countdown overlay inside track -->
     <div class="countdown-overlay" id="countdown-overlay">
       <span class="countdown-number" id="countdown-number"></span>
     </div>
-
+    <div class="power-flash" id="power-flash"></div>
+    <div class="rain-overlay"></div>
+    <div class="night-overlay"></div>
+    <div class="fog-overlay"></div>
     <div class="track-grass-top"></div>
     <div class="track-dirt" id="track-dirt">
       <div class="finish-line"></div>
@@ -484,762 +575,818 @@
 
   <div class="result-card" id="result-card">
     <div class="result-title" id="result-title">-</div>
-    <div class="result-sub"  id="result-sub">-</div>
-    <div class="payout-amt"  id="payout-amt"></div>
-    <ul class="finish-list"  id="finish-list"></ul>
+    <div class="result-sub"   id="result-sub">-</div>
+    <div class="payout-amt"   id="payout-amt"></div>
+    <div class="xp-earned hidden" id="xp-earned">+0 XP</div>
+    <div class="power-report hidden" id="power-report"></div>
+    <ul class="finish-list"   id="finish-list"></ul>
     <button class="again-btn" onclick="resetRace()">Race Again</button>
+  </div>
+</div>
+
+<!-- Challenges panel -->
+<div class="challenge-panel" id="challenge-panel">
+  <h3>📋 Daily Challenges</h3>
+  <div id="challenge-list"></div>
+</div>
+
+<!-- Level-up overlay -->
+<div class="levelup-overlay" id="levelup-overlay">
+  <div class="levelup-box">
+    <div style="font-size:3rem;margin-bottom:8px">⭐</div>
+    <h2>Level Up!</h2>
+    <p id="levelup-text">You reached Level 2!</p>
+    <p style="margin-top:6px;font-size:0.9rem;" id="levelup-reward"></p>
+    <button onclick="closeLevelUp()" style="margin-top:20px;padding:10px 28px;background:var(--purple);border:none;border-radius:8px;color:white;font-family:'Rye',serif;font-size:1rem;cursor:pointer;letter-spacing:1px;">Awesome!</button>
   </div>
 </div>
 
 <div class="confetti-wrap" id="confetti-wrap"></div>
 
 <script>
-  const MEDALS = ['🥇','🥈','🥉','4th','5th','6th'];
-  let wallet = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g, '')) || 0;
-  let selectedId = null;
-  let animHandle = null;
+// ═══════════════════════════════════════════════════════
+//  CLIENT STATE
+// ═══════════════════════════════════════════════════════
+const MEDALS = ['🥇','🥈','🥉','4th','5th','6th'];
+let wallet      = parseFloat(document.getElementById('wallet-display').textContent.replace(/,/g,'')) || 0;
+let selectedId  = null;
+let animHandle  = null;
+let gameMode    = 'classic';     // classic | turbo | mystery | weather
+let weatherCond = null;          // 'sunny'|'rain'|'mud'|'night'|'windy'
+let activePowers= new Set();     // set of power ids that are toggled on
+let xp          = parseInt(localStorage.getItem('ls_xp') || '0');
+let level       = parseInt(localStorage.getItem('ls_level') || '1');
+let streak      = parseInt(localStorage.getItem('ls_streak') || '0');
+let challenges  = JSON.parse(localStorage.getItem('ls_challenges') || 'null');
+let lastPowerReport = '';
 
-  function updateWallet(newVal) {
-    if (newVal !== undefined) wallet = newVal;
-    document.getElementById('wallet-display').textContent =
-      wallet.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+// XP per level table
+const XP_PER_LEVEL = [0,100,250,450,700,1050,1500,2100,3000,4500];
+
+// ═══════════════════════════════════════════════════════
+//  POWERS DEFINITION
+// ═══════════════════════════════════════════════════════
+const POWERS = [
+  {
+    id: 'boost',
+    icon: '🚀',
+    name: 'Speed Boost',
+    desc: 'Your horse gets a hidden speed bump mid-race',
+    cost: 30,
+    minLevel: 1,
+    flash: 'boost-flash',
+    tip: 'Applies +20% speed to your horse around the halfway mark'
+  },
+  {
+    id: 'shield',
+    icon: '🛡️',
+    name: 'Shield',
+    desc: 'If you lose by 1 place, you get 50% bet back',
+    cost: 20,
+    minLevel: 1,
+    flash: 'shield-flash',
+    tip: 'Consolation: if your horse finishes 2nd, refund 50% of bet'
+  },
+  {
+    id: 'ghost',
+    icon: '👻',
+    name: 'Ghost Mode',
+    desc: 'Your horse becomes partially invisible — confuses others',
+    cost: 35,
+    minLevel: 2,
+    flash: 'ghost-flash',
+    tip: 'Other horses get a slight speed debuff when near yours'
+  },
+  {
+    id: 'oracle',
+    icon: '🔮',
+    name: 'Oracle',
+    desc: 'Reveals true win probabilities before the race',
+    cost: 15,
+    minLevel: 2,
+    flash: null,
+    tip: 'Shows real win chances next to each horse name'
+  },
+  {
+    id: 'sabotage',
+    icon: '💣',
+    name: 'Sabotage',
+    desc: 'The leader gets a random stumble at 75% mark',
+    cost: 50,
+    minLevel: 3,
+    flash: 'sabotage-flash',
+    tip: 'The horse leading at 75% suddenly slows — good if it\'s not yours!'
+  },
+  {
+    id: 'insurance',
+    icon: '🏦',
+    name: 'Insurance',
+    desc: 'Get 25% of your bet back even if you lose',
+    cost: 25,
+    minLevel: 1,
+    flash: null,
+    tip: 'Win or lose, 25% of bet is always returned'
+  },
+  {
+    id: 'double',
+    icon: '💎',
+    name: 'Double Down',
+    desc: 'Win pays 2× but loss is also 2× — high stakes',
+    cost: 0,
+    minLevel: 4,
+    flash: null,
+    tip: 'Both win payout and loss are multiplied by 2. Costs nothing but requires Lv.4'
+  },
+  {
+    id: 'photofinish',
+    icon: '📸',
+    name: 'Photo Finish',
+    desc: 'If top-2 finish within 0.5s, you win regardless',
+    cost: 40,
+    minLevel: 3,
+    flash: null,
+    tip: 'Close races favour you — if 2nd place is within 0.5%, it counts as a win'
+  },
+  {
+    id: 'lucky7',
+    icon: '🍀',
+    name: 'Lucky Clover',
+    desc: 'Random 7% chance the server just makes you win',
+    cost: 60,
+    minLevel: 5,
+    flash: 'boost-flash',
+    tip: 'The ultimate gamble — pure luck applied server-side'
+  },
+];
+
+// ═══════════════════════════════════════════════════════
+//  DAILY CHALLENGES
+// ═══════════════════════════════════════════════════════
+const CHALLENGE_DEFS = [
+  { id: 'c_3wins',   label: 'Win 3 races today',       goal: 3,   xpReward: 60,  key: 'daily_wins' },
+  { id: 'c_turbo',   label: 'Win a Turbo race',         goal: 1,   xpReward: 80,  key: 'turbo_wins' },
+  { id: 'c_mystery', label: 'Play Mystery mode x2',     goal: 2,   xpReward: 50,  key: 'mystery_plays'},
+  { id: 'c_power3',  label: 'Use 3 powers in one race', goal: 1,   xpReward: 40,  key: 'three_power_race' },
+  { id: 'c_streak',  label: 'Achieve a 3-win streak',   goal: 1,   xpReward: 100, key: 'streak3' },
+];
+
+function initChallenges() {
+  const today = new Date().toDateString();
+  if (!challenges || challenges.date !== today) {
+    challenges = { date: today, progress: {} };
+    CHALLENGE_DEFS.forEach(c => { challenges.progress[c.key] = 0; });
+    localStorage.setItem('ls_challenges', JSON.stringify(challenges));
   }
+  renderChallenges();
+}
 
-  function selectHorse(el) {
-    document.querySelectorAll('.horse-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    selectedId = parseInt(el.dataset.id);
+function updateChallenge(key, amount) {
+  if (!challenges) return;
+  const def = CHALLENGE_DEFS.find(c => c.key === key);
+  if (!def) return;
+  const prev = challenges.progress[key] || 0;
+  challenges.progress[key] = Math.min(def.goal, prev + amount);
+  const justDone = prev < def.goal && challenges.progress[key] >= def.goal;
+  localStorage.setItem('ls_challenges', JSON.stringify(challenges));
+  renderChallenges();
+  if (justDone) {
+    gainXP(def.xpReward);
+    toast('🎯 Challenge done! +' + def.xpReward + ' XP', 3000);
   }
+}
 
-  function setBet(amt) {
-    document.getElementById('bet-input').value = amt;
-  }
-
-  function showError(msg) {
-    const el = document.getElementById('err-msg');
-    el.textContent = msg;
-    el.classList.remove('hidden');
-  }
-
-  function clearError() {
-    document.getElementById('err-msg').classList.add('hidden');
-  }
-
-  async function startRace() {
-    clearError();
-    if (!selectedId) { showError('Please select a horse first!'); return; }
-    const bet = parseFloat(document.getElementById('bet-input').value);
-    if (!bet || bet <= 0) { showError('Enter a valid bet amount.'); return; }
-    if (bet > wallet) { showError("You don't have enough in your wallet!"); return; }
-
-    document.getElementById('run-btn').disabled = true;
-    document.getElementById('result-card').className = 'result-card';
-    const setupPanel = document.getElementById('setup-panel');
-    setupPanel.style.opacity = '0.4';
-    setupPanel.style.pointerEvents = 'none';
-
-    const stage = document.getElementById('race-stage');
-    stage.classList.add('visible');
-
-    buildLanes();
-    document.getElementById('status-bar').textContent = 'Fetching race data...';
-
-    let data;
-    try {
-      const resp = await fetch('/api/race', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ horse: selectedId, bet })
-      });
-      data = await resp.json();
-      if (data.error) { showError(data.error); resetSetup(); return; }
-    } catch(e) {
-      showError('Network error - try again.'); resetSetup(); return;
-    }
-
-    await countdown();
-    await animateRace(data);
-    showResult(data, bet);
-  }
-
-  function buildLanes() {
-    const container = document.getElementById('race-lanes');
-    container.innerHTML = '';
-    const cards = [...document.querySelectorAll('.horse-card')];
-    cards.forEach((card, idx) => {
-      const id   = parseInt(card.dataset.id);
-      const name = card.dataset.name;
-      const lane = document.createElement('div');
-      lane.className = 'lane';
-      lane.innerHTML =
-        '<div class="lane-num">' + (idx + 1) + '</div>' +
-        '<div class="lane-label">' + name + '</div>' +
-        '<div class="lane-track" id="track-' + id + '">' +
-          '<div class="dust-trail" id="dust-' + id + '"></div>' +
-          '<div class="horse-runner' + (id === selectedId ? ' my-horse' : '') + '" id="runner-' + id + '">🐎</div>' +
-          '<div class="pos-badge" id="pos-' + id + '"></div>' +
-        '</div>';
-      container.appendChild(lane);
-    });
-  }
-
-  function countdown() {
-    return new Promise(resolve => {
-      const overlay = document.getElementById('countdown-overlay');
-      const num     = document.getElementById('countdown-number');
-      const bar     = document.getElementById('status-bar');
-      const steps   = ['3', '2', '1', 'GO!'];
-      let i = 0;
-
-      function showStep() {
-        if (i >= steps.length) {
-          overlay.classList.remove('show');
-          resolve();
-          return;
-        }
-        overlay.classList.add('show');
-        num.textContent = steps[i];
-        // re-trigger animation
-        num.style.animation = 'none';
-        void num.offsetWidth;
-        num.style.animation = 'pop 0.4s ease';
-
-        bar.textContent = steps[i] === 'GO!' ? "They're off!" : 'Get ready...';
-        i++;
-        setTimeout(showStep, steps[i - 1] === 'GO!' ? 600 : 700);
-      }
-      showStep();
-    });
-  }
-
-  function animateRace(data) {
-    const frames = data.frames;
-    const MS = 1000 / 28; // ~28fps
-
-    return new Promise(resolve => {
-      let f = 0;
-      const bar      = document.getElementById('status-bar');
-      const livePosEl= document.getElementById('live-positions');
-
-      function tick() {
-        if (f >= frames.length) {
-          // Snap everyone to final positions
-          for (const h of data.finishOrder) {
-            const runner = document.getElementById('runner-' + h.id);
-            if (runner) runner.style.left = '91%';
-          }
-          resolve();
-          return;
-        }
-
-        const frame = frames[f];
-
-        // Update horse positions & dust
-        const posArr = Object.entries(frame).map(([id, pct]) => ({ id: parseInt(id), pct }));
-
-        for (const { id, pct } of posArr) {
-          const runner = document.getElementById('runner-' + id);
-          const dust   = document.getElementById('dust-' + id);
-          if (runner) {
-            const leftPct = (pct / 100) * 88; // 88% of lane-track width so it stops before finish
-            runner.style.left = leftPct + '%';
-            // Show dust when moving
-            if (dust) {
-              dust.style.left  = Math.max(0, leftPct - 3) + '%';
-              dust.style.opacity = pct > 2 ? '1' : '0';
-            }
-          }
-        }
-
-        // Update live position chips every 15 frames
-        if (f % 15 === 0) {
-          const sorted = [...posArr].sort((a, b) => b.pct - a.pct);
-          livePosEl.innerHTML = '';
-          sorted.forEach((item, rank) => {
-            const name = data.finishOrder.find(h => h.id === item.id)?.name || ('Horse ' + item.id);
-            const chip = document.createElement('div');
-            chip.className = 'live-pos-chip' + (rank === 0 ? ' leader' : '');
-            chip.textContent = (rank + 1) + '. ' + name;
-            livePosEl.appendChild(chip);
-          });
-
-          // Update status bar with leader name
-          if (sorted[0].pct < 92) {
-            const leaderName = data.finishOrder.find(h => h.id === sorted[0].id)?.name;
-            if (leaderName) bar.textContent = '🏇 ' + leaderName + ' in the lead!';
-          }
-        }
-
-        f++;
-        animHandle = setTimeout(tick, MS);
-      }
-      tick();
-    });
-  }
-
-  function showResult(data, bet) {
-    document.getElementById('status-bar').textContent = '🏆 ' + data.winner + ' wins the race!';
-    document.getElementById('live-positions').innerHTML = '';
-
-    // Flash winner horse
-    const winRunner = document.getElementById('runner-' + data.winnerId);
-    if (winRunner) winRunner.classList.add('winner-flash');
-
-    const card  = document.getElementById('result-card');
-    const title = document.getElementById('result-title');
-    const sub   = document.getElementById('result-sub');
-    const pamt  = document.getElementById('payout-amt');
-    const flist = document.getElementById('finish-list');
-
-    if (data.win) {
-      updateWallet(data.wallet);
-      card.className = 'result-card show win';
-      title.textContent = '🎉 You Won!';
-      sub.textContent = data.winner + ' crossed the line first!';
-      pamt.textContent = '+$' + data.payout.toLocaleString();
-      launchConfetti();
-    } else {
-      updateWallet(data.wallet);
-      card.className = 'result-card show lose';
-      title.textContent = 'Better Luck Next Time';
-      sub.textContent = data.winner + ' took the trophy.';
-      pamt.textContent = '-$' + bet.toLocaleString();
-    }
-
-    flist.innerHTML = '';
-    data.finishOrder.forEach(function(h, i) {
-      const li = document.createElement('li');
-      const placeColors = ['gold', 'silver', 'bronze', '', '', ''];
-      li.innerHTML =
-        '<span class="finish-place ' + (placeColors[i] || '') + '">' + MEDALS[i] + '</span>' +
-        '<span>' + h.name + '</span>' +
-        (h.id === selectedId ? '<span style="color:var(--accent);margin-left:auto">⭐ your pick</span>' : '');
-      flist.appendChild(li);
-    });
-  }
-
-  function launchConfetti() {
-    const wrap = document.getElementById('confetti-wrap');
-    wrap.innerHTML = '';
-    const colors = ['#f5c842','#e23c3c','#3cd66e','#3c9fe2','#f57842'];
-    for (let i = 0; i < 100; i++) {
-      const p = document.createElement('div');
-      p.className = 'confetti-piece';
-      p.style.left = (Math.random() * 100) + 'vw';
-      p.style.animationDelay = (Math.random() * 1.0) + 's';
-      p.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
-      p.style.background = colors[Math.floor(Math.random() * colors.length)];
-      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      p.style.width  = (6 + Math.random() * 8) + 'px';
-      p.style.height = (6 + Math.random() * 8) + 'px';
-      wrap.appendChild(p);
-    }
-    setTimeout(function() { wrap.innerHTML = ''; }, 2800);
-  }
-
-  function resetSetup() {
-    document.getElementById('run-btn').disabled = false;
-    const setupPanel = document.getElementById('setup-panel');
-    setupPanel.style.opacity = '1';
-    setupPanel.style.pointerEvents = 'auto';
-  }
-
-  function resetRace() {
-    if (animHandle) clearTimeout(animHandle);
-    document.getElementById('race-stage').classList.remove('visible');
-    document.getElementById('result-card').className = 'result-card';
-    document.getElementById('race-lanes').innerHTML = '';
-    document.getElementById('status-bar').textContent = 'Ready...';
-    document.getElementById('live-positions').innerHTML = '';
-    document.getElementById('countdown-overlay').classList.remove('show');
-    resetSetup();
-  }
-</script>
-
-<!-- ═══════════════════════════════ AD REVENUE SYSTEM ═══════════════════════════════ -->
-<style>
-  .ad-toggle-btn {
-    position: fixed; bottom: 20px; right: 20px; z-index: 200;
-    background: linear-gradient(135deg, #f5c842, #e6a800);
-    border: none; border-radius: 12px;
-    padding: 10px 18px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.95rem; font-weight: 700;
-    color: #1a0f00; cursor: pointer; letter-spacing: 0.5px;
-    box-shadow: 0 4px 18px rgba(245,200,66,0.4);
-    transition: transform 0.15s, box-shadow 0.15s;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .ad-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.5); }
-  .ad-toggle-btn.ads-on { background: linear-gradient(135deg, #3cd66e, #28b855); box-shadow: 0 4px 18px rgba(60,214,110,0.4); }
-  .ad-toggle-btn .ad-earn-rate { font-size: 0.75rem; opacity: 0.75; }
-
-  .ad-popup {
-    position: fixed; z-index: 9999;
-    background: #fff;
-    border: 3px solid #c00;
-    border-radius: 2px;
-    width: min(460px, 92vw);
-    min-height: min(520px, 80vh);
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 0 1px #000;
-    font-family: Arial, Helvetica, sans-serif;
-    overflow: visible;
-    animation: adSlideIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    user-select: none;
-    display: flex; flex-direction: column;
-  }
-  @keyframes adSlideIn {
-    from { transform: scale(0.3) rotate(-8deg); opacity: 0; }
-    to   { transform: scale(1) rotate(0deg); opacity: 1; }
-  }
-  .ad-titlebar {
-    background: linear-gradient(180deg, #0a6fdb 0%, #0047b0 100%);
-    color: #fff; padding: 6px 8px;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 13px; font-weight: bold;
-    cursor: move; gap: 6px;
-  }
-  .ad-titlebar-left { display: flex; align-items: center; gap: 4px; flex:1; overflow:hidden; white-space:nowrap; }
-  .ad-fake-close {
-    background: linear-gradient(180deg, #e9a800, #c47500);
-    border: 1px solid #8a4700; border-radius: 2px;
-    color: #000; font-size: 10px; font-weight: bold;
-    width: 18px; height: 16px; min-width: 18px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; position: relative; flex-shrink: 0;
-    transition: background 0.1s;
-  }
-  .ad-fake-close:hover { background: linear-gradient(180deg, #ffb800, #e08000); }
-  .ad-coins-badge {
-    position: absolute; top: -9px; right: -9px;
-    background: #3cd66e; color: #001a0f;
-    border-radius: 50%; width: 20px; height: 20px;
-    font-size: 8px; font-weight: bold;
-    display: flex; align-items: center; justify-content: center;
-    border: 1.5px solid #001a0f; pointer-events: none;
-  }
-  .ad-body {
-    padding: 16px 18px 18px;
-    background: linear-gradient(180deg, #fffde7 0%, #fff8c0 100%);
-    color: #000; font-size: 14px; line-height: 1.6;
-    flex: 1; display: flex; flex-direction: column; gap: 10px;
-  }
-  .ad-headline { font-size: 18px; font-weight: bold; color: #c00; text-transform: uppercase; border-bottom: 2px solid #c00; padding-bottom: 5px; }
-  .ad-body-text { color: #222; }
-  .ad-cta {
-    background: linear-gradient(180deg, #ff6600, #cc3300);
-    color: #fff !important; font-weight: bold; font-size: 15px;
-    padding: 12px 10px; border: 2px solid #8a1100;
-    border-radius: 2px; cursor: pointer; text-align: center;
-    box-shadow: 0 3px 0 #660000; text-decoration: none !important; display: block;
-    margin-top: auto;
-  }
-  .ad-cta:hover { background: linear-gradient(180deg, #ff7700, #dd4400); }
-  .ad-blink { animation: blinkText 0.5s step-start infinite; color: #c00; font-weight: bold; font-size: 11px; }
-  @keyframes blinkText { 50% { opacity: 0; } }
-  .ad-star-border { border: 2px dashed gold; padding: 3px 5px; background: #fffff0; color: #333; font-size: 10px; text-align: center; }
-  .ad-marquee { overflow: hidden; white-space: nowrap; border: 1px solid #999; background: #fffde7; padding: 2px 0; }
-  .ad-marquee-inner { display: inline-block; animation: marqueeScroll 7s linear infinite; }
-  @keyframes marqueeScroll { from { transform: translateX(280px); } to { transform: translateX(-100%); } }
-
-  @keyframes adShake {
-    0%,100% { transform: translateX(0) rotate(0); }
-    15%  { transform: translateX(-12px) rotate(-3deg); }
-    30%  { transform: translateX(14px) rotate(3deg); }
-    45%  { transform: translateX(-9px) rotate(-2deg); }
-    60%  { transform: translateX(10px) rotate(2deg); }
-    75%  { transform: translateX(-5px); }
-    90%  { transform: translateX(5px); }
-  }
-  .ad-popup.shaking { animation: adShake 0.55s ease !important; }
-
-  .earn-toast {
-    position: fixed; bottom: 72px; right: 20px; z-index: 10001;
-    background: rgba(60,214,110,0.97); color: #001a0f;
-    border-radius: 8px; padding: 6px 14px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem; font-weight: 700;
-    pointer-events: none; max-width: 320px;
-    animation: toastPop 2.2s ease forwards;
-  }
-
-  /* Penalty banner — shown on page load if player navigated away while ads were running */
-  .ad-penalty-banner {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 10002;
-    background: linear-gradient(135deg, #c00 0%, #800 100%);
-    color: #fff; font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px;
-    padding: 14px 20px; display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-    animation: penaltySlide 0.5s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes penaltySlide {
-    from { transform: translateY(-100%); }
-    to   { transform: translateY(0); }
-  }
-  .ad-penalty-banner .penalty-icon { font-size: 1.8rem; }
-  .ad-penalty-banner .penalty-close {
-    margin-left: auto; background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.4); border-radius: 6px;
-    color: #fff; padding: 4px 12px; cursor: pointer; font-size: 0.9rem;
-    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
-  }
-  .ad-penalty-banner .penalty-close:hover { background: rgba(255,255,255,0.3); }
-  @keyframes toastPop {
-    0%   { opacity: 0; transform: translateY(10px); }
-    12%  { opacity: 1; transform: translateY(0); }
-    78%  { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-8px); }
-  }
-</style>
-
-<button class="ad-toggle-btn" id="ad-toggle-btn" onclick="window._adSystem.toggle()">
-  📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>
-</button>
-
-<script>
-window._adSystem = (function() {
-  const AD_POOL = [
-    {
-      title: '⚠️ Warning from Microsoft', icon: '🖥️',
-      headline: 'YOUR PC HAS 47 VIRUSES!!!',
-      body: 'Our FREE scan detected 47 critical threats. Click NOW before your bank account is completely drained!!',
-      cta: '⚡ SCAN MY PC FOR FREE RIGHT NOW ⚡',
-      extra: '<div class="ad-blink">⚠️ YOUR DATA IS BEING STOLEN AS YOU READ THIS ⚠️</div>',
-    },
-    {
-      title: '🎉 Congratulations!!', icon: '🎁',
-      headline: 'YOU ARE THE 1,000,000th VISITOR!',
-      body: 'You\'ve been selected for a FREE iPhone 16 Pro + $1000 gift card! No purchase necessary! Absolutely no catch whatsoever!',
-      cta: '🎁 CLAIM MY FREE PRIZE NOW!!!! 🎁',
-      extra: '<div class="ad-star-border">⭐ Offer expires in: <b id="ftimer">04:59</b> — HURRY!! ⭐</div>',
-    },
-    {
-      title: '💊 Doctors HATE This Man', icon: '💊',
-      headline: 'LOSE 30KG IN 3 DAYS!!',
-      body: 'Local mum discovers ONE WEIRD TRICK that big pharma desperately doesn\'t want you to know. She ate only toast!',
-      cta: '👉 SEE THE WEIRD TRICK THEY\'RE HIDING 👈',
-      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">🔥 23,891 people bought this TODAY • ALMOST SOLD OUT • TOTALLY REAL PRODUCT 🔥</span></div>',
-    },
-    {
-      title: '🏦 Nigerian Prince Foundation', icon: '👑',
-      headline: 'URGENT & CONFIDENTIAL PROPOSAL',
-      body: 'Dear Esteemed Friend, I am Prince Adebayo of Lagos. I have $47,000,000 USD frozen. I need YOUR help and will give 40% commission!',
-      cta: '📧 REPLY TO HIS ROYAL HIGHNESS 📧',
-      extra: '<div class="ad-blink" style="font-size:10px;color:green;">✅ 100% REAL ✅ TOTALLY NOT A SCAM ✅ VERY LEGITIMATE</div>',
-    },
-    {
-      title: '🎮 GAMERS FURIOUS!!!', icon: '🕹️',
-      headline: 'UNLIMITED COINS GLITCH FOUND',
-      body: 'Local teen finds exploit that generates UNLIMITED free coins in ANY casino game. Lucky Strip users are furious! Click before they patch it!',
-      cta: '🎮 GET MY UNLIMITED COINS NOW 🎮',
-      extra: '<div class="ad-star-border" style="font-size:10px;">✅ Works here • ✅ 100% Safe • ✅ Definitely Legal • ✅ Won\'t steal your account</div>',
-    },
-    {
-      title: '🔮 Psychic Madame Zelda', icon: '🔮',
-      headline: 'YOUR WALLET IS IN DANGER!!',
-      body: 'Madame Zelda has foreseen great financial suffering in your future. For just $9.99 she will personally hex your enemies AND double your casino luck!',
-      cta: '🔮 CONTACT MADAME ZELDA IMMEDIATELY 🔮',
-      extra: '<div class="ad-blink" style="color:purple;font-size:10px;">★★★★★ "She tripled my keno winnings!" — Totally Real Person, definitely</div>',
-    },
-    {
-      title: '🚨 FLASH SALE ENDS IN 2 MIN', icon: '🚨',
-      headline: 'GENUINE DESIGNER GOODS $4.99!!',
-      body: 'Ray-Ban Sunglasses $4.99! Rolex Watches $7.99! Gucci Bags $12.99! These prices are ABSOLUTELY REAL and the products are definitely authentic!',
-      cta: '🛒 SHOP THESE EXTREMELY REAL DEALS 🛒',
-      extra: '<div class="ad-marquee"><span class="ad-marquee-inner">FREE SHIPPING • 100% GENUINE BRAND NAME PRODUCTS • NOT COUNTERFEIT AT ALL • VERY LEGITIMATE WEBSITE</span></div>',
-    },
-    {
-      title: '🏠 Wealth Secrets REVEALED', icon: '🏘️',
-      headline: 'QUIT YOUR JOB TOMORROW!!',
-      body: 'I made $47,000 last Tuesday flipping properties with NO money, NO experience, and NO pants. My FREE webinar reveals everything. Limited seats!',
-      cta: '💸 REGISTER FOR FREE WEBINAR (Ends Soon!) 💸',
-      extra: '<div class="ad-star-border" style="font-size:10px;">"Was living in a bin. Now I have 17 bins, but they\'re solid gold." — Mike T., Definitely Real</div>',
-    },
-    {
-      title: 'SCAM WATCH — OFFICIAL NOTICE', icon: '🛡️',
-      headline: 'YOUR ACCOUNT MAY BE COMPROMISED!!',
-      body: 'Our security team has detected SUSPICIOUS LOGIN ACTIVITY on your Lucky Strip account from an unknown device. To protect your winnings, please verify your identity IMMEDIATELY by entering your password below. This is 100% official and NOT a scam.',
-      cta: '🔐 VERIFY MY ACCOUNT NOW 🔐',
-      extra: '<div style="margin-top:6px;"><div style="font-size:13px;color:#c00;font-weight:bold;margin-bottom:6px;">🔐 ENTER PASSWORD TO SECURE ACCOUNT:</div><input type="password" placeholder="Enter your password here..." style="width:100%;padding:10px;border:2px solid #c00;border-radius:3px;font-size:14px;font-family:Arial;box-sizing:border-box;" /><div style="font-size:11px;color:#888;margin-top:4px;">✅ 256-bit encrypted &nbsp;✅ Never stored &nbsp;✅ Definitely not a scam</div><button onclick="window._adSystem.scamSubmit(this)" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(180deg,#ff0000,#990000);color:#fff;font-weight:bold;font-size:15px;border:2px solid #660000;border-radius:2px;cursor:pointer;box-shadow:0 3px 0 #440000;">🔐 VERIFY AND SECURE MY ACCOUNT NOW</button></div>',
-    },
-  ];
-
-  const MAX_ADS = 6;
-  const EARN_PER_AD_PER_MIN = 10;
-  const EARN_INTERVAL_MS = 10000; // 10s ticks
-  const COINS_PER_TICK_PER_AD = EARN_PER_AD_PER_MIN / 6; // 1.667
-
-  let adsEnabled = false;
-  let activeAds  = [];
-  let earnTimer  = null;
-  let spawnTimer = null;
-  let adIdCounter = 0;
-  let dragAd = null, dragOffX = 0, dragOffY = 0;
-
-  // ── Wallet display sync ──────────────────────────────────────
-  function updateLocalWallet(newVal) {
-    if (newVal === undefined) return;
-    wallet = parseFloat(newVal);   // keep game wallet var in sync with ad earnings
-    const el = document.getElementById('wallet-display');
-    if (el) el.textContent = wallet.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-  // ── Continuous wallet sync — picks up ad earnings on any page without reload ──
-  (function startWalletPoll() {
-    async function pollWallet() {
-      try {
-        const r = await fetch('/api/wallet');
-        if (r.ok) { const d = await r.json(); updateLocalWallet(d.wallet); }
-      } catch(e) { /* silent — don't interrupt gameplay */ }
-    }
-    pollWallet();
-    setInterval(pollWallet, 4000);  // every 4s for faster live updating
-  })();
-
-
-  // ── Update toggle button ─────────────────────────────────────
-  function updateBtn() {
-    const btn = document.getElementById('ad-toggle-btn');
-    if (!btn) return;
-    if (adsEnabled) {
-      const rate = activeAds.length * EARN_PER_AD_PER_MIN;
-      btn.className = 'ad-toggle-btn ads-on';
-      btn.innerHTML = '📺 Ads ON (' + activeAds.length + '/' + MAX_ADS + ') <span class="ad-earn-rate">+' + rate + '💰/min</span>';
-    } else {
-      btn.className = 'ad-toggle-btn';
-      btn.innerHTML = '📺 Enable Ad Revenue <span class="ad-earn-rate">earn up to 60💰/min</span>';
-    }
-  }
-
-  // ── Spawn one popup ad ───────────────────────────────────────
-  function spawnAd() {
-    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
-    const id = ++adIdCounter;
-    const d  = AD_POOL[Math.floor(Math.random() * AD_POOL.length)];
-    const pw = Math.min(460, window.innerWidth * 0.92);
-    const ph = Math.min(520, window.innerHeight * 0.80);
-    const x  = Math.random() * Math.max(0, window.innerWidth  - pw - 20);
-    const y  = Math.random() * Math.max(0, window.innerHeight - ph - 20);
-
-    const el = document.createElement('div');
-    el.className = 'ad-popup';
-    el.id = 'adpop-' + id;
-    el.style.left = x + 'px';
-    el.style.top  = y + 'px';
-    el.innerHTML =
-      '<div class="ad-titlebar" id="adtb-' + id + '">' +
-        '<div class="ad-titlebar-left">' +
-          '<span>' + d.icon + '</span>' +
-          '<span style="overflow:hidden;text-overflow:ellipsis;">' + d.title + '</span>' +
-        '</div>' +
-        '<div class="ad-fake-close" id="adbtn-' + id + '" title="Close ad">' +
-          '✕<div class="ad-coins-badge">💰</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="ad-body">' +
-        '<div class="ad-headline">' + d.headline + '</div>' +
-        '<div class="ad-body-text">' + d.body + '</div>' +
-        (d.extra || '') +
-        '<a class="ad-cta" href="javascript:void(0)" onclick="window._adSystem.ctaClick(' + id + ')">' + d.cta + '</a>' +
-      '</div>';
-
-    document.body.appendChild(el);
-    activeAds.push({ id, el });
-
-    // Drag from titlebar
-    const tb = document.getElementById('adtb-' + id);
-    if (tb) {
-      tb.addEventListener('mousedown', function(e) {
-        if (e.target.closest('.ad-fake-close')) return;
-        dragAd   = el;
-        dragOffX = e.clientX - el.offsetLeft;
-        dragOffY = e.clientY - el.offsetTop;
-        el.style.transition = 'none';
-        e.preventDefault();
-      });
-    }
-
-    // Fake close handler
-    const closeBtn = document.getElementById('adbtn-' + id);
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function() { fakeClose(id, closeBtn); });
-    }
-
-    updateBtn();
-  }
-
-  // ── Fake close — button runs away ───────────────────────────
-  function fakeClose(id, btn) {
-    const el = document.getElementById('adpop-' + id);
-    if (!el) return;
-    // Shake the popup
-    el.classList.remove('shaking');
-    void el.offsetWidth;
-    el.classList.add('shaking');
-    setTimeout(function() { el.classList.remove('shaking'); }, 600);
-
-    // Snatch the button and teleport it
-    const sasses = [
-      "Nope!","Nice try 😏","haha no","You wish!",
-      "Error 404","Try again?","That's not it",
-      "Ads = $$$","Keep watching!","Never gonna happen 😁",
-    ];
-    const sass = sasses[Math.floor(Math.random() * sasses.length)];
-    const nx = Math.random() * Math.max(10, window.innerWidth  - 80);
-    const ny = Math.random() * Math.max(10, window.innerHeight - 40);
-
-    btn.style.cssText = 'position:fixed;left:' + nx + 'px;top:' + ny + 'px;z-index:99999;width:auto;padding:3px 8px;font-size:10px;border-radius:4px;';
-    btn.textContent = sass;
-    document.body.appendChild(btn);
-
-    showToast('L ' + sass, '#f5c842', '#1a0f00', 1800);
-
-    setTimeout(function() {
-      // Return it to the ad
-      const tb = el.querySelector('.ad-titlebar');
-      if (tb) {
-        btn.removeAttribute('style');
-        btn.innerHTML = '✕<div class="ad-coins-badge">💰</div>';
-        tb.appendChild(btn);
-        btn.addEventListener('click', function() { fakeClose(id, btn); });
-      }
-    }, 2200);
-  }
-
-  // ── CTA click easter egg ─────────────────────────────────────
-  function ctaClick(id) {
-    const msgs = [
-      "🤑 Congrats! You won absolutely nothing. The ad stays though.",
-      "📞 Connecting to Madame Zelda... she says watch more ads.",
-      "🦠 Downloading 47 viruses... just kidding. Ad remains.",
-      "💸 Order confirmed! $0 charged, 0 items shipped. You're welcome!",
-      "🎉 You clicked it! The prince is grateful. The ad is not going anywhere.",
-    ];
-    showToast(msgs[Math.floor(Math.random() * msgs.length)], '#d63c3c', '#fff8ee', 3000);
-  }
-
-  // ── Earn tick ────────────────────────────────────────────────
-  async function earnTick() {
-    if (!adsEnabled || activeAds.length === 0) return;
-    const earned = parseFloat((COINS_PER_TICK_PER_AD * activeAds.length).toFixed(2));
-    try {
-      const resp = await fetch(window.location.origin + '/api/ads/earn', {
-        method: 'POST',
-        cache: 'no-store',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: earned })
-      });
-      if (resp.ok) {
-        const data = await resp.json();
-        updateLocalWallet(data.wallet);
-        if (Math.random() < 0.3) {
-          showToast('+$' + earned.toFixed(2) + ' ad revenue 💰', '#3cd66e', '#001a0f', 1800);
-        }
-      }
-    } catch(e) { /* silent */ }
-  }
-
-  // ── Spawn scheduler ──────────────────────────────────────────
-  function scheduleSpawn() {
-    if (!adsEnabled || activeAds.length >= MAX_ADS) return;
-    const delay = 7000 + Math.random() * 8000;
-    spawnTimer = setTimeout(function() { spawnAd(); scheduleSpawn(); }, delay);
-  }
-
-  // ── Toggle ───────────────────────────────────────────────────
-  function toggle() {
-    adsEnabled = !adsEnabled;
-    if (adsEnabled) {
-      spawnAd();
-      scheduleSpawn();
-      earnTimer = setInterval(earnTick, EARN_INTERVAL_MS);
-      showToast('📺 Ads enabled! +' + EARN_PER_AD_PER_MIN + '💰/min per ad, up to ' + MAX_ADS + ' ads.', '#3cd66e', '#001a0f', 2800);
-    } else {
-      clearTimeout(spawnTimer);
-      clearInterval(earnTimer);
-      activeAds.forEach(function(a) { if (a.el && a.el.parentNode) a.el.parentNode.removeChild(a.el); });
-      activeAds = [];
-      // Penalty for disabling ads — also tell server to clear the session flag cleanly
-      fetch('/api/ads/disable', { method: 'POST' }).catch(function() {});
-      fetch('/api/ads/penalty', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 400 })
-      }).then(function(r) { return r.json(); }).then(function(d) {
-        if (d.wallet !== undefined) updateLocalWallet(d.wallet);
-      }).catch(function() {});
-      showToast('📺 Ads disabled. Early termination fee: -$400.00 💸', '#d63c3c', '#fff8ee', 3500);
-    }
-    updateBtn();
-  }
-
-  // ── Drag ─────────────────────────────────────────────────────
-  document.addEventListener('mousemove', function(e) {
-    if (!dragAd) return;
-    var adW  = dragAd.offsetWidth;
-    var adH  = dragAd.offsetHeight;
-    var maxX = window.innerWidth  - adW;
-    var maxY = window.innerHeight - adH - 8;  // 8px buffer keeps it above taskbar
-    dragAd.style.left = Math.min(Math.max(0, e.clientX - dragOffX), maxX) + 'px';
-    dragAd.style.top  = Math.min(Math.max(0, e.clientY - dragOffY), maxY) + 'px';
+function renderChallenges() {
+  const list = document.getElementById('challenge-list');
+  list.innerHTML = '';
+  CHALLENGE_DEFS.forEach(c => {
+    const prog  = (challenges && challenges.progress[c.key]) || 0;
+    const done  = prog >= c.goal;
+    const pct   = Math.min(100, (prog / c.goal) * 100);
+    const div   = document.createElement('div');
+    div.className = 'challenge-item' + (done ? ' done' : '');
+    div.innerHTML =
+      '<span style="min-width:160px">' + (done ? '✅ ' : '') + c.label + '</span>' +
+      '<div class="ch-bar-bg"><div class="ch-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<span style="min-width:40px;text-align:right;font-size:0.8rem;color:var(--muted)">' + prog + '/' + c.goal + '</span>' +
+      '<span class="ch-reward">+' + c.xpReward + 'XP</span>';
+    list.appendChild(div);
   });
-  document.addEventListener('mouseup', function() { dragAd = null; });
+}
 
-  // ── Toast ─────────────────────────────────────────────────────
-  function showToast(msg, bg, color, ms) {
-    const t = document.createElement('div');
-    t.className = 'earn-toast';
-    t.style.background = bg || '#3cd66e';
-    t.style.color = color || '#001a0f';
-    t.style.animationDuration = ((ms || 2200) / 1000) + 's';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 2200);
+// ═══════════════════════════════════════════════════════
+//  XP / LEVELS
+// ═══════════════════════════════════════════════════════
+function xpForLevel(l) { return XP_PER_LEVEL[Math.min(l - 1, XP_PER_LEVEL.length - 1)] || (l * 150); }
+
+function gainXP(amount) {
+  xp += amount;
+  const needed = xpForLevel(level + 1);
+  if (xp >= needed) {
+    xp -= needed;
+    level++;
+    localStorage.setItem('ls_level', level);
+    showLevelUp(level);
+    // Unlock new power announcement
+    const unlocked = POWERS.filter(p => p.minLevel === level);
+    if (unlocked.length) {
+      setTimeout(() => toast('🔓 Unlocked: ' + unlocked.map(p => p.icon + ' ' + p.name).join(', '), 3000), 1800);
+    }
+    buildPowers(); // Re-render to update unlocked states
+  }
+  localStorage.setItem('ls_xp', xp);
+  updateXPDisplay();
+}
+
+function updateXPDisplay() {
+  const needed = xpForLevel(level + 1);
+  const pct    = Math.min(100, Math.round((xp / needed) * 100));
+  document.getElementById('xp-display').textContent    = xp;
+  document.getElementById('xp-next-display').textContent = needed;
+  document.getElementById('level-display').textContent  = level;
+  document.getElementById('xp-bar-fill').style.width   = pct + '%';
+  document.getElementById('xp-pct-label').textContent  = pct + '%';
+}
+
+function showLevelUp(newLevel) {
+  const overlay = document.getElementById('levelup-overlay');
+  const rewards = { 2:'Ghost & Oracle powers unlocked', 3:'Sabotage & Photo Finish unlocked', 4:'Double Down unlocked', 5:'Lucky Clover unlocked' };
+  document.getElementById('levelup-text').textContent   = 'You reached Level ' + newLevel + '!';
+  document.getElementById('levelup-reward').textContent = rewards[newLevel] || 'New challenges unlocked!';
+  overlay.style.display = 'flex';
+  launchConfetti();
+}
+function closeLevelUp() { document.getElementById('levelup-overlay').style.display = 'none'; }
+
+// ═══════════════════════════════════════════════════════
+//  STREAK
+// ═══════════════════════════════════════════════════════
+function updateStreak(won) {
+  streak = won ? streak + 1 : 0;
+  localStorage.setItem('ls_streak', streak);
+  document.getElementById('streak-display').textContent = streak;
+  renderStreakDots();
+  if (streak >= 3) updateChallenge('streak3', 1);
+}
+
+function renderStreakDots() {
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById('sd' + i);
+    if (!dot) continue;
+    dot.className = 'streak-dot';
+    if (i < streak && streak < 3)   dot.classList.add('filled');
+    if (i < streak && streak >= 3)  dot.classList.add('on-fire');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  WALLET
+// ═══════════════════════════════════════════════════════
+function updateWallet(newVal) {
+  if (newVal !== undefined) wallet = newVal;
+  document.getElementById('wallet-display').textContent =
+    wallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('rebuy-btn').classList.toggle('hidden', wallet >= 50);
+}
+
+async function doBuyIn() {
+  try {
+    const r = await fetch('/api/wallet/buyin', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({amount:500}) });
+    const d = await r.json();
+    if (d.wallet !== undefined) { updateWallet(d.wallet); toast('💰 +$500 topped up!', 2000); }
+  } catch(e) { toast('Error topping up :(', 2000); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  GAME MODES
+// ═══════════════════════════════════════════════════════
+const WEATHER_CONDITIONS = [
+  { id:'sunny', icon:'☀️', label:'Sunny & Dry — all horses at full ability', trackClass:'' },
+  { id:'rain',  icon:'🌧️', label:'Heavy Rain — stamina horses favoured, fast horses slip', trackClass:'mode-weather-rain' },
+  { id:'mud',   icon:'🌫️', label:'Muddy Track — erratic horses really struggle today', trackClass:'mode-weather-rain' },
+  { id:'night', icon:'🌙', label:'Night Race — visibility poor, lucky horses gain edge', trackClass:'mode-weather-night' },
+  { id:'windy', icon:'💨', label:'Strong Crosswinds — steady horses much more consistent', trackClass:'' },
+];
+
+function setMode(mode, el) {
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  gameMode = mode;
+
+  // Hide all info banners
+  ['turbo-info','mystery-info','weather-banner'].forEach(id => document.getElementById(id).classList.add('hidden'));
+
+  const badge = document.getElementById('mode-badge-label');
+  const title = document.getElementById('setup-title');
+
+  if (mode === 'classic') {
+    badge.className = 'mode-badge classic'; badge.textContent = 'Classic';
+    resetHorseOddsDisplay();
+  } else if (mode === 'turbo') {
+    badge.className = 'mode-badge turbo'; badge.textContent = 'Turbo';
+    document.getElementById('turbo-info').classList.remove('hidden');
+    resetHorseOddsDisplay();
+  } else if (mode === 'mystery') {
+    badge.className = 'mode-badge mystery'; badge.textContent = 'Mystery';
+    document.getElementById('mystery-info').classList.remove('hidden');
+    hideHorseOdds();
+  } else if (mode === 'weather') {
+    badge.className = 'mode-badge weather'; badge.textContent = 'Weather';
+    rollWeather();
+  }
+}
+
+function rollWeather() {
+  weatherCond = WEATHER_CONDITIONS[Math.floor(Math.random() * WEATHER_CONDITIONS.length)];
+  const banner = document.getElementById('weather-banner');
+  banner.classList.remove('hidden');
+  document.getElementById('weather-icon').textContent = weatherCond.icon;
+  document.getElementById('weather-text').textContent  = weatherCond.label;
+}
+
+function hideHorseOdds() {
+  document.querySelectorAll('.horse-card .horse-odds').forEach(el => el.textContent = '? × odds');
+}
+function resetHorseOddsDisplay() {
+  document.querySelectorAll('.horse-card').forEach(card => {
+    const id = parseInt(card.dataset.id);
+    const el = document.getElementById('card-odds-' + id);
+    if (el) el.textContent = card.dataset.odds + 'x odds';
+  });
+}
+
+// Oracle power: show true probabilities
+function applyOraclePower() {
+  const probs = { 1:21, 2:18, 3:21, 4:14, 5:11, 6:15 }; // matches server weights
+  document.querySelectorAll('.horse-card').forEach(card => {
+    const id = parseInt(card.dataset.id);
+    const el = document.getElementById('card-odds-' + id);
+    if (el) el.textContent = card.dataset.odds + 'x  (' + (probs[id]||'?') + '% win)';
+    card.style.borderColor = 'rgba(168,85,247,0.5)';
+  });
+  toast('🔮 Oracle revealed! True win chances shown.', 2800);
+}
+
+// ═══════════════════════════════════════════════════════
+//  POWERS
+// ═══════════════════════════════════════════════════════
+function buildPowers() {
+  const grid = document.getElementById('powers-grid');
+  grid.innerHTML = '';
+  POWERS.forEach(p => {
+    const locked  = level < p.minLevel;
+    const enabled = activePowers.has(p.id);
+    const div     = document.createElement('div');
+    div.className = 'power-card' + (locked ? ' disabled' : '') + (enabled ? ' active-power' : '');
+    div.title     = p.tip + (p.cost > 0 ? '\nCost: $' + p.cost : '');
+    div.innerHTML =
+      '<span class="p-icon">' + p.icon + '</span>' +
+      '<span class="p-name">' + p.name + '</span>' +
+      '<span class="p-cost">' + (locked ? '🔒 Lv.' + p.minLevel : (p.cost > 0 ? '-$' + p.cost : 'Free')) + '</span>';
+    if (!locked) div.onclick = () => togglePower(p.id);
+    grid.appendChild(div);
+  });
+}
+
+function togglePower(id) {
+  const p = POWERS.find(x => x.id === id);
+  if (!p || level < p.minLevel) return;
+
+  if (activePowers.has(id)) {
+    activePowers.delete(id);
+  } else {
+    activePowers.add(id);
+    if (id === 'oracle') applyOraclePower();
   }
 
-  // ── Scam ad fake submit ─────────────────────────────────────
-  function scamSubmit(btn) {
-    var inp = btn.parentElement.querySelector('input[type=password]');
-    var val = inp ? inp.value : '';
-    // Clear it immediately — we genuinely don't store or use it
-    if (inp) inp.value = '';
-    var responses = [
-      '😂 lmaooo we got you. Password: "' + (val ? val.slice(0,2) + '***' : '(nothing)') + '". We didn\'t save it but... really? On a SCAM WATCH ad?',
-      '🎣 PHISHING SUCCESSFUL!! Just kidding, we deleted it instantly. Please don\'t enter passwords on random popups!!',
-      '🤦 Mate. It literally said SCAM WATCH. Your password has been ceremonially deleted and judged.',
-      '🚨 ACCOUNT SECURED!! (we did nothing. your password is gone. never type passwords into random popups!)',
-      '😈 The scam wins again! Don\'t worry, it\'s gone. But seriously, never do this on a real site.',
-    ];
-    showToast(responses[Math.floor(Math.random() * responses.length)], '#d63c3c', '#fff8ee', 5000);
+  buildPowers();
+  renderActivePowersStrip();
+}
+
+function renderActivePowersStrip() {
+  const strip = document.getElementById('active-powers-strip');
+  strip.innerHTML = '';
+  activePowers.forEach(id => {
+    const p = POWERS.find(x => x.id === id);
+    if (!p) return;
+    const chip = document.createElement('div');
+    chip.className = 'active-power-chip';
+    chip.textContent = p.icon + ' ' + p.name + (p.cost > 0 ? ' (-$' + p.cost + ')' : '');
+    strip.appendChild(chip);
+  });
+}
+
+function calcPowerCost() {
+  let total = 0;
+  activePowers.forEach(id => { const p = POWERS.find(x => x.id === id); if (p) total += p.cost; });
+  return total;
+}
+
+// ═══════════════════════════════════════════════════════
+//  HORSE SELECT / BET
+// ═══════════════════════════════════════════════════════
+function selectHorse(el) {
+  document.querySelectorAll('.horse-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedId = parseInt(el.dataset.id);
+}
+
+function setBet(amt) { document.getElementById('bet-input').value = amt; }
+function showError(msg) { const el = document.getElementById('err-msg'); el.textContent = msg; el.classList.remove('hidden'); }
+function clearError()   { document.getElementById('err-msg').classList.add('hidden'); }
+
+// ═══════════════════════════════════════════════════════
+//  RACE START
+// ═══════════════════════════════════════════════════════
+async function startRace() {
+  clearError();
+  if (!selectedId) { showError('Please select a horse first!'); return; }
+  const bet = parseFloat(document.getElementById('bet-input').value);
+  if (!bet || bet <= 0) { showError('Enter a valid bet amount.'); return; }
+  const powerCost = calcPowerCost();
+  const totalCost = bet + powerCost;
+  if (totalCost > wallet) { showError('Not enough! Bet ($' + bet + ') + powers ($' + powerCost + ') = $' + totalCost); return; }
+
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('result-card').className = 'result-card';
+  const setupPanel = document.getElementById('setup-panel');
+  setupPanel.style.opacity = '0.4';
+  setupPanel.style.pointerEvents = 'none';
+
+  const stage = document.getElementById('race-stage');
+  stage.classList.add('visible');
+
+  // Set track visual mode
+  const track = document.getElementById('track-wrap');
+  track.className = 'track-wrap';
+  if (gameMode === 'turbo')   track.classList.add('mode-turbo');
+  if (gameMode === 'mystery') track.classList.add('mode-mystery');
+  if (gameMode === 'weather' && weatherCond) track.classList.add(weatherCond.trackClass);
+
+  buildLanes();
+  document.getElementById('status-bar').textContent = 'Fetching race data...';
+
+  // Apply power visual to our horse
+  if (activePowers.has('ghost')) applyHorseClass(selectedId, 'powered-ghost');
+  if (activePowers.has('shield')) applyHorseClass(selectedId, 'powered-shield');
+  if (activePowers.has('boost')) setTimeout(() => { applyHorseClass(selectedId, 'powered-boost'); setTimeout(() => removeHorseClass(selectedId,'powered-boost'), 1200); }, 3500);
+
+  let data;
+  try {
+    const payload = {
+      horse: selectedId,
+      bet,
+      mode: gameMode,
+      powers: [...activePowers],
+      weather: weatherCond ? weatherCond.id : null
+    };
+
+    // Kick off the network call AND the countdown simultaneously.
+    // The fetch is ~50-200ms; countdown is ~2.8s — user never waits.
+    const [resp] = await Promise.all([
+      fetch('/api/race', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }),
+      countdown()
+    ]);
+
+    data = await resp.json();
+    if (data.error) { showError(data.error); resetSetup(); return; }
+  } catch(e) {
+    showError('Network error — try again.'); resetSetup(); return;
+  }
+  lastPowerReport = data.power_report || '';
+
+  await animateRace(data);
+  showResult(data, bet);
+
+  // XP
+  const baseXP = data.win ? 25 : 8;
+  const modeBonus = gameMode === 'turbo' ? 15 : gameMode === 'mystery' ? 20 : gameMode === 'weather' ? 12 : 0;
+  const powerBonus = activePowers.size * 5;
+  const earnedXP = baseXP + modeBonus + powerBonus;
+  gainXP(earnedXP);
+  if (document.getElementById('xp-earned')) {
+    document.getElementById('xp-earned').textContent = '+' + earnedXP + ' XP';
+    document.getElementById('xp-earned').classList.remove('hidden');
   }
 
-  function reportLeavePenalty() {
-    if (!adsEnabled || activeAds.length === 0) return;
-    const payload = new Blob([JSON.stringify({ amount: 400 })], { type: 'application/json' });
-    navigator.sendBeacon('/api/ads/penalty', payload);
+  // Streak & challenges
+  updateStreak(data.win);
+  if (data.win) {
+    updateChallenge('daily_wins', 1);
+    if (gameMode === 'turbo')   updateChallenge('turbo_wins', 1);
+  }
+  if (gameMode === 'mystery') updateChallenge('mystery_plays', 1);
+  if (activePowers.size >= 3) updateChallenge('three_power_race', 1);
+
+  // Re-roll weather for next race
+  if (gameMode === 'weather') rollWeather();
+}
+
+function applyHorseClass(id, cls)  { const r = document.getElementById('runner-'+id); if (r) r.classList.add(cls); }
+function removeHorseClass(id, cls) { const r = document.getElementById('runner-'+id); if (r) r.classList.remove(cls); }
+
+// ═══════════════════════════════════════════════════════
+//  LANE BUILDER
+// ═══════════════════════════════════════════════════════
+function buildLanes() {
+  const container = document.getElementById('race-lanes');
+  container.innerHTML = '';
+  const cards = [...document.querySelectorAll('.horse-card')];
+  cards.forEach((card, idx) => {
+    const id   = parseInt(card.dataset.id);
+    const name = card.dataset.name;
+    const lane = document.createElement('div');
+    lane.className = 'lane';
+    lane.innerHTML =
+      '<div class="lane-num">' + (idx + 1) + '</div>' +
+      '<div class="lane-label">' + name + '</div>' +
+      '<div class="lane-track" id="track-' + id + '">' +
+        '<div class="dust-trail" id="dust-' + id + '"></div>' +
+        '<div class="horse-runner' + (id === selectedId ? ' my-horse' : '') + '" id="runner-' + id + '">🐎</div>' +
+        '<div class="pos-badge" id="pos-' + id + '"></div>' +
+      '</div>';
+    container.appendChild(lane);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  COUNTDOWN
+// ═══════════════════════════════════════════════════════
+function countdown() {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('countdown-overlay');
+    const num     = document.getElementById('countdown-number');
+    const bar     = document.getElementById('status-bar');
+    const steps   = gameMode === 'turbo' ? ['2','1','GO!'] : ['3','2','1','GO!'];
+    let i = 0;
+    function showStep() {
+      if (i >= steps.length) { overlay.classList.remove('show'); resolve(); return; }
+      overlay.classList.add('show');
+      num.textContent = steps[i];
+      num.style.animation = 'none'; void num.offsetWidth; num.style.animation = 'pop 0.4s ease';
+      bar.textContent = steps[i] === 'GO!' ? "They're off!" : 'Get ready...';
+      i++;
+      setTimeout(showStep, steps[i - 1] === 'GO!' ? 600 : (gameMode === 'turbo' ? 500 : 700));
+    }
+    showStep();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  RACE ANIMATION  (frames simulated locally from speed seeds)
+// ═══════════════════════════════════════════════════════
+function animateRace(data) {
+  // Build per-horse speed profiles from server seeds
+  const seeds    = data.speedSeeds || {};  // {horseId: {speed, variance, trait}}
+  const winner   = data.winnerId;
+  const powers   = data.powers || [];
+  const isTurbo  = data.mode === 'turbo';
+  const speed    = isTurbo ? 1000 / 55 : 1000 / 28;
+  const maxTicks = isTurbo ? 240 : 320;
+
+  // Initialise simulation state
+  const positions  = {};
+  const finished   = {};  // id -> place
+  let   place      = 1;
+  let   sabotage   = false;
+
+  for (const id of Object.keys(seeds)) {
+    positions[parseInt(id)] = 0.0;
   }
 
-  window.addEventListener('pagehide', reportLeavePenalty);
-  window.addEventListener('beforeunload', reportLeavePenalty);
+  return new Promise(resolve => {
+    let tick = 0;
+    const bar       = document.getElementById('status-bar');
+    const livePosEl = document.getElementById('live-positions');
+    let sabotageApplied = false;
 
-  // ── Show penalty banner if server flagged it ────────────────
-  function showPenaltyBanner() {
-    var banner = document.createElement('div');
-    banner.className = 'ad-penalty-banner';
-    banner.innerHTML =
-      '<span class="penalty-icon">🚔</span>' +
-      '<span>Nice try. You navigated away while ads were running. <b>-$400.00 penalty</b> has been charged. The ads remember.</span>' +
-      '<button class="penalty-close" onclick="this.parentElement.remove()">Dismiss</button>';
-    document.body.prepend(banner);
-    setTimeout(function() { if (banner.parentNode) banner.remove(); }, 8000);
+    function step() {
+      if (tick >= maxTicks || Object.keys(finished).length >= Object.keys(seeds).length) {
+        // Snap everyone to finish line
+        for (const h of data.finishOrder) {
+          const runner = document.getElementById('runner-' + h.id);
+          if (runner) runner.style.left = '91%';
+        }
+        resolve();
+        return;
+      }
+
+      const lead = Math.max(...Object.values(positions));
+
+      for (const [sid, seed] of Object.entries(seeds)) {
+        const hid = parseInt(sid);
+        if (finished[hid] !== undefined) continue;
+
+        let spd = seed.speed * (isTurbo ? 1.6 : 1.0);
+
+        // Winner gets a late surge so it reliably crosses first
+        if (lead > 60 && hid === winner) spd *= 1.22;
+
+        // Boost power: selected horse mid-race kick
+        if (powers.includes('boost') && hid === selectedId && positions[hid] > 40 && positions[hid] < 65) {
+          spd *= 1.25;
+        }
+
+        // Sabotage: leader stumbles past 70%
+        if (powers.includes('sabotage') && !sabotageApplied && lead > 70) {
+          const entries = Object.entries(positions)
+            .filter(([id]) => finished[parseInt(id)] === undefined)
+            .map(([id, p]) => [parseInt(id), p]);
+          if (entries.length) {
+            const [leaderId] = entries.sort((a, b) => b[1] - a[1])[0];
+            if (leaderId !== selectedId && seeds[leaderId]) {
+              seeds[leaderId].speed *= 0.55;
+            }
+            sabotageApplied = true;
+          }
+        }
+
+        // Gaussian step  (Box-Muller — good enough for animation)
+        const u1 = Math.random() || 1e-10;
+        const u2 = Math.random();
+        const gauss = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+        const move  = Math.max(0, spd + gauss * spd * seed.variance);
+
+        positions[hid] = Math.min(100, positions[hid] + move);
+
+        if (positions[hid] >= 100 && finished[hid] === undefined) {
+          finished[hid] = place++;
+        }
+      }
+
+      // Update DOM
+      const posArr = Object.entries(positions).map(([id, pct]) => ({ id: parseInt(id), pct }));
+      for (const { id, pct } of posArr) {
+        const runner = document.getElementById('runner-' + id);
+        const dust   = document.getElementById('dust-' + id);
+        if (runner) {
+          const leftPct = (pct / 100) * 88;
+          runner.style.left = leftPct + '%';
+          if (dust) { dust.style.left = Math.max(0, leftPct - 3) + '%'; dust.style.opacity = pct > 2 ? '1' : '0'; }
+        }
+      }
+
+      // Sabotage visual flash
+      if (powers.includes('sabotage') && sabotageApplied && !sabotage) {
+        sabotage = true;
+        const sorted = [...posArr].sort((a, b) => b.pct - a.pct);
+        if (sorted.length) {
+          const flash = document.getElementById('power-flash');
+          if (flash) { flash.className = 'power-flash sabotage-flash active'; setTimeout(() => flash.className = 'power-flash', 600); }
+          const lname = data.finishOrder.find(h => h.id === sorted[0].id)?.name || 'Leader';
+          toast('💣 Sabotage! ' + lname + ' stumbles!', 2000);
+        }
+      }
+
+      // Live positions strip (every 15 ticks)
+      if (tick % (isTurbo ? 8 : 15) === 0) {
+        const sorted = [...posArr].sort((a, b) => b.pct - a.pct);
+        livePosEl.innerHTML = '';
+        sorted.forEach((item, rank) => {
+          const name = data.finishOrder.find(h => h.id === item.id)?.name || ('Horse ' + item.id);
+          const chip = document.createElement('div');
+          chip.className = 'live-pos-chip' + (rank === 0 ? ' leader' : '');
+          chip.textContent = (rank + 1) + '. ' + name;
+          livePosEl.appendChild(chip);
+        });
+        if (sorted[0].pct < 92) {
+          const leaderName = data.finishOrder.find(h => h.id === sorted[0].id)?.name;
+          if (leaderName) bar.textContent = '🏇 ' + leaderName + ' leading!';
+        }
+      }
+
+      tick++;
+      animHandle = setTimeout(step, speed);
+    }
+
+    step();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  SHOW RESULT
+// ═══════════════════════════════════════════════════════
+function showResult(data, bet) {
+  document.getElementById('status-bar').textContent = '🏆 ' + data.winner + ' wins the race!';
+  document.getElementById('live-positions').innerHTML = '';
+
+  const winRunner = document.getElementById('runner-' + data.winnerId);
+  if (winRunner) winRunner.classList.add('winner-flash');
+
+  const card  = document.getElementById('result-card');
+  const title = document.getElementById('result-title');
+  const sub   = document.getElementById('result-sub');
+  const pamt  = document.getElementById('payout-amt');
+  const flist = document.getElementById('finish-list');
+  const preport = document.getElementById('power-report');
+
+  if (data.win) {
+    updateWallet(data.wallet);
+    card.className = 'result-card show win';
+    title.textContent = '🎉 You Won!';
+    sub.textContent   = data.winner + ' crossed first!';
+    pamt.textContent  = '+$' + data.payout.toLocaleString();
+    if (streak >= 3) sub.textContent += '  🔥 ' + streak + '-race streak!';
+    launchConfetti();
+  } else {
+    updateWallet(data.wallet);
+    card.className = 'result-card show lose';
+    title.textContent = 'Better Luck Next Time';
+    sub.textContent   = data.winner + ' took the trophy.';
+    const loss = data.actual_loss !== undefined ? data.actual_loss : bet;
+    pamt.textContent  = '-$' + loss.toLocaleString();
   }
 
-  // Flask sets a template variable; inline it safely
-  if (document.body.dataset.adPenalty === 'true') showPenaltyBanner();
+  // Power report
+  if (lastPowerReport) {
+    preport.innerHTML = '<strong>⚡ Powers applied:</strong> ' + lastPowerReport;
+    preport.classList.remove('hidden');
+  } else { preport.classList.add('hidden'); }
 
-  return { toggle: toggle, ctaClick: ctaClick, scamSubmit: scamSubmit };
-})();
+  flist.innerHTML = '';
+  data.finishOrder.forEach(function(h, i) {
+    const li = document.createElement('li');
+    const placeColors = ['gold', 'silver', 'bronze', '', '', ''];
+    li.innerHTML =
+      '<span class="finish-place ' + (placeColors[i] || '') + '">' + MEDALS[i] + '</span>' +
+      '<span>' + h.name + '</span>' +
+      (h.id === selectedId ? '<span style="color:var(--accent);margin-left:auto">⭐ your pick</span>' : '');
+    flist.appendChild(li);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  RESET
+// ═══════════════════════════════════════════════════════
+function resetSetup() {
+  document.getElementById('run-btn').disabled = false;
+  const setupPanel = document.getElementById('setup-panel');
+  setupPanel.style.opacity = '1';
+  setupPanel.style.pointerEvents = 'auto';
+}
+
+function resetRace() {
+  if (animHandle) clearTimeout(animHandle);
+  document.getElementById('race-stage').classList.remove('visible');
+  document.getElementById('result-card').className = 'result-card';
+  document.getElementById('race-lanes').innerHTML = '';
+  document.getElementById('status-bar').textContent = 'Ready...';
+  document.getElementById('live-positions').innerHTML = '';
+  document.getElementById('countdown-overlay').classList.remove('show');
+  document.getElementById('power-flash').className = 'power-flash';
+  document.getElementById('xp-earned').classList.add('hidden');
+  document.getElementById('track-wrap').className = 'track-wrap';
+  // Re-roll weather
+  if (gameMode === 'weather') rollWeather();
+  // Reset oracle display if mystery was reused
+  if (gameMode === 'mystery') hideHorseOdds();
+  else if (gameMode !== 'mystery') resetHorseOddsDisplay();
+  resetSetup();
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONFETTI / TOAST
+// ═══════════════════════════════════════════════════════
+function launchConfetti() {
+  const wrap = document.getElementById('confetti-wrap');
+  wrap.innerHTML = '';
+  const colors = ['#f5c842','#e23c3c','#3cd66e','#3c9fe2','#a855f7','#f57842'];
+  for (let i = 0; i < 100; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left              = (Math.random() * 100) + 'vw';
+    p.style.animationDelay    = (Math.random() * 1.0) + 's';
+    p.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
+    p.style.background        = colors[Math.floor(Math.random() * colors.length)];
+    p.style.borderRadius      = Math.random() > 0.5 ? '50%' : '2px';
+    p.style.width  = (6 + Math.random() * 8) + 'px';
+    p.style.height = (6 + Math.random() * 8) + 'px';
+    wrap.appendChild(p);
+  }
+  setTimeout(() => { wrap.innerHTML = ''; }, 2800);
+}
+
+function toast(msg, ms) {
+  const t = document.createElement('div');
+  t.className = 'toast-notif';
+  t.style.animationDuration = ((ms || 2500) / 1000) + 's';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 2500);
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+updateXPDisplay();
+renderStreakDots();
+document.getElementById('streak-display').textContent = streak;
+buildPowers();
+initChallenges();
+updateWallet();
 </script>
-
 </body>
 </html>
