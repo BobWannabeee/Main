@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Race Day – The Lucky Strip</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
       --dirt:   #c8a96e;
@@ -212,51 +210,46 @@
     .crowd-dot:nth-child(5) { animation-delay: 0.4s; }
     @keyframes pulse { to { opacity: 1; transform: scale(1.3); } }
 
-    /* MODE-SPECIFIC TRACK THEMES */
+    /* ── OVAL TRACK WRAP ── */
     .track-wrap {
-      border-radius: 16px; border: 4px solid #5a3510; overflow: hidden;
-      position: relative; box-shadow: 0 12px 48px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
-      transition: border-color 0.4s;
-    }
-    .track-wrap.mode-turbo   { border-color: #d63c3c; box-shadow: 0 12px 48px rgba(214,60,60,0.3); }
-    .track-wrap.mode-mystery { border-color: #a855f7; box-shadow: 0 12px 48px rgba(168,85,247,0.3); }
-    .track-wrap.mode-weather-rain { border-color: #3c9fe2; box-shadow: 0 12px 48px rgba(60,159,226,0.3); }
-    .track-wrap.mode-weather-night { border-color: #4a3c7a; box-shadow: 0 12px 48px rgba(74,60,122,0.4); }
-
-    .track-grass-top {
-      height: 18px;
-      background: linear-gradient(180deg, #2d6621 0%, #3a8c28 60%, #4aaa30 100%);
-      border-bottom: 3px solid #5a3510;
-    }
-    .track-grass-bottom {
-      height: 18px;
-      background: linear-gradient(180deg, #4aaa30 0%, #3a8c28 40%, #2d6621 100%);
-      border-top: 3px solid #5a3510;
-    }
-    /* Weather overlays on grass */
-    .track-wrap.mode-weather-rain .track-grass-top,
-    .track-wrap.mode-weather-rain .track-grass-bottom { filter: saturate(0.6) brightness(0.7); }
-    .track-wrap.mode-weather-night .track-grass-top,
-    .track-wrap.mode-weather-night .track-grass-bottom { filter: brightness(0.35) hue-rotate(200deg); }
-
-    .track-dirt {
       position: relative;
-      background:
-        repeating-linear-gradient(90deg, transparent 0px, transparent 38px, rgba(0,0,0,0.04) 38px, rgba(0,0,0,0.04) 40px),
-        linear-gradient(180deg, #b8924a 0%, #c8a55e 15%, #d4b070 40%, #c8a55e 60%, #b89050 85%, #a07840 100%);
-      transition: filter 0.5s;
+      width: min(820px, 96vw);
+      overflow: hidden;
+      border-radius: 12px;
+      border: 4px solid #5a3510;
+      box-shadow: 0 16px 56px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: border-color 0.4s, box-shadow 0.4s;
+      background: #1a2e0a;
     }
-    .track-wrap.mode-weather-rain .track-dirt  { filter: saturate(0.5) brightness(0.75); }
-    .track-wrap.mode-weather-night .track-dirt { filter: brightness(0.3); }
-    .track-wrap.mode-mystery .track-dirt { filter: hue-rotate(120deg) saturate(1.3) brightness(0.6); }
-    .track-wrap.mode-turbo .track-dirt { filter: saturate(0.4) brightness(0.85); }
+    .track-wrap.mode-turbo   { border-color: #d63c3c; box-shadow: 0 16px 56px rgba(214,60,60,0.35); }
+    .track-wrap.mode-mystery { border-color: #a855f7; box-shadow: 0 16px 56px rgba(168,85,247,0.35); }
+    .track-wrap.mode-weather-rain  { border-color: #3c9fe2; box-shadow: 0 16px 56px rgba(60,159,226,0.35); }
+    .track-wrap.mode-weather-night { border-color: #4a3c7a; box-shadow: 0 16px 56px rgba(74,60,122,0.45); }
+
+    /* Laps select */
+    #laps-select { background: rgba(0,0,0,0.55); color: var(--accent); border: 1px solid rgba(255,255,255,0.12); }
+    #laps-select option { color: #111; }
+
+    /* ── THE OVAL SVG CANVAS ── */
+    .oval-canvas {
+      display: block;
+      width: 100%;
+    }
+
+    /* Grass top/bottom strips for weather */
+    .track-wrap.mode-weather-rain  .oval-grass { filter: saturate(0.5) brightness(0.7); }
+    .track-wrap.mode-weather-night .oval-grass  { filter: brightness(0.3) hue-rotate(200deg); }
+    .track-wrap.mode-weather-rain  .oval-dirt   { filter: saturate(0.45) brightness(0.7); }
+    .track-wrap.mode-weather-night .oval-dirt   { filter: brightness(0.28); }
+    .track-wrap.mode-mystery       .oval-dirt   { filter: hue-rotate(100deg) saturate(1.4) brightness(0.55); }
+    .track-wrap.mode-turbo         .oval-dirt   { filter: saturate(0.35) brightness(0.8); }
 
     /* Rain effect */
     .rain-overlay {
       position: absolute; inset: 0; pointer-events: none; z-index: 20;
       background: repeating-linear-gradient(
         90deg, transparent 0px, transparent 3px,
-        rgba(180,200,255,0.07) 3px, rgba(180,200,255,0.07) 4px
+        rgba(180,200,255,0.06) 3px, rgba(180,200,255,0.06) 4px
       );
       animation: rainFall 0.12s linear infinite;
       display: none;
@@ -267,40 +260,159 @@
     /* Night overlay */
     .night-overlay {
       position: absolute; inset: 0; pointer-events: none; z-index: 15;
-      background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.8) 100%);
+      background: radial-gradient(ellipse at 50% 40%, transparent 25%, rgba(0,0,0,0.82) 100%);
       display: none;
     }
     .track-wrap.mode-weather-night .night-overlay { display: block; }
 
-    /* Finish / start lines */
-    .finish-line {
-      position: absolute; top: 0; bottom: 0; right: 56px; width: 8px;
-      background: repeating-linear-gradient(180deg, #fff 0 9px, #111 9px 18px);
-      z-index: 4; box-shadow: 0 0 12px rgba(255,255,255,0.4);
+    /* Mystery fog */
+    .fog-overlay {
+      position: absolute; top: 0; bottom: 0; right: 0; width: 55%; pointer-events: none; z-index: 14;
+      background: linear-gradient(90deg, transparent, rgba(80,0,120,0.65) 60%);
+      display: none;
     }
-    .start-line { position: absolute; top: 0; bottom: 0; left: 120px; width: 3px; background: rgba(255,255,255,0.25); z-index: 3; }
+    .track-wrap.mode-mystery .fog-overlay { display: block; animation: fogPulse 3s ease-in-out infinite; }
+    @keyframes fogPulse { 0%,100% { opacity: 0.65; } 50% { opacity: 1; } }
 
-    /* Lane */
-    .lane { display: flex; align-items: center; height: 58px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.18); transition: background 0.2s; }
-    .lane:last-child { border-bottom: none; }
-    .lane:nth-child(even) { background: rgba(0,0,0,0.06); }
-    .lane-num { width: 28px; min-width: 28px; text-align: center; font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.5); z-index: 3; }
-    .lane-label { width: 96px; min-width: 96px; padding: 0 6px 0 2px; font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.8); z-index: 3; }
+    /* ── LANE SVG RUNNERS ── */
+    /* The horse + jockey sprites live inside an SVG overlay on top of the oval canvas */
+    #runner-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      overflow: visible;
+    }
+    #track-wrap {
+      position: relative;
+    }
+    #oval-svg line[x1="75"][x2="75"] {
+      display: none !important;
+    }
+
+    /* Each horse group animated */
+    .horse-runner {
+      will-change: transform;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+    }
+    .horse-runner .horse-body {
+      animation: gallop 0.22s ease-in-out infinite;
+      transform-origin: center center;
+      opacity: 1;
+    }
+    .fallback-runner {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      pointer-events: none;
+      z-index: 50;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      border: 2px solid rgba(255,255,255,0.85);
+    }
+    #oval-svg line[x1="75"][x2="75"],
+    #oval-svg rect[x="68"][width="12"] {
+      display: none !important;
+    }
+    .horse-runner.my-horse .horse-body { filter: drop-shadow(0 0 8px gold); }
+    .horse-runner.winner-flash .horse-body {
+      animation: winnerPulse 0.4s ease infinite alternate;
+    }
+    @keyframes winnerPulse {
+      from { filter: drop-shadow(0 0 6px gold); }
+      to   { filter: drop-shadow(0 0 22px gold) brightness(1.3); }
+    }
+
+    /* Power visual effects */
+    .horse-runner.powered-boost  .horse-body { filter: drop-shadow(0 0 12px #f5c842) drop-shadow(0 0 24px #ff8c00); }
+    .horse-runner.powered-ghost  .horse-body { opacity: 0.42; filter: drop-shadow(0 0 10px #a855f7); }
+    .horse-runner.powered-shield .horse-body { filter: drop-shadow(0 0 10px #3c9fe2) drop-shadow(0 0 5px #fff); }
+
+    /* Gallop bounce — applied to the whole group in JS */
+    @keyframes gallop {
+      0%   { transform: translateY(0px); }
+      25%  { transform: translateY(-3px); }
+      50%  { transform: translateY(0px); }
+      75%  { transform: translateY(-2px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* Lap counter badge */
+    .lap-counter {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-family: 'Rye', serif;
+      font-size: 0.95rem;
+      color: var(--accent);
+      z-index: 22;
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
+
+    /* Dust trail */
+    .dust-trail { display: none; } /* handled in SVG overlay */
+
+    /* Pos badge — repurposed as chip below oval */
+    .pos-badge { display: none; }
+
+    /* Status bar */
+    .status-bar { text-align: center; margin-top: 14px; font-size: 1.2rem; color: #d4b07a; letter-spacing: 1px; min-height: 30px; font-weight: 700; text-shadow: 0 1px 6px rgba(0,0,0,0.5); }
+
+    /* Countdown */
+    .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.52); border-radius: 8px; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+    .countdown-overlay.show { opacity: 1; }
+    .countdown-number { font-family: 'Rye', serif; font-size: 5rem; color: var(--accent); text-shadow: 0 0 40px rgba(245,200,66,0.8); animation: pop 0.4s ease; }
+    @keyframes pop { 0% { transform: scale(2); opacity: 0; } 60% { transform: scale(0.9); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+    /* Power flash */
+    .power-flash {
+      position: absolute; inset: 0; z-index: 25; pointer-events: none;
+      border-radius: 8px; opacity: 0;
+    }
+    .power-flash.boost-flash    { background: rgba(245,200,66,0.22); }
+    .power-flash.shield-flash   { background: rgba(60,159,226,0.18); }
+    .power-flash.ghost-flash    { background: rgba(168,85,247,0.18); }
+    .power-flash.sabotage-flash { background: rgba(214,60,60,0.22); }
+    .power-flash.active { animation: flashIn 0.5s ease forwards; }
+    @keyframes flashIn { 0% { opacity:1; } 100% { opacity:0; } }
+
+    /* Lane table (hidden — we only use it for the DOM runner containers) */
+    .lane { display: none; }
+    .lane-track { display: none; }
     .lane-track { flex: 1; position: relative; height: 100%; overflow: hidden; }
 
     /* Dust */
     .dust-trail { position: absolute; top: 50%; left: 0; width: 36px; height: 14px; border-radius: 50%; background: radial-gradient(ellipse, rgba(200,165,94,0.55) 0%, transparent 70%); transform: translateY(-50%); pointer-events: none; z-index: 2; opacity: 0; transition: opacity 0.15s; }
 
     /* Horse runner */
-    .horse-runner { position: absolute; top: 50%; transform: translateY(-50%); font-size: 1.9rem; left: 0%; z-index: 3; will-change: left; animation: gallop 0.22s steps(2, end) infinite; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
+    .horse-runner {
+      will-change: transform;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+    }
+    .horse-body {
+      animation: gallop 0.22s ease-in-out infinite;
+      transform-origin: center center;
+    }
     .horse-runner.my-horse { filter: drop-shadow(0 0 10px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
-    .horse-runner.winner-flash { animation: winnerPulse 0.4s ease infinite alternate; }
+    .horse-runner.winner-flash .horse-body { animation: winnerPulse 0.4s ease infinite alternate; }
     /* Power visual effects on horses */
     .horse-runner.powered-boost { filter: drop-shadow(0 0 14px #f5c842) drop-shadow(0 0 28px #ff8c00); }
     .horse-runner.powered-ghost { opacity: 0.45; filter: drop-shadow(0 0 12px #a855f7); }
     .horse-runner.powered-shield { filter: drop-shadow(0 0 12px #3c9fe2) drop-shadow(0 0 6px #fff); }
-    @keyframes gallop { 0% { transform: translateY(-50%) scaleY(1); } 50% { transform: translateY(-56%) scaleY(0.93); } 100% { transform: translateY(-50%) scaleY(1); } }
-    @keyframes winnerPulse { from { transform: translateY(-50%) scale(1); filter: drop-shadow(0 0 8px gold); } to { transform: translateY(-56%) scale(1.15); filter: drop-shadow(0 0 20px gold); } }
+    @keyframes gallop { 0% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-2px) scaleY(0.94); } 100% { transform: translateY(0) scaleY(1); } }
+    @keyframes winnerPulse { from { filter: drop-shadow(0 0 8px gold); } to { transform: scale(1.15); filter: drop-shadow(0 0 20px gold); } }
 
     /* Turbo mode: speed lines on running horses */
     .track-wrap.mode-turbo .horse-runner { animation: gallopFast 0.12s steps(2, end) infinite; }
@@ -405,7 +517,7 @@
     @keyframes toastIn { 0% { opacity:0; transform: translateX(-50%) translateY(10px); } 10% { opacity:1; transform: translateX(-50%) translateY(0); } 80% { opacity:1; } 100% { opacity:0; transform: translateX(-50%) translateY(-6px); } }
 
     /* Level-up overlay */
-    .levelup-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; pointer-events: none; display: none; }
+    .levelup-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; pointer-events: auto; display: none; }
     .levelup-box { background: rgba(26,15,0,0.97); border: 3px solid var(--purple); border-radius: 20px; padding: 40px 60px; text-align: center; animation: levelupPop 0.5s ease; }
     .levelup-box h2 { font-family: 'Rye', serif; color: var(--purple); font-size: 2rem; margin-bottom: 8px; }
     .levelup-box p { color: var(--muted); font-size: 1.1rem; }
@@ -504,13 +616,11 @@
   <!-- Horse grid -->
   <div class="horse-grid" id="horse-grid">
     {% for horse in horses %}
-    <div class="horse-card" data-id="{{ horse.id }}" data-name="{{ horse.name }}" data-odds="{{ horse.odds }}" data-trait="{{ horse.trait }}" onclick="selectHorse(this)">
+    <div class="horse-card" data-id="{{ horse.id }}" data-name="{{ horse.name }}" data-odds="{{ horse.odds }}" data-trait="steady" onclick="selectHorse(this)">
       <div class="horse-icon">🐎</div>
       <div class="horse-name">{{ horse.name }}</div>
       <div class="horse-odds" id="card-odds-{{ horse.id }}">{{ horse.odds }}x odds</div>
-      <div class="horse-form" id="card-form-{{ horse.id }}">{{ horse.form }}</div>
       <span class="check">✅</span>
-      <span class="trait-badge trait-{{ horse.trait }}">{{ horse.trait }}</span>
     </div>
     {% endfor %}
   </div>
@@ -541,6 +651,16 @@
   </div>
 
   <div class="error-msg hidden" id="err-msg"></div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+    <label style="font-weight:700;color:var(--muted);min-width:64px;">Laps</label>
+    <select id="laps-select" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
   <button class="run-btn" id="run-btn" onclick="startRace()">🏁 Run the Race!</button>
   <button class="rebuy-btn hidden" id="rebuy-btn" onclick="doBuyIn()">💰 Top-up Wallet (+$500)</button>
 </div>
@@ -561,13 +681,99 @@
     <div class="rain-overlay"></div>
     <div class="night-overlay"></div>
     <div class="fog-overlay"></div>
-    <div class="track-grass-top"></div>
-    <div class="track-dirt" id="track-dirt">
-      <div class="finish-line"></div>
-      <div class="start-line"></div>
-      <div id="race-lanes"></div>
-    </div>
-    <div class="track-grass-bottom"></div>
+
+    <!-- Oval track SVG — drawn once, runners overlaid in JS -->
+    <svg id="oval-svg" class="oval-canvas" viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer grass -->
+      <rect width="820" height="340" fill="#2e5e18"/>
+      <!-- Outer grass texture lines -->
+      <rect width="820" height="340" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0"/>
+      <line x1="0" y1="170" x2="820" y2="170" stroke="rgba(80,180,40,0.08)" stroke-width="120"/>
+
+      <!-- ── Main dirt oval (outer edge) ── -->
+      <!-- The racing oval: a rounded rectangle approximated as an ellipse path -->
+      <ellipse cx="410" cy="170" rx="375" ry="145" fill="#c8a55e" class="oval-dirt"/>
+      <!-- Dirt texture overlay -->
+      <ellipse cx="410" cy="170" rx="375" ry="145"
+               fill="url(#dirtPattern)" class="oval-dirt" opacity="0.5"/>
+      <!-- Dirt shading: lighter center stripe -->
+      <ellipse cx="410" cy="170" rx="375" ry="145"
+               fill="none" stroke="rgba(215,185,110,0.35)" stroke-width="38"/>
+      <!-- Inner edge of track band / inner grass -->
+      <ellipse cx="410" cy="170" rx="285" ry="95" fill="#2d5e15" class="oval-grass"/>
+      <!-- Inner grass highlight -->
+      <ellipse cx="410" cy="160" rx="265" ry="80" fill="rgba(80,160,40,0.18)"/>
+      <!-- Inner rail (white line) -->
+      <ellipse cx="410" cy="170" rx="290" ry="100" fill="none" stroke="#eee" stroke-width="2.5" opacity="0.7"/>
+      <!-- Outer rail -->
+      <ellipse cx="410" cy="170" rx="376" ry="146" fill="none" stroke="#7a4f1e" stroke-width="5"/>
+
+      <!-- ── Lane dividers (6 lanes, concentric) ── -->
+      <!-- We space the 6 lanes evenly across the track band (~85px wide) -->
+      <!-- Lane 1 outer (outermost) = 375, inner grass = 290. Step = (375-290)/6 ≈ 14.2 -->
+      <ellipse cx="410" cy="170" rx="361" ry="132" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="14 8"/>
+      <ellipse cx="410" cy="170" rx="347" ry="118" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="14 8"/>
+      <ellipse cx="410" cy="170" rx="333" ry="105" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="14 8"/>
+      <ellipse cx="410" cy="170" rx="319" ry="111" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="14 8"/>
+      <ellipse cx="410" cy="170" rx="305" ry="106" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="14 8"/>
+
+      <!-- ── Finish line at the right straight ── -->
+      <!-- Checkered finish at ~x=750 -->
+      <rect x="747" y="25" width="12" height="290" fill="url(#checkerPattern)"/>
+      <rect x="747" y="25" width="12" height="290" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+
+      <!-- Finish flag pole -->
+      <line x1="759" y1="20" x2="759" y2="60" stroke="white" stroke-width="2.5"/>
+      <polygon points="759,20 784,28 759,36" fill="#f5c842"/>
+
+      <!-- ── Start marker ── -->
+      <g id="start-marker">
+        <rect x="0" y="152" width="820" height="18" fill="url(#checkerPattern)" opacity="0.95"/>
+        <rect x="0" y="152" width="820" height="18" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+        <text x="16" y="148" fill="rgba(255,255,255,0.95)" font-family="Arial" font-size="12" font-weight="bold">START</text>
+      </g>
+
+      <!-- ── Lane number labels (infield, right side) ── -->
+      <text x="412" y="122" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Arial" font-size="9">L1</text>
+      <text x="412" y="136" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Arial" font-size="9">L2</text>
+      <text x="412" y="150" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Arial" font-size="9">L3</text>
+      <text x="412" y="164" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Arial" font-size="9">L4</text>
+      <text x="412" y="178" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Arial" font-size="9">L5</text>
+      <text x="412" y="192" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="Arial" font-size="9">L6</text>
+
+      <!-- ── Infield sponsor board ── -->
+      <rect x="340" y="145" width="140" height="50" rx="6" fill="rgba(0,0,0,0.45)" stroke="rgba(245,200,66,0.4)" stroke-width="1.5"/>
+      <text x="410" y="163" text-anchor="middle" fill="#f5c842" font-family="Arial" font-size="11" font-weight="bold">🏆 LUCKY STRIP</text>
+      <text x="410" y="180" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="Arial" font-size="9">RACE DAY</text>
+
+      <defs>
+        <!-- Dirt texture -->
+        <pattern id="dirtPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          <rect width="40" height="40" fill="none"/>
+          <line x1="0" y1="0" x2="40" y2="40" stroke="rgba(180,140,80,0.12)" stroke-width="1"/>
+          <line x1="40" y1="0" x2="0" y2="40" stroke="rgba(180,140,80,0.08)" stroke-width="1"/>
+        </pattern>
+        <!-- Checkered finish pattern -->
+        <pattern id="checkerPattern" x="0" y="0" width="12" height="10" patternUnits="userSpaceOnUse">
+          <rect width="6" height="5" fill="white"/>
+          <rect x="6" width="6" height="5" fill="black"/>
+          <rect y="5" width="6" height="5" fill="black"/>
+          <rect x="6" y="5" width="6" height="5" fill="white"/>
+        </pattern>
+      </defs>
+    </svg>
+
+    <!-- SVG overlay for horse runners — sits on top of oval -->
+    <svg id="runner-overlay" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:10;"
+         viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg">
+      <!-- horses injected here by JS -->
+    </svg>
+
+    <!-- Hidden lane containers so runner IDs still exist in DOM -->
+    <div id="race-lanes" style="display:none"></div>
+
+    <!-- Lap counter badge -->
+    <div class="lap-counter" id="lap-counter" style="display:none">Lap 1</div>
   </div>
 
   <div class="live-positions" id="live-positions"></div>
@@ -1484,6 +1690,8 @@ async function startRace() {
   if (gameMode === 'mystery') track.classList.add('mode-mystery');
   if (gameMode === 'weather' && weatherCond) track.classList.add(weatherCond.trackClass);
 
+  window.raceLaps = parseInt(document.getElementById('laps-select')?.value || '1');
+
   buildLanes();
   document.getElementById('status-bar').textContent = 'Fetching race data...';
 
@@ -1551,27 +1759,160 @@ function applyHorseClass(id, cls)  { const r = document.getElementById('runner-'
 function removeHorseClass(id, cls) { const r = document.getElementById('runner-'+id); if (r) r.classList.remove(cls); }
 
 // ═══════════════════════════════════════════════════════
-//  LANE BUILDER
+//  OVAL TRACK GEOMETRY HELPERS
+// ═══════════════════════════════════════════════════════
+
+// The oval viewBox is 820×340. The track band runs between inner rail (rx=290,ry=100)
+// and outer rail (rx=376,ry=146). Centre = (410,170).
+// 6 lanes evenly spaced. Lane 0 = outermost, lane 5 = innermost.
+const OVAL_CX = 410, OVAL_CY = 170;
+
+// Per-lane radii (x,y) — 6 lanes from outer to inner
+const LANE_RX = [366, 352, 338, 324, 310, 296];
+const LANE_RY = [138, 124, 111,  98,  105,  101];
+
+// Jockey colours per lane
+const JOCKEY_COLORS = ['#e23c3c','#3c9fe2','#3cd66e','#f5c842','#a855f7','#f57842'];
+const HORSE_COLORS  = ['#5a2d00','#2a1800','#6b3a10','#3b2200','#1a1200','#4a2800'];
+
+// Map progress fraction [0,1] over N laps to an (x,y) point on the oval.
+// Angle=0 starts at right side. We offset -π/2 so angle=0 = top of oval.
+// Horses start on the left straight (around angle = π = left side).
+function ovalPoint(fraction, laneIdx, laps) {
+  const rx = LANE_RX[laneIdx] || LANE_RX[5];
+  const ry = LANE_RY[laneIdx] || LANE_RY[5];
+  // Spread horses slightly in angle so they don't all stack at start
+  const startAngle = Math.PI + (laneIdx - 2.5) * 0.04; // left side
+  const totalAngle = fraction * laps * Math.PI * 2;
+  const angle = startAngle + totalAngle;
+  const x = OVAL_CX + rx * Math.cos(angle);
+  const y = OVAL_CY + ry * Math.sin(angle);
+  // heading direction for rotation
+  const dx = -rx * Math.sin(angle);
+  const dy =  ry * Math.cos(angle);
+  const heading = Math.atan2(dy, dx) * 180 / Math.PI; // degrees
+  return { x, y, heading };
+}
+
+// ═══════════════════════════════════════════════════════
+//  LANE BUILDER  (oval version)
 // ═══════════════════════════════════════════════════════
 function buildLanes() {
+  // Clear hidden lane containers (for DOM id references)
   const container = document.getElementById('race-lanes');
   container.innerHTML = '';
+  // Remove old lane rings if any
+  document.querySelectorAll('.lane-ring').forEach(r => r.remove());
+
   const cards = [...document.querySelectorAll('.horse-card')];
+
+  // Clear runner overlay
+  const overlay = document.getElementById('runner-overlay');
+  overlay.innerHTML = '';
+
+  // Ensure overlay has explicit pixel sizing to avoid zero-height SVG issues
+  try {
+    const parent = overlay.parentElement || document.getElementById('track-wrap');
+    const pw = parent.clientWidth || 820;
+    const ph = parent.clientHeight || 340;
+    overlay.setAttribute('width', pw);
+    overlay.setAttribute('height', ph);
+    overlay.style.width  = pw + 'px';
+    overlay.style.height = ph + 'px';
+  } catch (e) { /* ignore */ }
+
   cards.forEach((card, idx) => {
     const id   = parseInt(card.dataset.id);
     const name = card.dataset.name;
-    const lane = document.createElement('div');
-    lane.className = 'lane';
-    lane.innerHTML =
-      '<div class="lane-num">' + (idx + 1) + '</div>' +
-      '<div class="lane-label">' + name + '</div>' +
-      '<div class="lane-track" id="track-' + id + '">' +
-        '<div class="dust-trail" id="dust-' + id + '"></div>' +
-        '<div class="horse-runner' + (id === selectedId ? ' my-horse' : '') + '" id="runner-' + id + '">🐎</div>' +
-        '<div class="pos-badge" id="pos-' + id + '"></div>' +
-      '</div>';
-    container.appendChild(lane);
+
+    // Hidden div so runner ID selectors still work for power effects
+    const div = document.createElement('div');
+    div.className = 'lane';
+    div.innerHTML = `<div class="lane-track" id="track-${id}"><div class="dust-trail" id="dust-${id}"></div></div>`;
+    container.appendChild(div);
+
+    const jColor = JOCKEY_COLORS[idx % JOCKEY_COLORS.length];
+    const hColor = HORSE_COLORS[idx % HORSE_COLORS.length];
+    const isMine = (id === selectedId);
+
+    // Build detailed horse+jockey SVG group via a temp SVG wrapper (innerHTML works on SVG element)
+    const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    tmpSvg.innerHTML = `<g id="runner-${id}" class="horse-runner${isMine ? ' my-horse' : ''}"
+      transform="translate(${ovalPoint(0,idx,1).x},${ovalPoint(0,idx,1).y}) rotate(${ovalPoint(0,idx,1).heading})">
+      <g class="horse-body" style="animation: gallop 0.3s ease-in-out infinite;">
+        <!-- Horse body -->
+        <ellipse cx="0" cy="2" rx="11" ry="5.5" fill="${hColor}" stroke="rgba(0,0,0,0.4)" stroke-width="0.8"/>
+        <!-- Horse neck -->
+        <path d="M 6 0 Q 10 -5 12 -8" stroke="${hColor}" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <!-- Horse head -->
+        <ellipse cx="12" cy="-9" rx="3.5" ry="2.5" fill="${hColor}" stroke="rgba(0,0,0,0.4)" stroke-width="0.7"/>
+        <!-- Horse ear -->
+        <line x1="13" y1="-11" x2="14.5" y2="-13" stroke="${hColor}" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Horse nostril -->
+        <circle cx="14.5" cy="-8.5" r="0.8" fill="rgba(0,0,0,0.4)"/>
+        <!-- Mane -->
+        <path d="M 8 -3 Q 10 -7 11 -6 Q 10 -4 12 -7" stroke="#b8860b" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Tail -->
+        <path d="M -10 1 Q -14 -2 -13 -5" stroke="#b8860b" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <!-- Legs (animated pairs) -->
+        <g class="legs-a">
+          <line x1="-5" y1="7" x2="-6" y2="13" stroke="${hColor}" stroke-width="2.2" stroke-linecap="round"/>
+          <line x1="3"  y1="7" x2="5"  y2="13" stroke="${hColor}" stroke-width="2.2" stroke-linecap="round"/>
+        </g>
+        <g class="legs-b">
+          <line x1="-3" y1="7" x2="-2" y2="13" stroke="${hColor}" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          <line x1="5"  y1="7" x2="7"  y2="13" stroke="${hColor}" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        </g>
+        <!-- Jockey torso -->
+        <ellipse cx="2" cy="-3" rx="4" ry="3.5" fill="${jColor}" stroke="rgba(0,0,0,0.35)" stroke-width="0.8"/>
+        <!-- Jockey silks cross stripe -->
+        <line x1="-1.5" y1="-4.5" x2="5.5" y2="-1.5" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+        <!-- Jockey helmet -->
+        <path d="M -1 -5 Q 2 -10 6 -6 L 3 -5 Z" fill="${jColor}" stroke="rgba(0,0,0,0.4)" stroke-width="0.7"/>
+        <!-- Visor -->
+        <path d="M -1 -5 Q 0 -6 3 -5" stroke="rgba(0,0,0,0.5)" stroke-width="0.8" fill="none"/>
+        <!-- Jockey head -->
+        <circle cx="3" cy="-8.5" r="2.2" fill="#f5d0a0" stroke="rgba(0,0,0,0.25)" stroke-width="0.6"/>
+        <!-- Jockey whip -->
+        <line x1="5" y1="-6" x2="10" y2="-12" stroke="rgba(0,0,0,0.6)" stroke-width="0.8" stroke-linecap="round"/>
+        <!-- My-horse gold circle highlight -->
+        ${isMine ? `<circle cx="0" cy="0" r="18" fill="none" stroke="gold" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.55"/>` : ''}
+        <!-- Lane number badge -->
+        <circle cx="-10" cy="-7" r="4.5" fill="${jColor}" stroke="rgba(0,0,0,0.5)" stroke-width="0.8" opacity="0.9"/>
+        <text x="-10" y="-5" text-anchor="middle" fill="white" font-size="4.5" font-weight="bold" font-family="Arial">${idx+1}</text>
+      </g>
+      <!-- Dust puff behind horse -->
+      <ellipse class="dust-puff" cx="-14" cy="6" rx="5" ry="2.5" fill="rgba(200,165,90,0.3)" opacity="0"/>
+    </g>`;
+
+    // Extract the <g> from tmpSvg and append to the real runner overlay
+    const g = tmpSvg.firstElementChild;
+    if (g) {
+      // ensure visible
+      g.setAttribute('opacity', '1');
+      overlay.appendChild(g);
+    }
+
+    // Add an HTML fallback runner that can animate even if SVG injection fails
+    const fallback = document.createElement('div');
+    fallback.id = 'runner-html-' + id;
+    fallback.className = 'fallback-runner';
+    fallback.title = name;
+    fallback.style.background = jColor;
+    fallback.style.left = '0px';
+    fallback.style.top = '0px';
+    fallback.style.opacity = '0';
+    fallback.textContent = '🐎';
+    document.getElementById('track-wrap').appendChild(fallback);
   });
+
+  // If SVG innerHTML failed (some browsers/security settings), show the HTML fallback runners
+  if (overlay.children.length === 0) {
+    document.querySelectorAll('.fallback-runner').forEach(el => el.style.opacity = '1');
+  } else {
+    // hide fallback runners when SVG runners are available
+    document.querySelectorAll('.fallback-runner').forEach(el => el.style.opacity = '0');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1598,113 +1939,109 @@ function countdown() {
 }
 
 // ═══════════════════════════════════════════════════════
-//  RACE ANIMATION  (frames simulated locally from speed seeds)
+//  RACE ANIMATION  (oval track, SVG runners)
+//  Drives from data.frames (pre-computed by server)
 // ═══════════════════════════════════════════════════════
 function animateRace(data) {
-  // Build per-horse speed profiles from server seeds
-  const seeds    = data.speedSeeds || {};  // {horseId: {speed, variance, trait}}
-  const winner   = data.winnerId;
-  const powers   = data.powers || [];
-  const isTurbo  = data.mode === 'turbo';
-  const speed    = isTurbo ? 1000 / 55 : 1000 / 28;
-  const maxTicks = isTurbo ? 240 : 320;
+  // data.frames is an array of frame objects: each frame = { horseId: pct, ... }
+  // Keys are strings (JSON), values are 0-100 progress floats.
+  const frames  = data.frames || [];
+  const isTurbo = data.mode === 'turbo';
+  // ~28 fps normal, ~55 fps turbo
+  const MS_PER_FRAME = isTurbo ? 1000 / 55 : 1000 / 28;
+  const laps    = window.raceLaps || 1;
 
-  // Initialise simulation state
-  const positions  = {};
-  const finished   = {};  // id -> place
-  let   place      = 1;
-  let   sabotage   = false;
+  // If server did not provide precomputed frames, synthesize a smooth fallback
+  if (!frames.length) {
+    // If we have a finish order, interpolate from 0 -> final positions
+    const finish = Array.isArray(data.finishOrder) ? data.finishOrder.map(h => h.id) : [];
+    if (finish.length) {
+      const horses = finish.slice();
+      // number of frames: make the synthesized animation slower so horses don't zip
+      // normal: ~6s; turbo: ~3.5s
+      const targetSecs = isTurbo ? 3.5 : 6.0;
+      const framesCount = Math.max(48, Math.round((isTurbo ? 55 : 28) * targetSecs));
 
-  for (const id of Object.keys(seeds)) {
-    positions[parseInt(id)] = 0.0;
+      // assign final % for each horse based on finish rank (winner closer to 100)
+      const finalPcts = {};
+      horses.forEach((hid, i) => { finalPcts[hid] = Math.max(60, 100 - i * 4); });
+
+      for (let fi = 0; fi < framesCount; fi++) {
+        const t = fi / (framesCount - 1);
+        const eased = 1 - Math.pow(1 - t, 2); // ease-out
+        const frame = {};
+        horses.forEach(hid => { frame[hid] = Math.min(100, Math.round(eased * finalPcts[hid] * 100) / 100); });
+        frames.push(frame);
+      }
+    } else {
+      return Promise.resolve();
+    }
   }
 
+  // Build lane index map from horse card order in DOM
+  const horseOrder = [...document.querySelectorAll('.horse-card')].map(c => parseInt(c.dataset.id));
+  const laneIndex  = {};
+  horseOrder.forEach((hid, i) => laneIndex[hid] = i);
+
+  // Show lap counter
+  const lapEl = document.getElementById('lap-counter');
+  if (lapEl) { lapEl.style.display = 'block'; lapEl.textContent = 'Lap 1 / ' + laps; }
+
   return new Promise(resolve => {
-    let tick = 0;
+    let f = 0;
     const bar       = document.getElementById('status-bar');
     const livePosEl = document.getElementById('live-positions');
-    let sabotageApplied = false;
 
     function step() {
-      if (tick >= maxTicks || Object.keys(finished).length >= Object.keys(seeds).length) {
-        // Snap everyone to finish line
-        for (const h of data.finishOrder) {
-          const runner = document.getElementById('runner-' + h.id);
-          if (runner) runner.style.left = '91%';
+      if (f >= frames.length) {
+        // Snap everyone to their final lap-scaled finish position
+        const lastFrame = frames[frames.length - 1];
+        for (const [sid, pct] of Object.entries(lastFrame)) {
+          const hid = parseInt(sid);
+          const g   = document.getElementById('runner-' + hid);
+          if (!g) continue;
+          const idx = laneIndex[hid] ?? 0;
+          const pt  = ovalPoint(1.0, idx, laps);
+          g.setAttribute('transform', `translate(${pt.x},${pt.y}) rotate(${pt.heading})`);
         }
+        if (lapEl) lapEl.textContent = 'Lap ' + laps + ' / ' + laps;
         resolve();
         return;
       }
 
-      const lead = Math.max(...Object.values(positions));
+      const frame = frames[f];
 
-      for (const [sid, seed] of Object.entries(seeds)) {
-        const hid = parseInt(sid);
-        if (finished[hid] !== undefined) continue;
+      // Convert server frame (id->pct) into posArr for display
+      const posArr = Object.entries(frame).map(([sid, pct]) => ({ id: parseInt(sid), pct }));
 
-        let spd = seed.speed * (isTurbo ? 1.6 : 1.0);
-
-        // Winner gets a late surge so it reliably crosses first
-        if (lead > 60 && hid === winner) spd *= 1.22;
-
-        // Boost power: selected horse mid-race kick
-        if (powers.includes('boost') && hid === selectedId && positions[hid] > 40 && positions[hid] < 65) {
-          spd *= 1.25;
-        }
-
-        // Sabotage: leader stumbles past 70%
-        if (powers.includes('sabotage') && !sabotageApplied && lead > 70) {
-          const entries = Object.entries(positions)
-            .filter(([id]) => finished[parseInt(id)] === undefined)
-            .map(([id, p]) => [parseInt(id), p]);
-          if (entries.length) {
-            const [leaderId] = entries.sort((a, b) => b[1] - a[1])[0];
-            if (leaderId !== selectedId && seeds[leaderId]) {
-              seeds[leaderId].speed *= 0.55;
-            }
-            sabotageApplied = true;
-          }
-        }
-
-        // Gaussian step  (Box-Muller — good enough for animation)
-        const u1 = Math.random() || 1e-10;
-        const u2 = Math.random();
-        const gauss = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-        const move  = Math.max(0, spd + gauss * spd * seed.variance);
-
-        positions[hid] = Math.min(100, positions[hid] + move);
-
-        if (positions[hid] >= 100 && finished[hid] === undefined) {
-          finished[hid] = place++;
-        }
-      }
-
-      // Update DOM
-      const posArr = Object.entries(positions).map(([id, pct]) => ({ id: parseInt(id), pct }));
+      // Update each horse on the oval
       for (const { id, pct } of posArr) {
-        const runner = document.getElementById('runner-' + id);
-        const dust   = document.getElementById('dust-' + id);
-        if (runner) {
-          const leftPct = (pct / 100) * 88;
-          runner.style.left = leftPct + '%';
-          if (dust) { dust.style.left = Math.max(0, leftPct - 3) + '%'; dust.style.opacity = pct > 2 ? '1' : '0'; }
+        const g = document.getElementById('runner-' + id);
+        const idx      = laneIndex[id] ?? 0;
+        const fraction = Math.min(1, pct / 100);
+        const pt       = ovalPoint(fraction, idx, laps);
+        if (g) {
+          g.setAttribute('transform', `translate(${pt.x},${pt.y}) rotate(${pt.heading})`);
+          const dust = g.querySelector('.dust-puff');
+          if (dust) dust.setAttribute('opacity', pct > 2 ? '0.5' : '0');
+        }
+        const html = document.getElementById('runner-html-' + id);
+        if (html) {
+          const svgEl = document.getElementById('oval-svg');
+          const rect = svgEl ? svgEl.getBoundingClientRect() : { width: 820, height: 340 };
+          html.style.left = ((pt.x / 820) * rect.width) + 'px';
+          html.style.top  = ((pt.y / 340) * rect.height) + 'px';
+          html.style.opacity = '1';
         }
       }
 
-      // Sabotage visual flash
-      if (powers.includes('sabotage') && sabotageApplied && !sabotage) {
-        sabotage = true;
-        const sorted = [...posArr].sort((a, b) => b.pct - a.pct);
-        if (sorted.length) {
-          const flash = document.getElementById('power-flash');
-          if (flash) { flash.className = 'power-flash sabotage-flash active'; setTimeout(() => flash.className = 'power-flash', 600); }
-          const lname = data.finishOrder.find(h => h.id === sorted[0].id)?.name || 'Leader';
-          toast('💣 Sabotage! ' + lname + ' stumbles!', 2000);
-        }
-      }
+      // Lap counter
+      const maxPct = Math.max(...Object.values(frame));
+      const currentLap = Math.min(laps, Math.floor((maxPct / 100) * laps) + 1);
+      if (lapEl) lapEl.textContent = 'Lap ' + currentLap + ' / ' + laps;
 
-      // Live positions strip (every 15 ticks)
-      if (tick % (isTurbo ? 8 : 15) === 0) {
+      // Live positions (every 10 frames)
+      if (f % 10 === 0) {
         const sorted = [...posArr].sort((a, b) => b.pct - a.pct);
         livePosEl.innerHTML = '';
         sorted.forEach((item, rank) => {
@@ -1714,14 +2051,14 @@ function animateRace(data) {
           chip.textContent = (rank + 1) + '. ' + name;
           livePosEl.appendChild(chip);
         });
-        if (sorted[0].pct < 92) {
+        if (sorted[0] && sorted[0].pct < 95) {
           const leaderName = data.finishOrder.find(h => h.id === sorted[0].id)?.name;
-          if (leaderName) bar.textContent = '🏇 ' + leaderName + ' leading!';
+          if (leaderName) bar.textContent = '🏇 ' + leaderName + ' in the lead!';
         }
       }
 
-      tick++;
-      animHandle = setTimeout(step, speed);
+      f++;
+      animHandle = setTimeout(step, MS_PER_FRAME);
     }
 
     step();
@@ -1795,6 +2132,12 @@ function resetRace() {
   document.getElementById('race-stage').classList.remove('visible');
   document.getElementById('result-card').className = 'result-card';
   document.getElementById('race-lanes').innerHTML = '';
+  // Clear runner overlay
+  const overlay = document.getElementById('runner-overlay');
+  if (overlay) overlay.innerHTML = '';
+  // Hide lap counter
+  const lapEl = document.getElementById('lap-counter');
+  if (lapEl) lapEl.style.display = 'none';
   document.getElementById('status-bar').textContent = 'Ready...';
   document.getElementById('live-positions').innerHTML = '';
   document.getElementById('countdown-overlay').classList.remove('show');
